@@ -18,6 +18,11 @@ export default function PaymentPage() {
   const [showModal, setShowModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель для админа
+  const [isResetting, setIsResetting] = useState(false);
+  
+  // Проверяем является ли пользователь админом
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   useEffect(() => {
     // Не проверяем пока загружается
@@ -28,11 +33,51 @@ export default function PaymentPage() {
       return;
     }
 
-    if (user.hasPaid) {
+    // Админ может видеть страницу оплаты даже если оплатил (для тестирования)
+    if (user.hasPaid && !isAdmin) {
       router.push("/courses");
       return;
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isAdmin]);
+
+  const handleResetSubscription = async () => {
+    if (!isAdmin) {
+      alert('Only admin can reset subscription');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reset your subscription? You will need to pay again.')) {
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          has_paid: false,
+          stripe_customer_id: null,
+          subscription_type: null
+        })
+        .eq('email', user?.email);
+
+      if (error) {
+        console.error('Error resetting subscription:', error);
+        alert('Failed to reset subscription: ' + error.message);
+        return;
+      }
+
+      alert('✅ Subscription reset successfully! Refreshing page...');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error resetting subscription:', error);
+      alert('Failed to reset subscription: ' + error.message);
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (isProcessing) return;
@@ -49,7 +94,12 @@ export default function PaymentPage() {
         return;
       }
       
-      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y';
+      // Выбираем цену: если админ выбрал тест - используем тестовую, иначе продакшн
+      const priceId = useTestPrice 
+        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
+        : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y');
+      
+      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.01)' : 'PRODUCTION ($100)');
       console.log('💰 Price ID:', priceId);
       console.log('📡 Calling /api/checkout...');
       
@@ -301,6 +351,35 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
+                {/* АДМИНСКАЯ ПАНЕЛЬ - ВЫБОР ЦЕНЫ */}
+                {isAdmin && (
+                  <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
+                    <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ - ВЫБОР ЦЕНЫ:</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setUseTestPrice(false)}
+                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                          !useTestPrice 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        $100 (LIVE)
+                      </button>
+                      <button
+                        onClick={() => setUseTestPrice(true)}
+                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                          useTestPrice 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        $0.01 (TEST)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handlePayment}
                   disabled={isProcessing}
@@ -314,10 +393,31 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      Pay $100 - Get Full Access
+                      {useTestPrice ? 'Pay $0.01 (TEST)' : 'Pay $100 - Get Full Access'}
                     </>
                   )}
                 </button>
+
+                {/* АДМИНСКАЯ КНОПКА СБРОСА ПОДПИСКИ */}
+                {isAdmin && user?.hasPaid && (
+                  <button
+                    onClick={handleResetSubscription}
+                    disabled={isResetting}
+                    className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 flex items-center justify-center gap-2 premium-shadow text-sm mb-4"
+                  >
+                    {isResetting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Resetting...
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-4 w-4" />
+                        Reset Subscription (Admin)
+                      </>
+                    )}
+                  </button>
+                )}
 
                 <p className="text-xs text-center text-gray-400">
                   Click the button to get instant access to all lessons
