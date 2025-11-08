@@ -618,7 +618,7 @@ export default function AdminPage() {
                   </div>
                   <p className="text-sm text-gray-400">
                     Бесплатные уроки доступны без регистрации и оплаты. 
-                    Максимум {freeLessonsCount} бесплатных уроков.
+                    Ты решаешь сколько сделать бесплатных.
                   </p>
                 </div>
 
@@ -658,7 +658,7 @@ export default function AdminPage() {
             <span>Все уроки ({levels.length})</span>
             <div className="flex gap-4 text-sm">
               <span className="text-purple-400">
-                🎁 Бесплатных: {levels.filter(l => l.isFree).length}/{freeLessonsCount}
+                🎁 Бесплатных: {levels.filter(l => l.isFree).length}
               </span>
               <span className="text-blue-400">
                 ✍️ Практика: {levels.filter(l => l.practice).length}
