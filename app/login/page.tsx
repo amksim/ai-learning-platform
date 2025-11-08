@@ -28,21 +28,19 @@ export default function LoginPage() {
         // Sign up new user
         await signup(email, password, name || email.split('@')[0]);
         toast.success(`🎉 Добро пожаловать, ${name || email.split('@')[0]}!`, {
-          duration: 2000,
+          duration: 1500,
         });
-        // Wait for auth state to update before redirect
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        router.push("/courses");
       } else {
         // Login existing user
         await login(email, password);
         toast.success("✅ Вы успешно вошли!", {
-          duration: 2000,
+          duration: 1500,
         });
-        setTimeout(() => {
-          router.push("/courses");
-        }, 500);
       }
+      
+      // Redirect после успешной авторизации
+      console.log('✅ Авторизация успешна, перенаправление...');
+      window.location.href = '/courses';
     } catch (error: any) {
       console.error("Auth error:", error);
       
