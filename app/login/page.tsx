@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,23 +27,46 @@ export default function LoginPage() {
       if (isSignup) {
         // Sign up new user
         await signup(email, password, name || email.split('@')[0]);
-        alert("✅ Регистрация успешна! Добро пожаловать!");
-        router.push("/courses");
+        toast.success(`🎉 Добро пожаловать, ${name || email.split('@')[0]}!`, {
+          duration: 3000,
+        });
+        // Wait for auth state to update
+        setTimeout(() => {
+          router.push("/courses");
+        }, 500);
       } else {
         // Login existing user
         await login(email, password);
-        router.push("/courses");
+        toast.success("✅ Вы успешно вошли!", {
+          duration: 2000,
+        });
+        setTimeout(() => {
+          router.push("/courses");
+        }, 500);
       }
     } catch (error: any) {
       console.error("Auth error:", error);
+      setLoading(false);
+      
       if (error.message?.includes('already registered')) {
-        alert("Этот email уже зарегистрирован. Переключитесь на 'Вход'!");
-        setIsSignup(false);
-      } else if (error.message?.includes('Invalid login')) {
-        alert("Неверный email или пароль. Попробуйте ещё раз или зарегистрируйтесь.");
+        toast.error("❌ Этот email уже зарегистрирован!\nПереключитесь на 'Вход'", {
+          duration: 4000,
+        });
+        setTimeout(() => setIsSignup(false), 1000);
+      } else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid')) {
+        toast.error("❌ Неверный email или пароль\nПопробуйте ещё раз", {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('security purposes')) {
+        toast.error("⏱️ Слишком много попыток\nПодождите 1 минуту и попробуйте снова", {
+          duration: 5000,
+        });
       } else {
-        alert(error.message || "Ошибка. Попробуйте ещё раз.");
+        toast.error(error.message || "Ошибка входа. Попробуйте позже.", {
+          duration: 4000,
+        });
       }
+      return;
     }
     
     setLoading(false);

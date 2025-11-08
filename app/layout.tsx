@@ -6,6 +6,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReviewsProvider } from "@/contexts/ReviewsContext";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "AI Learning Platform - Научись создавать с AI",
@@ -29,6 +30,31 @@ export default function RootLayout({
               </main>
               <SupportButton />
               <MobileBottomNav />
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#1f2937',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    fontSize: '14px',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: '#10b981',
+                      secondary: '#fff',
+                    },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#fff',
+                    },
+                  },
+                }}
+              />
             </ReviewsProvider>
           </LanguageProvider>
         </AuthProvider>
