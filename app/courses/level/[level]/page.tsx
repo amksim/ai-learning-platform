@@ -204,7 +204,7 @@ export default function LessonPage() {
 
   const handleComplete = () => {
     if (user) {
-      updateProgress(levelId);
+      updateProgress("main-course", levelId);
       // Используем полную перезагрузку чтобы прогресс обновился визуально
       setTimeout(() => {
         window.location.href = "/courses";
@@ -342,7 +342,7 @@ export default function LessonPage() {
                 <Button 
                   onClick={() => {
                     if (user) {
-                      updateProgress(levelId);
+                      updateProgress("main-course", levelId);
                     }
                     setTimeout(() => {
                       router.push("/profile");
@@ -367,7 +367,7 @@ export default function LessonPage() {
                   <Button 
                     onClick={() => {
                       if (user) {
-                        updateProgress(levelId);
+                        updateProgress("main-course", levelId);
                       }
                       router.push("/payment");
                     }}
@@ -384,7 +384,7 @@ export default function LessonPage() {
                 <Button 
                   onClick={() => {
                     if (user) {
-                      updateProgress(levelId);
+                      updateProgress("main-course", levelId);
                     }
                     router.push(`/courses/level/${nextLessonId}`);
                   }}
