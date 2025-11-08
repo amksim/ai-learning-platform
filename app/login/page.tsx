@@ -11,46 +11,37 @@ import { Button } from "@/components/ui/Button";
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { signup, sendMagicLink } = useAuth();
+  const { signup, login } = useAuth();
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isSignup, setIsSignup] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const handleSendCode = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      // Send magic link for passwordless login
-      await sendMagicLink(email);
-      setCodeSent(true);
-      alert("Проверьте email! Мы отправили ссылку для входа.");
-    } catch (error: any) {
-      console.error("Error sending magic link:", error);
-      alert(error.message || "Ошибка отправки письма");
-    }
-    
-    setLoading(false);
-  };
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      // For demo: create account with temporary password
-      const demoPassword = `demo-${code}-${Date.now()}`;
-      await signup(email, demoPassword, email.split('@')[0]);
-      router.push("/courses");
-    } catch (error: any) {
-      console.error("Demo login error:", error);
-      // If user already exists, just redirect
-      if (error.message?.includes('already registered')) {
-        alert("Этот email уже зарегистрирован. Используйте magic link для входа!");
-        setCodeSent(false);
+      if (isSignup) {
+        // Sign up new user
+        await signup(email, password, name || email.split('@')[0]);
+        alert("✅ Регистрация успешна! Добро пожаловать!");
+        router.push("/courses");
       } else {
-        alert("Ошибка входа. Попробуйте ещё раз.");
+        // Login existing user
+        await login(email, password);
+        router.push("/courses");
+      }
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      if (error.message?.includes('already registered')) {
+        alert("Этот email уже зарегистрирован. Переключитесь на 'Вход'!");
+        setIsSignup(false);
+      } else if (error.message?.includes('Invalid login')) {
+        alert("Неверный email или пароль. Попробуйте ещё раз или зарегистрируйтесь.");
+      } else {
+        alert(error.message || "Ошибка. Попробуйте ещё раз.");
       }
     }
     
@@ -67,78 +58,79 @@ export default function LoginPage() {
                 <Mail className="h-6 w-6 text-primary" />
               </div>
               <CardTitle className="text-center text-2xl">
-                {t.auth.login_title}
+                {isSignup ? "Регистрация" : "Вход"}
               </CardTitle>
               <CardDescription className="text-center">
-                {codeSent
-                  ? `${t.auth.code_sent} ${email}`
-                  : "Введите email для входа"}
+                {isSignup
+                  ? "Создайте аккаунт для доступа к курсам"
+                  : "Войдите в свой аккаунт"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!codeSent ? (
-                <form onSubmit={handleSendCode} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {isSignup && (
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium">
-                      Email
+                    <label htmlFor="name" className="text-sm font-medium">
+                      Имя
                     </label>
                     <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t.auth.email_placeholder}
-                      required
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Ваше имя"
                       className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      "Отправка..."
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        {t.auth.send_code}
-                      </>
-                    )}
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerify} className="space-y-4">
-                  <div className="space-y-2">
-                    <label htmlFor="code" className="text-sm font-medium">
-                      Код подтверждения
-                    </label>
-                    <input
-                      id="code"
-                      type="text"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder={t.auth.code_placeholder}
-                      maxLength={6}
-                      required
-                      className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-center text-2xl font-mono tracking-widest focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    <p className="text-xs text-muted-foreground text-center">
-                      Для демо: используйте любой 6-значный код
-                    </p>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Проверка..." : t.auth.verify}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => {
-                      setCodeSent(false);
-                      setCode("");
-                    }}
-                  >
-                    Изменить email
-                  </Button>
-                </form>
-              )}
+                )}
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Пароль
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Минимум 6 символов"
+                    required
+                    minLength={6}
+                    className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    "Загрузка..."
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      {isSignup ? "Зарегистрироваться" : "Войти"}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setIsSignup(!isSignup)}
+                >
+                  {isSignup ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
