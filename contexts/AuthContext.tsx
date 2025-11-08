@@ -77,13 +77,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('📝 Регистрация:', email);
 
     try {
-      // 1. Создаём пользователя
+      // 1. Проверяем - может пользователь уже есть?
+      const { data: existingUser } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (existingUser?.user) {
+        console.log('✅ Пользователь уже существует, входим');
+        await checkUser();
+        return;
+      }
+    } catch (e) {
+      // Пользователя нет, продолжаем регистрацию
+      console.log('📝 Новый пользователь, создаём');
+    }
+
+    try {
+      // 2. Создаём пользователя
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (authError) {
+        // Если email уже занят - пробуем войти
+        if (authError.message?.includes('already') || authError.message?.includes('registered')) {
+          console.log('⚠️ Email занят, пробуем войти');
+          throw new Error('Email уже зарегистрирован! Используйте вход.');
+        }
         console.error('❌ Auth error:', authError);
         throw authError;
       }
@@ -94,10 +116,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('✅ Auth user created:', authData.user.id);
 
-      // 2. Ждём 500ms
+      // 3. Ждём 500ms
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // 3. Создаём профиль
+      // 4. Создаём профиль
       console.log('📝 Создаём профиль...');
       const { error: profileError } = await supabase
         .from('profiles')
@@ -113,17 +135,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileError) {
         console.error('❌ Profile error:', profileError);
         // Игнорируем ошибку дубликата
-        if (!profileError.message.includes('duplicate') && !profileError.message.includes('already exists')) {
+        if (!profileError.message.includes('duplicate') && 
+            !profileError.message.includes('already exists') &&
+            !profileError.code?.includes('23505')) {
           throw profileError;
         }
+        console.log('⚠️ Профиль уже существует, игнорируем');
+      } else {
+        console.log('✅ Profile created');
       }
 
-      console.log('✅ Profile created');
-
-      // 4. Ждём ещё 500ms
+      // 5. Ждём ещё 500ms
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // 5. Логинимся
+      // 6. Логинимся
       console.log('📝 Выполняем вход...');
       const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email,
@@ -137,12 +162,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('✅ Logged in');
 
-      // 6. Загружаем пользователя
+      // 7. Загружаем пользователя
       console.log('📝 Загружаем профиль...');
       await checkUser();
       console.log('✅ Всё готово!');
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Signup error:', err);
       throw err;
     }
