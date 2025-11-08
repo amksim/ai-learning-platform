@@ -58,8 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             full_name: profile.full_name || 'User',
             progress: 0,
             joinedDate: profile.created_at || new Date().toISOString(),
-            hasPaid: profile.has_purchased || false,
-            subscription_status: profile.has_purchased ? 'premium' : 'free',
+            hasPaid: profile.subscription_status === 'premium',
+            subscription_status: profile.subscription_status || 'free',
             subscription_end_date: profile.subscription_end_date || null,
             stripe_customer_id: profile.stripe_customer_id || null,
           });
@@ -103,8 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .insert({
           id: authData.user.id,
+          email: email,
           full_name: name,
-          has_purchased: false,
+          subscription_status: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
@@ -206,7 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase
       .from('profiles')
       .update({
-        has_purchased: true,
+        subscription_status: 'premium',
         stripe_customer_id: customerId,
         subscription_end_date: endDate.toISOString(),
         updated_at: new Date().toISOString(),
