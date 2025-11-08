@@ -76,45 +76,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signup(email: string, password: string, name: string) {
     console.log('📝 Регистрация:', email);
 
-    // 1. Создаём пользователя
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (authError) throw authError;
-    if (!authData.user) throw new Error('User not created');
-
-    console.log('✅ Auth user created:', authData.user.id);
-
-    // 2. Создаём профиль
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user.id,
-        full_name: name,
-        has_purchased: false,
+    try {
+      // 1. Создаём пользователя
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
       });
 
-    if (profileError && !profileError.message.includes('duplicate')) {
-      console.error('Profile error:', profileError);
-      throw profileError;
+      if (authError) {
+        console.error('❌ Auth error:', authError);
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error('User not created');
+      }
+
+      console.log('✅ Auth user created:', authData.user.id);
+
+      // 2. Ждём 500ms
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 3. Создаём профиль
+      console.log('📝 Создаём профиль...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          full_name: name,
+          has_purchased: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error('❌ Profile error:', profileError);
+        // Игнорируем ошибку дубликата
+        if (!profileError.message.includes('duplicate') && !profileError.message.includes('already exists')) {
+          throw profileError;
+        }
+      }
+
+      console.log('✅ Profile created');
+
+      // 4. Ждём ещё 500ms
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 5. Логинимся
+      console.log('📝 Выполняем вход...');
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (loginError) {
+        console.error('❌ Login error:', loginError);
+        throw loginError;
+      }
+
+      console.log('✅ Logged in');
+
+      // 6. Загружаем пользователя
+      console.log('📝 Загружаем профиль...');
+      await checkUser();
+      console.log('✅ Всё готово!');
+      
+    } catch (err) {
+      console.error('❌ Signup error:', err);
+      throw err;
     }
-
-    console.log('✅ Profile created');
-
-    // 3. Логинимся
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError) throw loginError;
-
-    console.log('✅ Logged in');
-
-    // 4. Загружаем пользователя
-    await checkUser();
   }
 
   // Вход
