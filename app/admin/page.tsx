@@ -59,66 +59,47 @@ export default function AdminPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    // Load from localStorage first (to keep user changes)
-    const stored = localStorage.getItem("courseLevels");
-    
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        // If stored lessons are empty or less than default, reinitialize
-        if (parsed.length < allCourseLevels.length && allCourseLevels.length > 0) {
-          console.log("Updating lessons from courseLevels.ts");
-          const levelsWithIconNames = allCourseLevels.map(level => ({
-            ...level,
-            icon: getIconName(level.icon),
-            practice: level.practice || false,
-            practiceDescription: level.practiceDescription || "",
-            isFree: level.isFree || false
-          }));
-          setLevels(levelsWithIconNames);
-          localStorage.setItem("courseLevels", JSON.stringify(levelsWithIconNames));
-        } else {
-          setLevels(parsed);
-        }
-      } catch (e) {
-        console.error("Failed to parse stored levels", e);
-        // If parsing fails, use original data
-        const levelsWithIconNames = allCourseLevels.map(level => ({
-          ...level,
-          icon: getIconName(level.icon),
-          practice: level.practice || false,
-          practiceDescription: level.practiceDescription || "",
-          isFree: level.isFree || false
+  // Load courses from API
+  const loadCourses = async () => {
+    try {
+      console.log('📡 Loading courses from API...');
+      const response = await fetch('/api/courses');
+      const data = await response.json();
+      
+      if (data.courses && data.courses.length > 0) {
+        console.log('✅ Loaded', data.courses.length, 'courses');
+        const formattedCourses = data.courses.map((course: any) => ({
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          difficulty: course.difficulty,
+          topics: course.topics || [],
+          category: course.category,
+          icon: course.icon,
+          blockName: course.block_name,
+          practice: course.practice || false,
+          practiceDescription: course.practice_description,
+          isFree: course.is_free || false,
+          translations: course.translations || {}
         }));
-        setLevels(levelsWithIconNames);
-        localStorage.setItem("courseLevels", JSON.stringify(levelsWithIconNames));
+        setLevels(formattedCourses);
+      } else {
+        console.log('⚠️ No courses in DB, using defaults');
+        setLevels(allCourseLevels);
       }
-    } else {
-      // First load - use data from file
-      const levelsWithIconNames = allCourseLevels.map(level => ({
-        ...level,
-        icon: getIconName(level.icon),
-        practice: level.practice || false,
-        practiceDescription: level.practiceDescription || "",
-        isFree: level.isFree || false
-      }));
-      setLevels(levelsWithIconNames);
-      localStorage.setItem("courseLevels", JSON.stringify(levelsWithIconNames));
+    } catch (error) {
+      console.error('❌ Error loading courses:', error);
+      setLevels(allCourseLevels);
     }
+  };
+
+  useEffect(() => {
+    loadCourses();
   }, []);
 
-  const saveLevels = (updatedLevels: Level[]) => {
-    // Add auto-translations to each level
-    const levelsWithTranslations = updatedLevels.map(level => ({
-      ...level,
-      translations: autoTranslateCourseContent(level.title, level.description)
-    }));
-    
-    setLevels(levelsWithTranslations);
-    localStorage.setItem("courseLevels", JSON.stringify(levelsWithTranslations));
-    // Trigger refresh on courses page with custom event
-    window.dispatchEvent(new CustomEvent('courseLevelsUpdated', { detail: levelsWithTranslations }));
+  // Trigger refresh on courses page
+  const triggerRefresh = () => {
+    window.dispatchEvent(new CustomEvent('courseLevelsUpdated'));
   };
 
   const renumberLevels = (levelsArray: Level[]) => {
@@ -128,12 +109,26 @@ export default function AdminPage() {
     }));
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!confirm(`Удалить урок ${id}?`)) return;
     
-    const filtered = levels.filter(l => l.id !== id);
-    const renumbered = renumberLevels(filtered);
-    saveLevels(renumbered);
+    try {
+      const response = await fetch(`/api/courses?id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        alert('✅ Урок удалён!');
+        loadCourses();
+        triggerRefresh();
+      } else {
+        const error = await response.json();
+        alert(`❌ Ошибка: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('❌ Ошибка при удалении');
+    }
   };
 
   const handleEdit = (level: Level) => {
@@ -141,16 +136,45 @@ export default function AdminPage() {
     setEditForm(level);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingId) return;
     
-    const updated = levels.map(l => 
-      l.id === editingId ? { ...l, ...editForm } as Level : l
-    );
-    saveLevels(updated);
-    setEditingId(null);
-    setEditForm({});
-    alert("✅ Урок успешно обновлён!");
+    try {
+      const updateData = {
+        id: editingId,
+        title: editForm.title,
+        description: editForm.description,
+        difficulty: editForm.difficulty,
+        topics: editForm.topics || [],
+        category: editForm.category,
+        icon: editForm.icon,
+        block_name: editForm.blockName,
+        practice: editForm.practice || false,
+        practice_description: editForm.practiceDescription,
+        is_free: editForm.isFree || false,
+        translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
+      };
+      
+      const response = await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+      
+      if (response.ok) {
+        alert('✅ Урок обновлён!');
+        loadCourses();
+        triggerRefresh();
+        setEditingId(null);
+        setEditForm({});
+      } else {
+        const error = await response.json();
+        alert(`❌ Ошибка: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('❌ Ошибка при обновлении');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -179,79 +203,111 @@ export default function AdminPage() {
     });
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!editForm.title || !editForm.description) {
       alert("Заполните название и описание урока");
       return;
     }
 
-    let updated: Level[];
-    
-    if (insertAfter !== null) {
-      // Insert after specific lesson
-      const insertIndex = levels.findIndex(l => l.id === insertAfter);
-      const before = levels.slice(0, insertIndex + 1);
-      const after = levels.slice(insertIndex + 1);
+    try {
+      // Определяем display_order
+      let displayOrder = levels.length + 1;
+      if (insertAfter !== null) {
+        const insertIndex = levels.findIndex(l => l.id === insertAfter);
+        displayOrder = insertIndex + 2; // +2 потому что вставляем ПОСЛЕ
+      }
       
-      const newLevel: Level = {
-        id: insertAfter + 1,
+      const newCourse = {
         title: editForm.title || "",
         description: editForm.description || "",
         difficulty: editForm.difficulty || "beginner",
         topics: editForm.topics || [],
         category: editForm.category || "foundation",
         icon: editForm.icon || 'Sparkles',
-        blockName: editForm.blockName,
+        block_name: editForm.blockName,
         practice: editForm.practice || false,
-        practiceDescription: editForm.practiceDescription || "",
-        isFree: editForm.isFree || false
+        practice_description: editForm.practiceDescription || "",
+        is_free: editForm.isFree || false,
+        display_order: displayOrder,
+        translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
       };
       
-      updated = [...before, newLevel, ...after];
-    } else {
-      // Add to end
-      const newLevel: Level = {
-        id: levels.length + 1,
-        title: editForm.title || "",
-        description: editForm.description || "",
-        difficulty: editForm.difficulty || "beginner",
-        topics: editForm.topics || [],
-        category: editForm.category || "foundation",
-        icon: editForm.icon || 'Sparkles',
-        blockName: editForm.blockName,
-        practice: editForm.practice || false,
-        practiceDescription: editForm.practiceDescription || "",
-        isFree: editForm.isFree || false
-      };
+      const response = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCourse)
+      });
       
-      updated = [...levels, newLevel];
+      if (response.ok) {
+        alert('✅ Новый урок добавлен!');
+        loadCourses();
+        triggerRefresh();
+        setShowAddForm(false);
+        setInsertAfter(null);
+        setEditForm({});
+      } else {
+        const error = await response.json();
+        alert(`❌ Ошибка: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Add error:', error);
+      alert('❌ Ошибка при добавлении');
     }
-    
-    const renumbered = renumberLevels(updated);
-    saveLevels(renumbered);
-    setShowAddForm(false);
-    setInsertAfter(null);
-    setEditForm({});
   };
 
-  const handleMoveUp = (id: number) => {
+  const handleMoveUp = async (id: number) => {
     const index = levels.findIndex(l => l.id === id);
     if (index <= 0) return;
     
-    const updated = [...levels];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    const renumbered = renumberLevels(updated);
-    saveLevels(renumbered);
+    try {
+      // Меняем display_order у двух курсов
+      const current = levels[index];
+      const previous = levels[index - 1];
+      
+      await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: current.id, display_order: index })
+      });
+      
+      await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: previous.id, display_order: index + 1 })
+      });
+      
+      loadCourses();
+      triggerRefresh();
+    } catch (error) {
+      console.error('Move error:', error);
+    }
   };
 
-  const handleMoveDown = (id: number) => {
+  const handleMoveDown = async (id: number) => {
     const index = levels.findIndex(l => l.id === id);
     if (index >= levels.length - 1) return;
     
-    const updated = [...levels];
-    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-    const renumbered = renumberLevels(updated);
-    saveLevels(renumbered);
+    try {
+      const current = levels[index];
+      const next = levels[index + 1];
+      
+      await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: current.id, display_order: index + 2 })
+      });
+      
+      await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: next.id, display_order: index + 1 })
+      });
+      
+      loadCourses();
+      triggerRefresh();
+    } catch (error) {
+      console.error('Move error:', error);
+    }
   };
 
   const addTopic = () => {

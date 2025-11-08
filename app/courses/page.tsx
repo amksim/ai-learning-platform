@@ -46,37 +46,55 @@ export default function CoursesPage() {
   };
 
   useEffect(() => {
-    // Load levels from localStorage if they were edited in admin
-    const loadLevels = () => {
-      const savedLevels = localStorage.getItem("courseLevels");
-      if (savedLevels) {
-        setAllLevels(JSON.parse(savedLevels));
-      } else {
-        // Initialize with default lessons from allCourseLevels
-        if (allCourseLevels.length > 0) {
+    // Load courses from API (Supabase)
+    const loadCourses = async () => {
+      try {
+        console.log('📡 Loading courses from API...');
+        const response = await fetch('/api/courses');
+        const data = await response.json();
+        
+        if (data.courses && data.courses.length > 0) {
+          console.log('✅ Loaded', data.courses.length, 'courses from database');
+          // Преобразуем в формат который ожидает приложение
+          const formattedCourses = data.courses.map((course: any) => ({
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            difficulty: course.difficulty,
+            topics: course.topics || [],
+            category: course.category,
+            icon: course.icon,
+            blockName: course.block_name,
+            practice: course.practice || false,
+            practiceDescription: course.practice_description,
+            isFree: course.is_free || false,
+            translations: course.translations || {}
+          }));
+          setAllLevels(formattedCourses);
+        } else {
+          // Fallback to default if no courses in DB
+          console.log('⚠️ No courses in database, using defaults');
           setAllLevels(allCourseLevels);
-          localStorage.setItem("courseLevels", JSON.stringify(allCourseLevels));
         }
+      } catch (error) {
+        console.error('❌ Error loading courses:', error);
+        // Fallback to default on error
+        setAllLevels(allCourseLevels);
       }
     };
     
-    loadLevels();
+    loadCourses();
     
     // Listen for changes from admin panel
-    const handleCourseLevelsUpdate = (event: any) => {
-      if (event.detail) {
-        setAllLevels(event.detail);
-      } else {
-        loadLevels();
-      }
+    const handleCourseLevelsUpdate = () => {
+      console.log('🔄 Courses updated, reloading...');
+      loadCourses();
     };
     
     window.addEventListener('courseLevelsUpdated', handleCourseLevelsUpdate);
-    window.addEventListener('storage', loadLevels);
     
     return () => {
       window.removeEventListener('courseLevelsUpdated', handleCourseLevelsUpdate);
-      window.removeEventListener('storage', loadLevels);
     };
   }, []);
 
