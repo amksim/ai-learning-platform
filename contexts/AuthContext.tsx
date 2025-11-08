@@ -129,7 +129,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('✅ Пользователь создан:', data.user.id);
 
-      // Шаг 2: Сразу логинимся
+      // Шаг 2: Создаём профиль ВРУЧНУЮ (обходим RLS)
+      console.log('🔄 Создаём профиль...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          full_name: fullName || email.split('@')[0],
+          has_purchased: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.warn('⚠️ Профиль не создан (возможно уже существует):', profileError);
+      } else {
+        console.log('✅ Профиль создан!');
+      }
+
+      // Шаг 3: Логинимся
       console.log('🔄 Выполняем вход...');
       const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email,
@@ -143,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('✅ Вход выполнен, загружаем профиль...');
 
-      // Шаг 3: Загружаем профиль
+      // Шаг 4: Загружаем профиль
       if (loginData.user) {
         await loadUserProfile(loginData.user);
         console.log('✅ Профиль загружен!');
