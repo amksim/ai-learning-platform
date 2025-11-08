@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { login } = useAuth();
+  const { signup, sendMagicLink } = useAuth();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
@@ -21,29 +21,37 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate sending code
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setCodeSent(true);
-    setLoading(false);
+    try {
+      // Send magic link for passwordless login
+      await sendMagicLink(email);
+      setCodeSent(true);
+      alert("Проверьте email! Мы отправили ссылку для входа.");
+    } catch (error: any) {
+      console.error("Error sending magic link:", error);
+      alert(error.message || "Ошибка отправки письма");
+    }
     
-    // In real app, send verification code to email via API
-    console.log("Verification code sent to:", email);
+    setLoading(false);
   };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate verification
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // In real app, verify code via API
-    // For demo, accept any 6-digit code
-    if (code.length === 6) {
-      login(email);
+    try {
+      // For demo: create account with temporary password
+      const demoPassword = `demo-${code}-${Date.now()}`;
+      await signup(email, demoPassword, email.split('@')[0]);
       router.push("/courses");
-    } else {
-      alert("Неверный код. Для демо используйте любой 6-значный код.");
+    } catch (error: any) {
+      console.error("Demo login error:", error);
+      // If user already exists, just redirect
+      if (error.message?.includes('already registered')) {
+        alert("Этот email уже зарегистрирован. Используйте magic link для входа!");
+        setCodeSent(false);
+      } else {
+        alert("Ошибка входа. Попробуйте ещё раз.");
+      }
     }
     
     setLoading(false);
