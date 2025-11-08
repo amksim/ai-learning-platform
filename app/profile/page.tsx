@@ -44,7 +44,7 @@ export default function ProfilePage() {
     }
     
     addReview({
-      name: user.email.split('@')[0],
+      name: user.full_name || user.email.split('@')[0],
       email: user.email,
       text: reviewText.trim(),
       rating: reviewRating,
@@ -74,12 +74,12 @@ export default function ProfilePage() {
         <div className="mb-8 text-center">
           {/* Avatar */}
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 mb-4 text-4xl font-bold text-white premium-shadow neon-glow">
-            {user.email[0].toUpperCase()}
+            {(user.full_name || user.email)[0].toUpperCase()}
           </div>
           
           <h1 className="text-4xl md:text-5xl font-bold mb-2">
             <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              {user.email.split('@')[0]}
+              {user.full_name || user.email.split('@')[0]}
             </span>
           </h1>
           <p className="text-gray-400">{user.email}</p>

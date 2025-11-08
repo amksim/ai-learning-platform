@@ -147,11 +147,11 @@ export function Navigation() {
                 </Link>
                 
                 {/* Admin panel - only for specific email */}
-                {user.email === "Kmak4551@gmail.com" && (
+                {user.email?.toLowerCase() === "kmak4551@gmail.com" && (
                   <Link
                     href="/admin"
                     className={cn(
-                      "hidden md:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                      "flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors",
                       pathname === "/admin" && "bg-accent"
                     )}
                     title="Админ-панель"
