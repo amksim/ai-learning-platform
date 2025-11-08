@@ -111,14 +111,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           full_name: fullName || email.split('@')[0],
         },
+        // Автоматически входить без email verification
+        emailRedirectTo: undefined,
       },
     });
 
     if (error) throw error;
     
-    // Отправляем письмо с подтверждением
-    if (data.user) {
-      console.log('✅ Регистрация успешна! Проверьте email для подтверждения.');
+    // Сразу загружаем профиль пользователя
+    if (data.user && data.session) {
+      await loadUserProfile(data.user);
+      console.log('✅ Регистрация и вход выполнены успешно!');
+    } else if (data.user) {
+      // Если session не создался автоматически, логинимся
+      console.log('⚠️ Выполняем вход после регистрации...');
+      await login(email, password);
     }
   };
 
