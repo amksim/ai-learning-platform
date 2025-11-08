@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail } from "lucide-react";
+import { Mail, Send } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -10,48 +11,66 @@ import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { signup, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [isSignup, setIsSignup] = useState(false);
+  const [isSignup, setIsSignup] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('📝 Form submitted, isSignup:', isSignup);
     setLoading(true);
-
+    
     try {
       if (isSignup) {
-        if (!name.trim()) {
-          toast.error("Введите имя");
-          setLoading(false);
-          return;
-        }
-        await signup(email, password, name);
-        toast.success(`Добро пожаловать, ${name}!`);
+        console.log('📝 Регистрация:', email);
+        // Sign up new user
+        await signup(email, password, name || email.split('@')[0]);
+        console.log('✅ signup() завершён');
+        toast.success(`🎉 Добро пожаловать, ${name || email.split('@')[0]}!`, {
+          duration: 1500,
+        });
       } else {
+        console.log('📝 Вход:', email);
+        // Login existing user
         await login(email, password);
-        toast.success("Вы вошли!");
+        console.log('✅ login() завершён');
+        toast.success("✅ Вы успешно вошли!", {
+          duration: 1500,
+        });
       }
-
-      // Перенаправление
+      
+      // Redirect после успешной авторизации
+      console.log('✅ Перенаправление на /courses...');
       window.location.href = '/courses';
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       
-      if (error.message?.includes('already') || error.message?.includes('duplicate')) {
-        toast.error("Email уже зарегистрирован! Войдите.");
-        setIsSignup(false);
-      } else if (error.message?.includes('Invalid')) {
-        toast.error("Неверный email или пароль");
+      if (error.message?.includes('already registered')) {
+        toast.error("❌ Этот email уже зарегистрирован!\nПереключитесь на 'Вход'", {
+          duration: 4000,
+        });
+        setTimeout(() => setIsSignup(false), 1000);
+      } else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid')) {
+        toast.error("❌ Неверный email или пароль\nПопробуйте ещё раз", {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('security purposes')) {
+        toast.error("⏱️ Слишком много попыток\nПодождите 1 минуту и попробуйте снова", {
+          duration: 5000,
+        });
       } else {
-        toast.error(error.message || "Ошибка входа");
+        toast.error(error.message || "Ошибка входа. Попробуйте позже.", {
+          duration: 4000,
+        });
       }
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-accent/10 py-20">
@@ -84,7 +103,6 @@ export default function LoginPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ваше имя"
-                      required={isSignup}
                       className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
@@ -132,10 +150,7 @@ export default function LoginPage() {
                   type="button"
                   variant="ghost"
                   className="w-full"
-                  onClick={() => {
-                    setIsSignup(!isSignup);
-                    setName("");
-                  }}
+                  onClick={() => setIsSignup(!isSignup)}
                 >
                   {isSignup ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
                 </Button>

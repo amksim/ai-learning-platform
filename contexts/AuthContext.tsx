@@ -1,30 +1,24 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabase, type Profile } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
   email: string;
-  full_name: string | null;
-  progress: number;
-  joinedDate: string;
+  full_name: string;
   hasPaid: boolean;
-  subscription_status: 'free' | 'premium';
-  subscription_end_date: string | null;
-  stripe_customer_id: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProgress: (courseSlug: string, lessonIndex: number, codeSubmission?: string) => Promise<void>;
-  completePurchase: (stripeCustomerId: string, subscriptionType: 'monthly' | 'yearly') => Promise<void>;
-  sendMagicLink: (email: string) => Promise<void>;
+  updateProgress: (courseSlug: string, lessonIndex: number) => Promise<void>;
+  completePurchase: (customerId: string, type: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,283 +27,150 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Загрузка профиля пользователя
-  const loadUserProfile = async (supabaseUser: SupabaseUser) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
-
-      if (error) throw error;
-
-      if (profile) {
-        // Получаем прогресс
-        const { data: progressData } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', profile.id);
-
-        const totalCompleted = progressData?.filter(p => p.completed).length || 0;
-
-        setUser({
-          id: profile.id,
-          email: profile.email,
-          full_name: profile.full_name,
-          progress: totalCompleted,
-          joinedDate: profile.created_at,
-          hasPaid: profile.subscription_status === 'premium',
-          subscription_status: profile.subscription_status,
-          subscription_end_date: profile.subscription_end_date,
-          stripe_customer_id: profile.stripe_customer_id,
-        });
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    }
-  };
-
-  // Проверка сессии при загрузке
+  // Загрузка пользователя при старте
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await loadUserProfile(session.user);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-
-    // Подписка на изменения авторизации
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await loadUserProfile(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    checkUser();
   }, []);
 
-  // Регистрация
-  const signup = async (email: string, password: string, fullName?: string) => {
+  // Проверка текущего пользователя
+  async function checkUser() {
     try {
-      console.log('🔄 Начинаем регистрацию:', email);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
       
-      // Шаг 1: Регистрация
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName || email.split('@')[0],
-          },
-        },
-      });
+      if (authUser) {
+        // Загружаем профиль
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
 
-      if (error) {
-        console.error('❌ Ошибка регистрации:', error);
-        throw error;
+        if (profile) {
+          setUser({
+            id: authUser.id,
+            email: authUser.email!,
+            full_name: profile.full_name || 'User',
+            hasPaid: profile.has_purchased || false,
+          });
+        }
       }
-      
-      if (!data.user) {
-        throw new Error('Ошибка: пользователь не создан');
-      }
-
-      console.log('✅ Пользователь создан:', data.user.id);
-
-      // Шаг 2: Создаём профиль ВРУЧНУЮ (обходим RLS)
-      console.log('🔄 Создаём профиль...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          full_name: fullName || email.split('@')[0],
-          has_purchased: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.warn('⚠️ Профиль не создан (возможно уже существует):', profileError);
-      } else {
-        console.log('✅ Профиль создан!');
-      }
-
-      // Шаг 3: Логинимся
-      console.log('🔄 Выполняем вход...');
-      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (loginError) {
-        console.error('❌ Ошибка входа:', loginError);
-        throw loginError;
-      }
-
-      console.log('✅ Вход выполнен, загружаем профиль...');
-
-      // Шаг 4: Загружаем профиль
-      if (loginData.user) {
-        await loadUserProfile(loginData.user);
-        console.log('✅ Профиль загружен!');
-      }
-    } catch (err) {
-      console.error('❌ signup error:', err);
-      throw err;
+    } catch (error) {
+      console.error('Check user error:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
+
+  // Регистрация
+  async function signup(email: string, password: string, name: string) {
+    console.log('📝 Регистрация:', email);
+
+    // 1. Создаём пользователя
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error('User not created');
+
+    console.log('✅ Auth user created:', authData.user.id);
+
+    // 2. Создаём профиль
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: authData.user.id,
+        full_name: name,
+        has_purchased: false,
+      });
+
+    if (profileError && !profileError.message.includes('duplicate')) {
+      console.error('Profile error:', profileError);
+      throw profileError;
+    }
+
+    console.log('✅ Profile created');
+
+    // 3. Логинимся
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (loginError) throw loginError;
+
+    console.log('✅ Logged in');
+
+    // 4. Загружаем пользователя
+    await checkUser();
+  }
 
   // Вход
-  const login = async (email: string, password: string) => {
-    try {
-      console.log('🔄 Начинаем вход:', email);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  async function login(email: string, password: string) {
+    console.log('🔐 Вход:', email);
 
-      if (error) {
-        console.error('❌ Ошибка входа:', error);
-        throw error;
-      }
-      
-      console.log('✅ Вход выполнен, загружаем профиль...');
-      
-      // Загружаем профиль после входа
-      if (data.user) {
-        await loadUserProfile(data.user);
-        console.log('✅ Профиль загружен!');
-      }
-    } catch (err) {
-      console.error('❌ login error:', err);
-      throw err;
-    }
-  };
-
-  // Magic Link (вход по email без пароля)
-  const sendMagicLink = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/courses`,
-      },
+      password,
     });
 
     if (error) throw error;
-  };
+
+    console.log('✅ Logged in');
+
+    await checkUser();
+  }
 
   // Выход
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+  async function logout() {
+    await supabase.auth.signOut();
     setUser(null);
-  };
+  }
 
   // Обновление прогресса
-  const updateProgress = async (courseSlug: string, lessonIndex: number, codeSubmission?: string) => {
+  async function updateProgress(courseSlug: string, lessonIndex: number) {
     if (!user) return;
 
-    try {
-      // Проверяем существующий прогресс
-      const { data: existing } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('course_slug', courseSlug)
-        .eq('lesson_index', lessonIndex)
-        .single();
-
-      if (existing) {
-        // Обновляем
-        await supabase
-          .from('user_progress')
-          .update({
-            completed: true,
-            code_solution: codeSubmission,
-            completed_at: new Date().toISOString(),
-          })
-          .eq('id', existing.id);
-      } else {
-        // Создаём новую запись
-        await supabase
-          .from('user_progress')
-          .insert({
-            user_id: user.id,
-            course_slug: courseSlug,
-            lesson_index: lessonIndex,
-            completed: true,
-            code_solution: codeSubmission,
-            completed_at: new Date().toISOString(),
-          });
-      }
-
-      // Обновляем локальный прогресс
-      setUser(prev => prev ? { ...prev, progress: prev.progress + 1 } : null);
-    } catch (error) {
-      console.error('Error updating progress:', error);
-    }
-  };
+    await supabase
+      .from('user_progress')
+      .upsert({
+        user_id: user.id,
+        course_slug: courseSlug,
+        lesson_index: lessonIndex,
+        completed: true,
+        updated_at: new Date().toISOString(),
+      });
+  }
 
   // Завершение покупки
-  const completePurchase = async (stripeCustomerId: string, subscriptionType: 'monthly' | 'yearly') => {
+  async function completePurchase(customerId: string, type: string) {
     if (!user) return;
 
-    try {
-      const subscriptionEndDate = new Date();
-      if (subscriptionType === 'monthly') {
-        subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
-      } else {
-        subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
-      }
+    await supabase
+      .from('profiles')
+      .update({
+        has_purchased: true,
+        stripe_customer_id: customerId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
 
-      // Обновляем профиль
-      await supabase
-        .from('profiles')
-        .update({
-          subscription_status: 'premium',
-          subscription_end_date: subscriptionEndDate.toISOString(),
-          stripe_customer_id: stripeCustomerId,
-        })
-        .eq('id', user.id);
-
-      // Обновляем локальное состояние
-      setUser(prev => prev ? {
-        ...prev,
-        hasPaid: true,
-        subscription_status: 'premium',
-        subscription_end_date: subscriptionEndDate.toISOString(),
-        stripe_customer_id: stripeCustomerId,
-      } : null);
-    } catch (error) {
-      console.error('Error completing purchase:', error);
-    }
-  };
+    await checkUser();
+  }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading,
-      login, 
-      signup,
-      logout, 
-      updateProgress, 
-      completePurchase,
-      sendMagicLink,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signup,
+        login,
+        logout,
+        updateProgress,
+        completePurchase,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -317,8 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 }
