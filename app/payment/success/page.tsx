@@ -22,11 +22,6 @@ function PaymentSuccessContent() {
         return;
       }
 
-      // Immediately mark as purchased to avoid logout appearance
-      completePurchase();
-      setIsVerified(true);
-      setIsLoading(false);
-
       try {
         // Verify with timeout
         const controller = new AbortController();
@@ -40,7 +35,13 @@ function PaymentSuccessContent() {
         const data = await response.json();
 
         if (data.paid) {
-          // Already marked as purchased above
+          // Mark as purchased with Stripe customer ID
+          const customerId = data.customer_id || `stripe_${sessionId}`;
+          const subscriptionType = data.subscription_type || 'monthly';
+          completePurchase(customerId, subscriptionType);
+          setIsVerified(true);
+          setIsLoading(false);
+          
           // Redirect to courses after 2 seconds
           setTimeout(() => {
             window.location.href = '/courses';
@@ -48,6 +49,9 @@ function PaymentSuccessContent() {
         } else {
           // If verification fails, still keep purchase active (already paid in Stripe)
           console.warn('Payment status returned not paid, but keeping purchase active');
+          completePurchase(`session_${sessionId}`, 'monthly');
+          setIsVerified(true);
+          setIsLoading(false);
           setTimeout(() => {
             window.location.href = '/courses';
           }, 2000);
@@ -55,6 +59,9 @@ function PaymentSuccessContent() {
       } catch (error) {
         console.error('Payment verification failed:', error);
         // Even on error, keep purchase active and redirect (payment was successful in Stripe)
+        completePurchase(`fallback_${Date.now()}`, 'monthly');
+        setIsVerified(true);
+        setIsLoading(false);
         setTimeout(() => {
           window.location.href = '/courses';
         }, 2000);

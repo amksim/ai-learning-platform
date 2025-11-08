@@ -53,7 +53,7 @@ export default function PaymentPage() {
           // Mock payment - simulate success (for development without Stripe keys)
           setTimeout(() => {
             setPaymentSuccess(true);
-            completePurchase();
+            completePurchase('mock_customer_' + Date.now(), 'monthly');
             setTimeout(() => {
               window.location.href = "/payment/success?session_id=" + data.sessionId;
             }, 2000);
