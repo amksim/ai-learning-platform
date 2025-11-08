@@ -1,0 +1,37 @@
+🔑 NETLIFY ENVIRONMENT VARIABLES
+====================================
+
+ОТКРОЙ: https://app.netlify.com/sites/ai-learning45/configuration/env
+
+Добавь эти переменные (нажми "Add a variable" для каждой):
+
+1. NEXT_PUBLIC_SUPABASE_URL
+   Value: https://ttnkswdqxtfiduqkkmne.supabase.co
+
+2. NEXT_PUBLIC_SUPABASE_ANON_KEY
+   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtzd2RxeHRmaWR1cWtrbW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTYzNjgsImV4cCI6MjA3ODE3MjM2OH0.r5z9no8j9thINUX9rBzLF1SazFuJmIouHTGa4fvaaOM
+
+3. SUPABASE_SERVICE_ROLE_KEY
+   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bmtzd2RxeHRmaWR1cWtrbW5lIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjU5NjM2OCwiZXhwIjoyMDc4MTcyMzY4fQ.L1Toe9JNWExcXyUhb1sLjDo5QuNjwh7GDFsVumO6ZzQ
+
+4. NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+   Value: pk_live_51SQxovIoyNMrDAfMUeBGMwehhuTeD4o0fatj4UulX3Tb1Vdas40yBR5AKLYqNIka3vsLbV90Kj88UBYCGGBQMDXQ00V4qBnxjG
+
+5. STRIPE_SECRET_KEY
+   Value: (твой секретный ключ из Stripe - sk_live_...)
+
+6. NEXTAUTH_URL
+   Value: https://ai-learning45.netlify.app
+
+7. NEXTAUTH_SECRET
+   Value: ai-learning-platform-secret-2024-production
+
+8. NODE_ENV
+   Value: production
+
+После добавления всех переменных:
+1. Перейди в "Deploys"
+2. Нажми "Trigger deploy" → "Deploy site"
+3. Жди 2-3 минуты
+
+✅ ГОТОВО!

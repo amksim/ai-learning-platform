@@ -1,99 +1,247 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase, type Profile } from "@/lib/supabase";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
+  id: string;
   email: string;
-  progress: number; // Единый прогресс для всех уровней
-  joinedDate: string; // Дата регистрации
-  hasPaid: boolean; // Оплач ли курс
-  registeredAt: number; // Время регистрации для таймера скидки
+  full_name: string | null;
+  progress: number;
+  joinedDate: string;
+  hasPaid: boolean;
+  subscription_status: 'free' | 'premium';
+  subscription_end_date: string | null;
+  stripe_customer_id: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string) => void;
-  logout: () => void;
-  updateProgress: (level: number) => void;
-  completePurchase: () => void; // Обработка успешной покупки
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, fullName?: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProgress: (courseSlug: string, lessonIndex: number, codeSubmission?: string) => Promise<void>;
+  completePurchase: (stripeCustomerId: string, subscriptionType: 'monthly' | 'yearly') => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Load user from localStorage
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      // Для старых пользователей без joinedDate добавляем дату
-      if (!parsed.joinedDate) {
-        parsed.joinedDate = new Date().toISOString();
+  // Загрузка профиля пользователя
+  const loadUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) throw error;
+
+      if (profile) {
+        // Получаем прогресс
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', profile.id);
+
+        const totalCompleted = progressData?.filter(p => p.completed).length || 0;
+
+        setUser({
+          id: profile.id,
+          email: profile.email,
+          full_name: profile.full_name,
+          progress: totalCompleted,
+          joinedDate: profile.created_at,
+          hasPaid: profile.subscription_status === 'premium',
+          subscription_status: profile.subscription_status,
+          subscription_end_date: profile.subscription_end_date,
+          stripe_customer_id: profile.stripe_customer_id,
+        });
       }
-      // Добавляем недостающие поля для старых пользователей
-      if (parsed.hasPaid === undefined) {
-        parsed.hasPaid = false;
-      }
-      if (parsed.registeredAt === undefined) {
-        parsed.registeredAt = Date.now();
-      }
-      // Исправляем некорректный прогресс
-      if (typeof parsed.progress !== 'number' || isNaN(parsed.progress)) {
-        parsed.progress = 0;
-      }
-      setUser(parsed);
-      localStorage.setItem("user", JSON.stringify(parsed));
+    } catch (error) {
+      console.error('Error loading profile:', error);
     }
+  };
+
+  // Проверка сессии при загрузке
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await loadUserProfile(session.user);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    // Подписка на изменения авторизации
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await loadUserProfile(session.user);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = (email: string) => {
-    const newUser: User = {
+  // Регистрация
+  const signup = async (email: string, password: string, fullName?: string) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
-      progress: 0,
-      joinedDate: new Date().toISOString(),
-      hasPaid: false,
-      registeredAt: Date.now(),
-    };
-    setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
+      password,
+      options: {
+        data: {
+          full_name: fullName || email.split('@')[0],
+        },
+      },
+    });
+
+    if (error) throw error;
+    
+    // Отправляем письмо с подтверждением
+    if (data.user) {
+      console.log('✅ Регистрация успешна! Проверьте email для подтверждения.');
+    }
   };
 
-  const logout = () => {
+  // Вход
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+  };
+
+  // Magic Link (вход по email без пароля)
+  const sendMagicLink = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/courses`,
+      },
+    });
+
+    if (error) throw error;
+  };
+
+  // Выход
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
     setUser(null);
-    localStorage.removeItem("user");
   };
 
-  const updateProgress = (level: number) => {
-    if (user && level > user.progress) {
-      const updatedUser = { ...user, progress: level };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+  // Обновление прогресса
+  const updateProgress = async (courseSlug: string, lessonIndex: number, codeSubmission?: string) => {
+    if (!user) return;
+
+    try {
+      // Проверяем существующий прогресс
+      const { data: existing } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_slug', courseSlug)
+        .eq('lesson_index', lessonIndex)
+        .single();
+
+      if (existing) {
+        // Обновляем
+        await supabase
+          .from('user_progress')
+          .update({
+            completed: true,
+            code_solution: codeSubmission,
+            completed_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+      } else {
+        // Создаём новую запись
+        await supabase
+          .from('user_progress')
+          .insert({
+            user_id: user.id,
+            course_slug: courseSlug,
+            lesson_index: lessonIndex,
+            completed: true,
+            code_solution: codeSubmission,
+            completed_at: new Date().toISOString(),
+          });
+      }
+
+      // Обновляем локальный прогресс
+      setUser(prev => prev ? { ...prev, progress: prev.progress + 1 } : null);
+    } catch (error) {
+      console.error('Error updating progress:', error);
     }
   };
 
-  const completePurchase = () => {
-    if (user) {
-      const updatedUser = { ...user, hasPaid: true };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      // Сохраняем информацию о покупке отдельно
-      const purchase = {
-        email: user.email,
-        purchasedAt: Date.now(),
-        amount: 100,
-        currency: 'USD'
-      };
-      localStorage.setItem("purchase", JSON.stringify(purchase));
+  // Завершение покупки
+  const completePurchase = async (stripeCustomerId: string, subscriptionType: 'monthly' | 'yearly') => {
+    if (!user) return;
+
+    try {
+      const subscriptionEndDate = new Date();
+      if (subscriptionType === 'monthly') {
+        subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+      } else {
+        subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
+      }
+
+      // Обновляем профиль
+      await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'premium',
+          subscription_end_date: subscriptionEndDate.toISOString(),
+          stripe_customer_id: stripeCustomerId,
+        })
+        .eq('id', user.id);
+
+      // Обновляем локальное состояние
+      setUser(prev => prev ? {
+        ...prev,
+        hasPaid: true,
+        subscription_status: 'premium',
+        subscription_end_date: subscriptionEndDate.toISOString(),
+        stripe_customer_id: stripeCustomerId,
+      } : null);
+    } catch (error) {
+      console.error('Error completing purchase:', error);
     }
   };
-
-  // Обновляем общее количество уровней
-  const TOTAL_LEVELS = 220;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProgress, completePurchase }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading,
+      login, 
+      signup,
+      logout, 
+      updateProgress, 
+      completePurchase,
+      sendMagicLink,
+    }}>
       {children}
     </AuthContext.Provider>
   );
