@@ -18,6 +18,10 @@ export default function PaymentPage() {
   const [showModal, setShowModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель тест/прод цены
+  
+  // Проверяем является ли пользователь админом
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   useEffect(() => {
     // Не проверяем пока загружается
@@ -47,8 +51,14 @@ export default function PaymentPage() {
         return;
       }
       
+      const priceId = useTestPrice 
+        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
+        : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_1SQy9YEUse1J07rXnLjskpwX');
+      
       console.log('📡 Отправляем запрос на /api/checkout...');
       console.log('👤 Email пользователя:', user.email);
+      console.log('💰 Использую цену:', useTestPrice ? '$0.01 (ТЕСТ)' : '$100 (ПРОД)');
+      console.log('🔑 Price ID:', priceId);
       
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -56,7 +66,7 @@ export default function PaymentPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_1SQy9YEUse1J07rXnLjskpwX',
+          priceId: priceId,
           userEmail: user?.email,
         }),
       });
@@ -323,12 +333,51 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
+                {/* АДМИНСКИЙ ПЕРЕКЛЮЧАТЕЛЬ ЦЕНЫ */}
+                {isAdmin && (
+                  <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
+                    <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ:</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setUseTestPrice(false)}
+                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                          !useTestPrice 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        $100 (ПРОД)
+                      </button>
+                      <button
+                        onClick={() => setUseTestPrice(true)}
+                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                          useTestPrice 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        $0.01 (ТЕСТ)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handlePayment}
-                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 premium-shadow neon-glow text-lg mb-4"
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 flex items-center justify-center gap-3 premium-shadow neon-glow text-lg mb-4"
                 >
-                  <Zap className="h-6 w-6" />
-                  Оплатить $100
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      Обработка...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-6 w-6" />
+                      Оплатить {useTestPrice ? '$0.01' : '$100'}
+                    </>
+                  )}
                 </button>
 
                 <p className="text-xs text-center text-gray-400">
