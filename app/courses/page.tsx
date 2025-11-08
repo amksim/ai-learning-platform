@@ -53,7 +53,7 @@ export default function CoursesPage() {
         const response = await fetch('/api/courses');
         const data = await response.json();
         
-        if (data.courses && data.courses.length > 0) {
+        if (data.courses) {
           console.log('✅ Loaded', data.courses.length, 'courses from database');
           // Преобразуем в формат который ожидает приложение
           const formattedCourses = data.courses.map((course: any) => ({
@@ -71,15 +71,18 @@ export default function CoursesPage() {
             translations: course.translations || {}
           }));
           setAllLevels(formattedCourses);
+          
+          // Если база пустая - показываем сообщение
+          if (data.courses.length === 0) {
+            console.log('ℹ️ Database is empty - no courses to display');
+          }
         } else {
-          // Fallback to default if no courses in DB
-          console.log('⚠️ No courses in database, using defaults');
-          setAllLevels(allCourseLevels);
+          console.log('⚠️ No courses data, showing empty list');
+          setAllLevels([]);
         }
       } catch (error) {
         console.error('❌ Error loading courses:', error);
-        // Fallback to default on error
-        setAllLevels(allCourseLevels);
+        setAllLevels([]);
       }
     };
     
