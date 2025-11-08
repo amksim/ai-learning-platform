@@ -39,14 +39,24 @@ export default function PaymentPage() {
     setIsProcessing(true);
     
     try {
+      // Проверяем что пользователь залогинен
+      if (!user?.email) {
+        alert('Ошибка: пользователь не авторизован');
+        setIsProcessing(false);
+        router.push('/login');
+        return;
+      }
+      
       console.log('📡 Отправляем запрос на /api/checkout...');
+      console.log('👤 Email пользователя:', user.email);
+      
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: 'price_1SQy9YEUse1J07rXnLjskpwX',
+          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_1SQy9YEUse1J07rXnLjskpwX',
           userEmail: user?.email,
         }),
       });

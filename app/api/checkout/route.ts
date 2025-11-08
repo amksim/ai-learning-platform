@@ -50,18 +50,25 @@ export async function POST(request: NextRequest) {
     // Check if Stripe is configured
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     console.log('🔑 Stripe key present:', !!stripeKey);
+    console.log('🔑 Stripe key length:', stripeKey ? stripeKey.length : 0);
+    console.log('🔑 Stripe key starts with:', stripeKey ? stripeKey.substring(0, 7) : 'none');
     
-    if (!stripeKey) {
+    if (!stripeKey || stripeKey.trim() === '') {
       console.warn('⚠️ STRIPE_SECRET_KEY not configured - using MOCK mode');
       console.log('ℹ️ Set STRIPE_SECRET_KEY in Netlify environment variables');
+      console.log('ℹ️ Go to: Site settings → Environment variables → Add variable');
+      console.log('ℹ️ Name: STRIPE_SECRET_KEY');
+      console.log('ℹ️ Value: sk_test_... or sk_live_...');
       
       // Fallback to mock for development
       await new Promise(resolve => setTimeout(resolve, 1000));
       const mockSessionId = `cs_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const mockUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/payment/success?session_id=${mockSessionId}`;
       console.log('🎭 Returning mock session:', mockSessionId);
       
       return NextResponse.json({ 
         sessionId: mockSessionId,
+        url: mockUrl,
         mock: true
       });
     }
@@ -123,17 +130,40 @@ export async function POST(request: NextRequest) {
     console.error('❌ Error stack:', error.stack);
     
     // Extract more details from Stripe errors
+    let errorMessage = error.message || 'Failed to create checkout session';
+    let errorType = error.type || 'unknown_error';
+    let userFriendlyMessage = errorMessage;
+    
     if (error.type) {
       console.error('❌ Stripe error type:', error.type);
+      
+      // Provide user-friendly messages for common Stripe errors
+      if (error.type === 'StripeInvalidRequestError') {
+        if (error.message.includes('No such price')) {
+          userFriendlyMessage = '❌ Неправильный Price ID в настройках Stripe. Проверьте NEXT_PUBLIC_STRIPE_PRICE_ID в переменных окружения.';
+        } else if (error.message.includes('No such customer')) {
+          userFriendlyMessage = '❌ Проблема с данными клиента в Stripe.';
+        } else {
+          userFriendlyMessage = `❌ Ошибка Stripe: ${error.message}`;
+        }
+      } else if (error.type === 'StripeAuthenticationError') {
+        userFriendlyMessage = '❌ Неправильный Stripe API ключ. Проверьте STRIPE_SECRET_KEY в переменных окружения.';
+      } else if (error.type === 'StripeAPIError') {
+        userFriendlyMessage = '❌ Проблема с Stripe API. Попробуйте позже.';
+      }
     }
+    
     if (error.raw) {
       console.error('❌ Stripe raw error:', JSON.stringify(error.raw, null, 2));
     }
     
+    console.error('📝 User-friendly message:', userFriendlyMessage);
+    
     return NextResponse.json(
       { 
-        error: error.message || 'Failed to create checkout session',
-        details: error.type || 'unknown_error'
+        error: userFriendlyMessage,
+        details: errorType,
+        originalError: errorMessage
       },
       { status: 500 }
     );
