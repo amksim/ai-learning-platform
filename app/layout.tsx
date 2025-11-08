@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import SupportButton from "@/components/SupportButton";
@@ -7,8 +6,6 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReviewsProvider } from "@/contexts/ReviewsContext";
-
-const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
   title: "AI Learning Platform - Научись создавать с AI",
@@ -22,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
+      <body className="font-sans">
         <AuthProvider>
           <LanguageProvider>
             <ReviewsProvider>
