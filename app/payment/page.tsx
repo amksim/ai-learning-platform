@@ -352,7 +352,7 @@ export default function PaymentPage() {
                 </div>
 
                 {/* АДМИНСКАЯ ПАНЕЛЬ - ВЫБОР ЦЕНЫ */}
-                {isAdmin && process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
+                {isAdmin && (
                   <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
                     <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ - ВЫБОР ЦЕНЫ:</p>
                     <div className="flex items-center gap-3">
@@ -368,18 +368,24 @@ export default function PaymentPage() {
                       </button>
                       <button
                         onClick={() => setUseTestPrice(true)}
+                        disabled={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST}
                         className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
                           useTestPrice 
                             ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                            : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST
+                              ? 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                              : 'bg-gray-800 text-gray-600 cursor-not-allowed'
                         }`}
+                        title={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST ? 'Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify env' : ''}
                       >
                         $0.01 (TEST)
                       </button>
                     </div>
-                    <p className="text-xs text-yellow-300 mt-2">
-                      ℹ️ Test mode requires NEXT_PUBLIC_STRIPE_PRICE_ID_TEST in Netlify
-                    </p>
+                    {!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
+                      <p className="text-xs text-red-400 mt-2">
+                        ⚠️ Test price not configured. Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify.
+                      </p>
+                    )}
                   </div>
                 )}
 
