@@ -35,7 +35,7 @@ const getIconName = (icon: any): string => {
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [levels, setLevels] = useState<Level[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<Level>>({});
@@ -45,6 +45,9 @@ export default function AdminPage() {
 
   // Admin access protection
   useEffect(() => {
+    // Не проверяем пока загружается
+    if (loading) return;
+    
     if (!user) {
       router.push("/login");
       return;
@@ -54,7 +57,7 @@ export default function AdminPage() {
       router.push("/");
       return;
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   useEffect(() => {
     // Load from localStorage first (to keep user changes)
@@ -270,8 +273,20 @@ export default function AdminPage() {
 
   const IconComponent = iconOptions.find(opt => opt.name === editForm.icon)?.component || Sparkles;
 
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Don't render anything if user is not admin
-  if (!user || user.email !== "Kmak4551@gmail.com") {
+  if (!user || user.email?.toLowerCase() !== "kmak4551@gmail.com") {
     return null;
   }
 

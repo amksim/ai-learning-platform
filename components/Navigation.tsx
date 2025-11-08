@@ -39,7 +39,7 @@ const languages = [
 export function Navigation() {
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -131,7 +131,12 @@ export function Navigation() {
               )}
             </div>
 
-            {user ? (
+            {loading ? (
+              // Показываем загрузку вместо кнопки
+              <div className="flex items-center gap-2 px-4 py-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+              </div>
+            ) : user ? (
               <>
                 {/* Profile button */}
                 <Link
