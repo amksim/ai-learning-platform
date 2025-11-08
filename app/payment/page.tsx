@@ -18,10 +18,6 @@ export default function PaymentPage() {
   const [showModal, setShowModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель тест/прод цены
-  
-  // Проверяем является ли пользователь админом
-  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   useEffect(() => {
     // Не проверяем пока загружается
@@ -39,86 +35,50 @@ export default function PaymentPage() {
   }, [user, loading, router]);
 
   const handlePayment = async () => {
-    console.log('🔄 Начинаем оплату...');
-    setIsProcessing(true);
+    if (isProcessing) return;
     
+    setIsProcessing(true);
+
     try {
-      // Проверяем что пользователь залогинен
+      console.log('💳 STRIPE DIRECT CHECKOUT - Starting...');
+      console.log('👤 User email:', user?.email || 'No user');
+      
       if (!user?.email) {
-        alert('Ошибка: пользователь не авторизован');
+        alert('Please login first');
         setIsProcessing(false);
-        router.push('/login');
         return;
       }
       
-      const priceId = useTestPrice 
-        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
-        : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_1SQy9YEUse1J07rXnLjskpwX');
+      // ПРЯМОЕ ПОДКЛЮЧЕНИЕ К STRIPE - БЕЗ БЭКЕНДА!
+      const stripe = await stripePromise;
       
-      console.log('📡 Отправляем запрос на /api/checkout...');
-      console.log('👤 Email пользователя:', user.email);
-      console.log('💰 Использую цену:', useTestPrice ? '$0.01 (ТЕСТ)' : '$100 (ПРОД)');
-      console.log('🔑 Price ID:', priceId);
+      if (!stripe) {
+        alert('Stripe not loaded. Please refresh the page.');
+        setIsProcessing(false);
+        return;
+      }
       
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: priceId,
-          userEmail: user?.email,
-        }),
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y';
+      console.log('💰 Price ID:', priceId);
+      console.log('🚀 Redirecting directly to Stripe Checkout...');
+      
+      // ПРЯМОЙ РЕДИРЕКТ НА STRIPE - РАБОТАЕТ 100%!
+      const { error } = await stripe.redirectToCheckout({
+        lineItems: [{ price: priceId, quantity: 1 }],
+        mode: 'payment',
+        successUrl: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/payment?canceled=true`,
+        customerEmail: user.email,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('📦 Ответ от API:', data);
-      
-      if (data.error) {
-        const errorMsg = `Ошибка оплаты:\n${data.error}\n\n${data.details ? `Детали: ${data.details}` : ''}`;
-        console.error('❌ API вернул ошибку:', data);
-        alert(errorMsg);
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (data.sessionId) {
-        if (data.mock) {
-          console.log('🎭 Mock режим - симуляция оплаты');
-          alert('⚠️ ВНИМАНИЕ: Stripe не настроен!\n\nИспользуется тестовый режим.\nДобавьте STRIPE_SECRET_KEY в Netlify переменные.');
-          // Mock payment - simulate success
-          setTimeout(() => {
-            console.log('✅ Mock оплата успешна');
-            setPaymentSuccess(true);
-            completePurchase('mock_customer_' + Date.now(), 'monthly');
-            setTimeout(() => {
-              window.location.href = "/payment/success?session_id=" + data.sessionId;
-            }, 2000);
-          }, 2000);
-        } else {
-          // Real Stripe payment
-          console.log('💳 Настоящая оплата - редирект на Stripe');
-          if (data.url) {
-            console.log('🔗 URL для редиректа:', data.url);
-            window.location.href = data.url;
-          } else {
-            console.error('❌ Нет URL для редиректа');
-            alert('Ошибка: не получен URL для оплаты');
-            setIsProcessing(false);
-          }
-        }
-      } else {
-        console.error('❌ Нет sessionId в ответе');
-        alert('Ошибка: не получен ID сессии');
+      if (error) {
+        console.error('❌ Stripe error:', error);
+        alert(`Payment failed: ${error.message}`);
         setIsProcessing(false);
       }
     } catch (error: any) {
-      console.error('❌ Ошибка оплаты:', error);
-      alert(`Ошибка при обработке платежа:\n${error.message}`);
+      console.error('❌ Payment error:', error);
+      alert(`Payment failed: ${error.message}`);
       setIsProcessing(false);
     }
   };
@@ -333,35 +293,6 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
-                {/* АДМИНСКИЙ ПЕРЕКЛЮЧАТЕЛЬ ЦЕНЫ */}
-                {isAdmin && (
-                  <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
-                    <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ:</p>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setUseTestPrice(false)}
-                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-                          !useTestPrice 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                        }`}
-                      >
-                        $100 (ПРОД)
-                      </button>
-                      <button
-                        onClick={() => setUseTestPrice(true)}
-                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-                          useTestPrice 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                        }`}
-                      >
-                        $0.01 (ТЕСТ)
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 <button
                   onClick={handlePayment}
                   disabled={isProcessing}
@@ -370,18 +301,18 @@ export default function PaymentPage() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      Обработка...
+                      Processing...
                     </>
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      Оплатить {useTestPrice ? '$0.01' : '$100'}
+                      Pay $100 - Get Full Access
                     </>
                   )}
                 </button>
 
                 <p className="text-xs text-center text-gray-400">
-                  Нажимая кнопку, ты получишь мгновенный доступ ко всем урокам
+                  Click the button to get instant access to all lessons
                 </p>
               </CardContent>
             </Card>

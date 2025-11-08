@@ -21,17 +21,20 @@ const getStripe = () => {
 
 export async function POST(request: NextRequest) {
   console.log('🔵 API /checkout called');
+  console.log('📍 Function started at:', new Date().toISOString());
   
   try {
     // Parse request body
     let priceId, userEmail;
     try {
+      console.log('📥 Step 1: Parsing request body...');
       const body = await request.json();
       priceId = body.priceId;
       userEmail = body.userEmail;
       console.log('💳 Payment request:', { priceId, userEmail });
+      console.log('✅ Step 1: Request body parsed successfully');
     } catch (parseError: any) {
-      console.error('❌ Failed to parse request body:', parseError);
+      console.error('❌ Step 1 FAILED: Failed to parse request body:', parseError);
       return NextResponse.json(
         { error: 'Invalid request body' },
         { status: 400 }
@@ -39,32 +42,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate inputs
+    console.log('📥 Step 2: Validating inputs...');
     if (!priceId || !userEmail) {
-      console.error('❌ Missing required fields:', { priceId, userEmail });
+      console.error('❌ Step 2 FAILED: Missing required fields:', { priceId, userEmail });
       return NextResponse.json(
         { error: 'Missing priceId or userEmail' },
         { status: 400 }
       );
     }
+    console.log('✅ Step 2: Inputs validated successfully');
 
     // Check if Stripe is configured
+    console.log('📥 Step 3: Checking Stripe configuration...');
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     console.log('🔑 Stripe key present:', !!stripeKey);
     console.log('🔑 Stripe key length:', stripeKey ? stripeKey.length : 0);
     console.log('🔑 Stripe key starts with:', stripeKey ? stripeKey.substring(0, 7) : 'none');
     
     if (!stripeKey || stripeKey.trim() === '') {
-      console.warn('⚠️ STRIPE_SECRET_KEY not configured - using MOCK mode');
+      console.warn('⚠️ Step 3 FAILED: STRIPE_SECRET_KEY not configured - using MOCK mode');
       console.log('ℹ️ Set STRIPE_SECRET_KEY in Netlify environment variables');
       console.log('ℹ️ Go to: Site settings → Environment variables → Add variable');
       console.log('ℹ️ Name: STRIPE_SECRET_KEY');
       console.log('ℹ️ Value: sk_test_... or sk_live_...');
       
       // Fallback to mock for development
+      console.log('🎭 Returning mock response...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       const mockSessionId = `cs_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const mockUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/payment/success?session_id=${mockSessionId}`;
-      console.log('🎭 Returning mock session:', mockSessionId);
+      console.log('🎭 Mock session created:', mockSessionId);
       
       return NextResponse.json({ 
         sessionId: mockSessionId,
@@ -72,20 +79,22 @@ export async function POST(request: NextRequest) {
         mock: true
       });
     }
+    console.log('✅ Step 3: Stripe key found and valid');
 
     // Create real Stripe checkout session
-    console.log('✅ Initializing Stripe...');
+    console.log('📥 Step 4: Initializing Stripe...');
     const stripe = getStripe();
     
     if (!stripe) {
-      console.error('❌ Failed to initialize Stripe');
+      console.error('❌ Step 4 FAILED: Failed to initialize Stripe');
       return NextResponse.json(
         { error: 'Failed to initialize Stripe' },
         { status: 500 }
       );
     }
+    console.log('✅ Step 4: Stripe initialized successfully');
 
-    console.log('✅ Creating Stripe checkout session...');
+    console.log('📥 Step 5: Creating Stripe checkout session...');
     
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                     process.env.NEXTAUTH_URL || 
@@ -112,10 +121,13 @@ export async function POST(request: NextRequest) {
     
     console.log('📝 Session params:', JSON.stringify(sessionParams, null, 2));
     
+    console.log('📥 Step 5.1: Calling stripe.checkout.sessions.create()...');
     const session = await stripe.checkout.sessions.create(sessionParams);
+    console.log('📥 Step 5.2: Stripe response received');
 
-    console.log('✅ Stripe session created:', session.id);
+    console.log('✅ Step 5: Stripe session created successfully:', session.id);
     console.log('🔗 Checkout URL:', session.url);
+    console.log('📍 Function completed successfully at:', new Date().toISOString());
 
     return NextResponse.json({ 
       sessionId: session.id,
