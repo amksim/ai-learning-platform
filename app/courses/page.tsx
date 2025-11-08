@@ -291,7 +291,7 @@ export default function CoursesPage() {
                           <div className={`absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
                             unlocked ? 'bg-purple-500 text-white' : 'bg-gray-600 text-gray-300'
                           }`}>
-                            {level.id}
+                            {index + 1}
                           </div>
                         )}
                       </div>
@@ -339,7 +339,7 @@ export default function CoursesPage() {
 
                     {/* Название под кругом */}
                     <div className={`mt-4 ${isLeft ? 'text-left' : 'text-right'} max-w-[120px] sm:max-w-[140px] md:max-w-[160px]`}>
-                      <p className="text-xs text-gray-400 mb-1">{t.courses.lesson} {level.id}</p>
+                      <p className="text-xs text-gray-400 mb-1">{t.courses.lesson} {index + 1}</p>
                       <p className="text-xs sm:text-sm font-bold line-clamp-2">{getTranslated(level).title}</p>
                       {completed && (
                         <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 border border-green-400/50">
