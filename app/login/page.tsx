@@ -40,13 +40,35 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error('Auth error:', error);
       
-      if (error.message?.includes('already') || error.message?.includes('duplicate')) {
-        toast.error("Email уже зарегистрирован! Войдите.");
-        setIsSignup(false);
-      } else if (error.message?.includes('Invalid')) {
-        toast.error("Неверный email или пароль");
+      // Специальная обработка для дубликатов email
+      if (error.message?.includes('already') || 
+          error.message?.includes('registered') ||
+          error.message?.includes('duplicate') ||
+          error.message?.includes('существует')) {
+        toast.error("❌ Этот email уже зарегистрирован!\n\nИспользуйте кнопку 'Войти' ниже", {
+          duration: 5000,
+          style: {
+            background: '#ef4444',
+            color: '#fff',
+          }
+        });
+        // Автоматически переключаем на вход
+        setTimeout(() => {
+          setIsSignup(false);
+          setPassword(''); // Очищаем пароль для безопасности
+        }, 1500);
+      } else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid')) {
+        toast.error("❌ Неверный email или пароль\nПроверьте данные и попробуйте ещё раз", {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('security purposes') || error.message?.includes('rate limit')) {
+        toast.error("⏱️ Слишком много попыток входа\n\nПодождите 1 минуту и попробуйте снова", {
+          duration: 5000,
+        });
       } else {
-        toast.error(error.message || "Ошибка входа");
+        toast.error(error.message || "Ошибка входа. Попробуйте позже.", {
+          duration: 4000,
+        });
       }
     } finally {
       setLoading(false);

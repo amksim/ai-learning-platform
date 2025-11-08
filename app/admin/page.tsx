@@ -50,7 +50,7 @@ export default function AdminPage() {
       return;
     }
     
-    if (user.email !== "Kmak4551@gmail.com") {
+    if (user.email?.toLowerCase() !== "kmak4551@gmail.com") {
       router.push("/");
       return;
     }
