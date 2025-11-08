@@ -21,25 +21,30 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('📝 Form submitted, isSignup:', isSignup);
     setLoading(true);
     
     try {
       if (isSignup) {
+        console.log('📝 Регистрация:', email);
         // Sign up new user
         await signup(email, password, name || email.split('@')[0]);
+        console.log('✅ signup() завершён');
         toast.success(`🎉 Добро пожаловать, ${name || email.split('@')[0]}!`, {
           duration: 1500,
         });
       } else {
+        console.log('📝 Вход:', email);
         // Login existing user
         await login(email, password);
+        console.log('✅ login() завершён');
         toast.success("✅ Вы успешно вошли!", {
           duration: 1500,
         });
       }
       
       // Redirect после успешной авторизации
-      console.log('✅ Авторизация успешна, перенаправление...');
+      console.log('✅ Перенаправление на /courses...');
       window.location.href = '/courses';
     } catch (error: any) {
       console.error("Auth error:", error);

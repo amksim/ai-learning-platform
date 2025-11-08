@@ -104,51 +104,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Регистрация
   const signup = async (email: string, password: string, fullName?: string) => {
-    // Шаг 1: Регистрация
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName || email.split('@')[0],
+    try {
+      console.log('🔄 Начинаем регистрацию:', email);
+      
+      // Шаг 1: Регистрация
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName || email.split('@')[0],
+          },
         },
-      },
-    });
+      });
 
-    if (error) throw error;
-    
-    if (!data.user) {
-      throw new Error('Ошибка регистрации: пользователь не создан');
-    }
+      if (error) {
+        console.error('❌ Ошибка регистрации:', error);
+        throw error;
+      }
+      
+      if (!data.user) {
+        throw new Error('Ошибка: пользователь не создан');
+      }
 
-    // Шаг 2: ВСЕГДА делаем вход после регистрации
-    console.log('🔄 Выполняем вход после регистрации...');
-    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      console.log('✅ Пользователь создан:', data.user.id);
 
-    if (loginError) throw loginError;
+      // Шаг 2: Сразу логинимся
+      console.log('🔄 Выполняем вход...');
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    // Шаг 3: Загружаем профиль
-    if (loginData.user) {
-      await loadUserProfile(loginData.user);
-      console.log('✅ Регистрация и вход выполнены успешно!');
+      if (loginError) {
+        console.error('❌ Ошибка входа:', loginError);
+        throw loginError;
+      }
+
+      console.log('✅ Вход выполнен, загружаем профиль...');
+
+      // Шаг 3: Загружаем профиль
+      if (loginData.user) {
+        await loadUserProfile(loginData.user);
+        console.log('✅ Профиль загружен!');
+      }
+    } catch (err) {
+      console.error('❌ signup error:', err);
+      throw err;
     }
   };
 
   // Вход
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      console.log('🔄 Начинаем вход:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) throw error;
-    
-    // Загружаем профиль после входа
-    if (data.user) {
-      await loadUserProfile(data.user);
+      if (error) {
+        console.error('❌ Ошибка входа:', error);
+        throw error;
+      }
+      
+      console.log('✅ Вход выполнен, загружаем профиль...');
+      
+      // Загружаем профиль после входа
+      if (data.user) {
+        await loadUserProfile(data.user);
+        console.log('✅ Профиль загружен!');
+      }
+    } catch (err) {
+      console.error('❌ login error:', err);
+      throw err;
     }
   };
 
