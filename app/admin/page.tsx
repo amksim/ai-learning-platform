@@ -67,7 +67,7 @@ export default function AdminPage() {
       const data = await response.json();
       
       if (data.courses) {
-        console.log('✅ Loaded', data.courses.length, 'courses from database');
+        console.log('✅ Loaded', data.courses.length, 'courses');
         const formattedCourses = data.courses.map((course: any) => ({
           id: course.id,
           title: course.title,
@@ -80,9 +80,18 @@ export default function AdminPage() {
           practice: course.practice || false,
           practiceDescription: course.practice_description,
           isFree: course.is_free || false,
-          translations: course.translations || {}
+          translations: course.translations || {},
+          displayOrder: course.display_order || course.id
         }));
-        setLevels(formattedCourses);
+        
+        // СОРТИРОВКА: Бесплатные наверху, потом платные
+        const sortedCourses = formattedCourses.sort((a: any, b: any) => {
+          if (a.isFree && !b.isFree) return -1;
+          if (!a.isFree && b.isFree) return 1;
+          return a.displayOrder - b.displayOrder;
+        });
+        
+        setLevels(sortedCourses);
         
         // Если база пустая - показываем пустой список, НЕ дефолтные курсы
         if (data.courses.length === 0) {

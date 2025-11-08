@@ -68,9 +68,21 @@ export default function CoursesPage() {
             practice: course.practice || false,
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
-            translations: course.translations || {}
+            translations: course.translations || {},
+            displayOrder: course.display_order || course.id
           }));
-          setAllLevels(formattedCourses);
+          
+          // СОРТИРОВКА: Бесплатные ВСЕГДА наверху, потом платные
+          const sortedCourses = formattedCourses.sort((a: any, b: any) => {
+            // Если один бесплатный, а другой платный - бесплатный наверх
+            if (a.isFree && !b.isFree) return -1;
+            if (!a.isFree && b.isFree) return 1;
+            // Если оба одинаковые (оба бесплатные или оба платные) - по display_order
+            return a.displayOrder - b.displayOrder;
+          });
+          
+          console.log('📊 Sorted courses: Free first, then paid');
+          setAllLevels(sortedCourses);
           
           // Если база пустая - показываем сообщение
           if (data.courses.length === 0) {

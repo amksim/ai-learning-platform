@@ -133,11 +133,19 @@ export default function LessonPage() {
             practice: course.practice || false,
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
-            translations: course.translations || {}
+            translations: course.translations || {},
+            displayOrder: course.display_order || course.id
           }));
           
-          setAllLevels(formattedCourses);
-          const level = formattedCourses.find((l: any) => l.id === levelId);
+          // СОРТИРОВКА: Бесплатные наверху, потом платные
+          const sortedCourses = formattedCourses.sort((a: any, b: any) => {
+            if (a.isFree && !b.isFree) return -1;
+            if (!a.isFree && b.isFree) return 1;
+            return a.displayOrder - b.displayOrder;
+          });
+          
+          setAllLevels(sortedCourses);
+          const level = sortedCourses.find((l: any) => l.id === levelId);
           setCurrentLevel(level);
           
           // Free lessons don't require login
