@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { CheckCircle, ArrowRight, ArrowLeft, BookOpen } from "lucide-react";
-import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
+import { Level } from "@/lib/courseLevels";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -107,64 +107,82 @@ export default function LessonPage() {
   const params = useParams();
   const { t, language } = useLanguage();
   const { user, updateProgress } = useAuth();
+  const [currentLevel, setCurrentLevel] = useState<any>(null);
+  const [allLevels, setAllLevels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const levelId = parseInt(params.level as string);
 
   useEffect(() => {
-    // Load from localStorage to get current levels with free status
-    const savedLevels = localStorage.getItem("courseLevels");
-    let levels = allCourseLevels;
-    if (savedLevels) {
+    // Load courses from API
+    const loadCourses = async () => {
       try {
-        levels = JSON.parse(savedLevels);
-      } catch (e) {
-        console.error("Failed to parse levels", e);
+        const response = await fetch('/api/courses');
+        const data = await response.json();
+        
+        if (data.courses) {
+          const formattedCourses = data.courses.map((course: any) => ({
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            difficulty: course.difficulty,
+            topics: course.topics || [],
+            category: course.category,
+            icon: course.icon,
+            blockName: course.block_name,
+            practice: course.practice || false,
+            practiceDescription: course.practice_description,
+            isFree: course.is_free || false,
+            translations: course.translations || {}
+          }));
+          
+          setAllLevels(formattedCourses);
+          const level = formattedCourses.find((l: any) => l.id === levelId);
+          setCurrentLevel(level);
+          
+          // Free lessons don't require login
+          if (level?.isFree) {
+            setLoading(false);
+            return;
+          }
+          
+          // Paid lessons require login and payment
+          if (!user) {
+            router.push("/login");
+            return;
+          }
+          
+          // Check if user has paid for the course
+          if (!user.hasPaid) {
+            router.push("/payment");
+            return;
+          }
+          
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        setLoading(false);
       }
-    }
+    };
     
-    // Find the level to check if it's free
-    const level = levels.find(l => l.id === levelId);
-    
-    // Free lessons don't require login
-    if (level?.isFree) {
-      return;
-    }
-    
-    // Paid lessons require login and payment
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    
-    // Check if user has paid for the course
-    if (!user.hasPaid) {
-      router.push("/payment");
-      return;
-    }
+    loadCourses();
   }, [user, router, levelId]);
 
-  // Load lesson from localStorage
-  const savedLevels = localStorage.getItem("courseLevels");
-  let currentLevel = null;
-  let allLevels: any[] = [];
-  let hasNextLesson = false;
-  let nextLessonId = levelId + 1;
-  let isLastLesson = false;
+  // Calculate lesson navigation
+  const nextLessonId = levelId + 1;
+  const hasNextLesson = allLevels.some((l: any) => l.id === nextLessonId);
+  const maxId = allLevels.length > 0 ? Math.max(...allLevels.map((l: any) => l.id)) : levelId;
+  const isLastLesson = levelId === maxId;
   
-  if (savedLevels) {
-    try {
-      allLevels = JSON.parse(savedLevels);
-      currentLevel = allLevels.find((l: any) => l.id === levelId);
-      
-      // Check if next lesson exists
-      hasNextLesson = allLevels.some((l: any) => l.id === nextLessonId);
-      
-      // Check if this is the last lesson
-      const maxId = Math.max(...allLevels.map((l: any) => l.id));
-      isLastLesson = levelId === maxId;
-    } catch (e) {
-      console.error("Failed to parse levels", e);
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-8">
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <p>Загрузка...</p>
+        </div>
+      </div>
+    );
   }
 
   // Get translated content
