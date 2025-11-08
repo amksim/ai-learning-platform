@@ -7,8 +7,13 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 interface User {
   id: string;
   email: string;
-  full_name: string;
+  full_name: string | null;
+  progress: number;
+  joinedDate: string;
   hasPaid: boolean;
+  subscription_status: 'free' | 'premium';
+  subscription_end_date: string | null;
+  stripe_customer_id: string | null;
 }
 
 interface AuthContextType {
@@ -17,8 +22,9 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProgress: (courseSlug: string, lessonIndex: number) => Promise<void>;
-  completePurchase: (customerId: string, type: string) => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
+  updateProgress: (courseSlug: string, lessonIndex: number, codeSubmission?: string) => Promise<void>;
+  completePurchase: (customerId: string, type: 'monthly' | 'yearly') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,7 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: authUser.id,
             email: authUser.email!,
             full_name: profile.full_name || 'User',
+            progress: 0,
+            joinedDate: profile.created_at || new Date().toISOString(),
             hasPaid: profile.has_purchased || false,
+            subscription_status: profile.has_purchased ? 'premium' : 'free',
+            subscription_end_date: profile.subscription_end_date || null,
+            stripe_customer_id: profile.stripe_customer_id || null,
           });
         }
       }
@@ -128,8 +139,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
+  // Magic Link (для совместимости, но не используется)
+  async function sendMagicLink(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/courses`,
+      },
+    });
+    if (error) throw error;
+  }
+
   // Обновление прогресса
-  async function updateProgress(courseSlug: string, lessonIndex: number) {
+  async function updateProgress(courseSlug: string, lessonIndex: number, codeSubmission?: string) {
     if (!user) return;
 
     await supabase
@@ -139,19 +161,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         course_slug: courseSlug,
         lesson_index: lessonIndex,
         completed: true,
+        code_submission: codeSubmission || null,
         updated_at: new Date().toISOString(),
       });
   }
 
   // Завершение покупки
-  async function completePurchase(customerId: string, type: string) {
+  async function completePurchase(customerId: string, type: 'monthly' | 'yearly') {
     if (!user) return;
+
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + (type === 'yearly' ? 12 : 1));
 
     await supabase
       .from('profiles')
       .update({
         has_purchased: true,
         stripe_customer_id: customerId,
+        subscription_end_date: endDate.toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id);
@@ -167,6 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signup,
         login,
         logout,
+        sendMagicLink,
         updateProgress,
         completePurchase,
       }}
