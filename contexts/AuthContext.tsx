@@ -139,12 +139,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Вход
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
+    
+    // Загружаем профиль после входа
+    if (data.user) {
+      await loadUserProfile(data.user);
+    }
   };
 
   // Magic Link (вход по email без пароля)

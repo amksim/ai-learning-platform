@@ -45,7 +45,6 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error("Auth error:", error);
-      setLoading(false);
       
       if (error.message?.includes('already registered')) {
         toast.error("❌ Этот email уже зарегистрирован!\nПереключитесь на 'Вход'", {
@@ -65,10 +64,9 @@ export default function LoginPage() {
           duration: 4000,
         });
       }
-      return;
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
