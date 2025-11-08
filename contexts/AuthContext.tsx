@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Регистрация
   const signup = async (email: string, password: string, fullName?: string) => {
+    // Шаг 1: Регистрация
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -111,21 +112,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           full_name: fullName || email.split('@')[0],
         },
-        // Автоматически входить без email verification
-        emailRedirectTo: undefined,
       },
     });
 
     if (error) throw error;
     
-    // Сразу загружаем профиль пользователя
-    if (data.user && data.session) {
-      await loadUserProfile(data.user);
+    if (!data.user) {
+      throw new Error('Ошибка регистрации: пользователь не создан');
+    }
+
+    // Шаг 2: ВСЕГДА делаем вход после регистрации
+    console.log('🔄 Выполняем вход после регистрации...');
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (loginError) throw loginError;
+
+    // Шаг 3: Загружаем профиль
+    if (loginData.user) {
+      await loadUserProfile(loginData.user);
       console.log('✅ Регистрация и вход выполнены успешно!');
-    } else if (data.user) {
-      // Если session не создался автоматически, логинимся
-      console.log('⚠️ Выполняем вход после регистрации...');
-      await login(email, password);
     }
   };
 

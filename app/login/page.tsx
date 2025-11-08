@@ -28,12 +28,11 @@ export default function LoginPage() {
         // Sign up new user
         await signup(email, password, name || email.split('@')[0]);
         toast.success(`🎉 Добро пожаловать, ${name || email.split('@')[0]}!`, {
-          duration: 3000,
+          duration: 2000,
         });
-        // Wait for auth state to update
-        setTimeout(() => {
-          router.push("/courses");
-        }, 500);
+        // Wait for auth state to update before redirect
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        router.push("/courses");
       } else {
         // Login existing user
         await login(email, password);
