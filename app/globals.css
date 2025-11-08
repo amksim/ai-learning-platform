@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Средний комфортный дизайн - не тёмный и не светлый */
+    --background: 240 8% 20%;
+    --foreground: 240 5% 96%;
+    --card: 240 8% 24%;
+    --card-foreground: 240 5% 96%;
+    --popover: 240 8% 24%;
+    --popover-foreground: 240 5% 96%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 6% 28%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 6% 28%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 6% 28%;
+    --accent-foreground: 240 5% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 35%;
+    --input: 240 6% 35%;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(240, 8%, 18%) 0%, hsl(250, 10%, 22%) 50%, hsl(260, 8%, 20%) 100%);
+    background-attachment: fixed;
+  }
+  
+  /* Премиум glassmorphism эффект */
+  .glass {
+    background: rgba(45, 50, 65, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(120, 120, 150, 0.2);
+  }
+  
+  /* Нейросетевые градиенты */
+  .ai-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+  
+  /* Премиум тени */
+  .premium-shadow {
+    box-shadow: 0 20px 60px -10px rgba(102, 126, 234, 0.4), 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Неоновое свечение */
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4), 0 0 60px rgba(102, 126, 234, 0.2);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+/* Animations */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
