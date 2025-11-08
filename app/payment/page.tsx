@@ -59,7 +59,9 @@ export default function PaymentPage() {
       console.log('📦 Ответ от API:', data);
       
       if (data.error) {
-        alert(`Ошибка: ${data.error}`);
+        const errorMsg = `Ошибка оплаты:\n${data.error}\n\n${data.details ? `Детали: ${data.details}` : ''}`;
+        console.error('❌ API вернул ошибку:', data);
+        alert(errorMsg);
         setIsProcessing(false);
         return;
       }
