@@ -352,7 +352,7 @@ export default function PaymentPage() {
                 </div>
 
                 {/* АДМИНСКАЯ ПАНЕЛЬ - ВЫБОР ЦЕНЫ */}
-                {isAdmin && (
+                {isAdmin && process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
                   <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
                     <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ - ВЫБОР ЦЕНЫ:</p>
                     <div className="flex items-center gap-3">
@@ -377,6 +377,9 @@ export default function PaymentPage() {
                         $0.01 (TEST)
                       </button>
                     </div>
+                    <p className="text-xs text-yellow-300 mt-2">
+                      ℹ️ Test mode requires NEXT_PUBLIC_STRIPE_PRICE_ID_TEST in Netlify
+                    </p>
                   </div>
                 )}
 
