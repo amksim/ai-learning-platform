@@ -16,13 +16,16 @@ const getStripe = () => {
 export async function POST(request: NextRequest) {
   try {
     const { priceId, userEmail } = await request.json();
+    console.log('💳 Payment request:', { priceId, userEmail });
 
     // Check if Stripe is configured
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.log('Stripe not configured, using mock mode');
+      console.warn('⚠️ STRIPE_SECRET_KEY not configured - using MOCK mode');
+      console.log('ℹ️ Set STRIPE_SECRET_KEY in Netlify environment variables');
       // Fallback to mock for development
       await new Promise(resolve => setTimeout(resolve, 1000));
       const mockSessionId = `cs_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('🎭 Returning mock session:', mockSessionId);
       return NextResponse.json({ 
         sessionId: mockSessionId,
         mock: true
@@ -30,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create real Stripe checkout session
+    console.log('✅ Creating real Stripe session...');
     const stripe = getStripe();
     if (!stripe) {
       throw new Error('Stripe is not configured');
@@ -52,15 +56,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('✅ Stripe session created:', session.id);
+    console.log('🔗 Checkout URL:', session.url);
+
     return NextResponse.json({ 
       sessionId: session.id,
-      url: session.url, // URL for redirect to Stripe Checkout
+      url: session.url,
       mock: false
     });
-  } catch (error) {
-    console.error('Payment error:', error);
+  } catch (error: any) {
+    console.error('❌ Payment API error:', error);
+    console.error('Error details:', error.message);
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
     );
   }

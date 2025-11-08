@@ -12,7 +12,7 @@ import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function PaymentPage() {
-  const { user, completePurchase } = useAuth();
+  const { user, completePurchase, loading } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -20,6 +20,9 @@ export default function PaymentPage() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   useEffect(() => {
+    // Не проверяем пока загружается
+    if (loading) return;
+    
     if (!user) {
       router.push("/login");
       return;
@@ -29,29 +32,45 @@ export default function PaymentPage() {
       router.push("/courses");
       return;
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   const handlePayment = async () => {
+    console.log('🔄 Начинаем оплату...');
     setIsProcessing(true);
     
     try {
+      console.log('📡 Отправляем запрос на /api/checkout...');
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: 'price_1SQy9YEUse1J07rXnLjskpwX', // Stripe Price ID for $100 course
+          priceId: 'price_1SQy9YEUse1J07rXnLjskpwX',
           userEmail: user?.email,
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log('📦 Ответ от API:', data);
+      
+      if (data.error) {
+        alert(`Ошибка: ${data.error}`);
+        setIsProcessing(false);
+        return;
+      }
       
       if (data.sessionId) {
         if (data.mock) {
-          // Mock payment - simulate success (for development without Stripe keys)
+          console.log('🎭 Mock режим - симуляция оплаты');
+          alert('⚠️ ВНИМАНИЕ: Stripe не настроен!\n\nИспользуется тестовый режим.\nДобавьте STRIPE_SECRET_KEY в Netlify переменные.');
+          // Mock payment - simulate success
           setTimeout(() => {
+            console.log('✅ Mock оплата успешна');
             setPaymentSuccess(true);
             completePurchase('mock_customer_' + Date.now(), 'monthly');
             setTimeout(() => {
@@ -59,20 +78,25 @@ export default function PaymentPage() {
             }, 2000);
           }, 2000);
         } else {
-          // Real Stripe payment - redirect to Stripe Checkout
+          // Real Stripe payment
+          console.log('💳 Настоящая оплата - редирект на Stripe');
           if (data.url) {
+            console.log('🔗 URL для редиректа:', data.url);
             window.location.href = data.url;
           } else {
-            console.error('No checkout URL returned');
+            console.error('❌ Нет URL для редиректа');
+            alert('Ошибка: не получен URL для оплаты');
             setIsProcessing(false);
           }
         }
       } else {
-        console.error('No session ID returned');
+        console.error('❌ Нет sessionId в ответе');
+        alert('Ошибка: не получен ID сессии');
         setIsProcessing(false);
       }
-    } catch (error) {
-      console.error('Payment error:', error);
+    } catch (error: any) {
+      console.error('❌ Ошибка оплаты:', error);
+      alert(`Ошибка при обработке платежа:\n${error.message}`);
       setIsProcessing(false);
     }
   };
@@ -80,6 +104,23 @@ export default function PaymentPage() {
   const discountPrice = 100;
   const originalPrice = 150;
   const totalLessons = getTotalLessonsCount();
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if no user
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen py-8 sm:py-10 md:py-12 bg-gradient-to-b from-background to-purple-500/5">
