@@ -40,7 +40,7 @@ export default function PaymentPage() {
     setIsProcessing(true);
 
     try {
-      console.log('💳 STRIPE DIRECT CHECKOUT - Starting...');
+      console.log('💳 Starting payment process...');
       console.log('👤 User email:', user?.email || 'No user');
       
       if (!user?.email) {
@@ -49,32 +49,40 @@ export default function PaymentPage() {
         return;
       }
       
-      // ПРЯМОЕ ПОДКЛЮЧЕНИЕ К STRIPE - БЕЗ БЭКЕНДА!
-      const stripe = await stripePromise;
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y';
+      console.log('💰 Price ID:', priceId);
+      console.log('📡 Calling /api/checkout...');
       
-      if (!stripe) {
-        alert('Stripe not loaded. Please refresh the page.');
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: priceId,
+          userEmail: user.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('📦 API response:', data);
+      
+      if (data.error) {
+        console.error('❌ API error:', data);
+        alert(`Payment error: ${data.error}`);
         setIsProcessing(false);
         return;
       }
       
-      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y';
-      console.log('💰 Price ID:', priceId);
-      console.log('🚀 Redirecting directly to Stripe Checkout...');
-      
-      // ПРЯМОЙ РЕДИРЕКТ НА STRIPE - РАБОТАЕТ 100%!
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [{ price: priceId, quantity: 1 }],
-        mode: 'payment',
-        successUrl: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/payment?canceled=true`,
-        customerEmail: user.email,
-      });
-
-      if (error) {
-        console.error('❌ Stripe error:', error);
-        alert(`Payment failed: ${error.message}`);
-        setIsProcessing(false);
+      if (data.url) {
+        console.log('💳 Redirecting to Stripe...');
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error: any) {
       console.error('❌ Payment error:', error);
