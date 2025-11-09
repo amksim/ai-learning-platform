@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { getTotalLessonsCount } from "@/lib/getLessonsCount";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -21,6 +20,26 @@ export default function ProfilePage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
+
+  // Загружаем реальное количество уроков из API
+  useEffect(() => {
+    const loadTotalLessons = async () => {
+      try {
+        const response = await fetch('/api/courses');
+        const data = await response.json();
+        if (data.courses && data.courses.length > 0) {
+          setTotalLevels(data.courses.length);
+          console.log(`📚 Загружено ${data.courses.length} уроков из базы`);
+        }
+      } catch (error) {
+        console.error('❌ Ошибка загрузки количества уроков:', error);
+        // Оставляем дефолтное значение 100
+      }
+    };
+    
+    loadTotalLessons();
+  }, []);
 
   // Removed redirect - causes issues when resetting payment status
   // User check is handled in Navigation component
@@ -29,7 +48,6 @@ export default function ProfilePage() {
     return null;
   }
 
-  const totalLevels = getTotalLessonsCount();
   const completedLevels = user.progress || 0;
   const remainingLevels = totalLevels - completedLevels;
   const progressPercent = Math.round((completedLevels / totalLevels) * 100);
