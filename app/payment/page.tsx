@@ -378,7 +378,7 @@ export default function PaymentPage() {
                         }`}
                         title={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST ? 'Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify env' : ''}
                       >
-                        $0.01 (TEST)
+                        $0.50 (TEST)
                       </button>
                     </div>
                     {!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
@@ -402,7 +402,7 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      {useTestPrice ? 'Pay $0.01 (TEST)' : 'Pay $100 - Get Full Access'}
+                      {useTestPrice ? 'Pay $0.50 (TEST)' : 'Pay $100 - Get Full Access'}
                     </>
                   )}
                 </button>
