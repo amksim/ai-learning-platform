@@ -34,7 +34,8 @@ export default function CoursesPage() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { translate } = useTranslate();
-  const [allLevels, setAllLevels] = useState<Level[]>(allCourseLevels);
+  const [allLevels, setAllLevels] = useState<Level[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isResettingSubscription, setIsResettingSubscription] = useState(false);
 
   // Helper function to get translated content
@@ -134,6 +135,8 @@ export default function CoursesPage() {
       } catch (error) {
         console.error('❌ Error loading courses:', error);
         setAllLevels([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -230,7 +233,40 @@ export default function CoursesPage() {
           </p>
         </div>
 
+        {/* Skeleton Loader */}
+        {isLoading && (
+          <div className="relative px-4 md:px-8 space-y-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div 
+                key={i} 
+                className={`flex items-center gap-6 ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+              >
+                <div className="w-full max-w-md">
+                  <div className="glass rounded-2xl border-2 border-gray-700 p-6 animate-pulse">
+                    {/* Icon skeleton */}
+                    <div className="mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-600" />
+                    
+                    {/* Title skeleton */}
+                    <div className="mb-3 h-6 w-3/4 rounded bg-gradient-to-r from-gray-700 to-gray-600" />
+                    
+                    {/* Description skeleton */}
+                    <div className="mb-2 h-4 w-full rounded bg-gradient-to-r from-gray-700 to-gray-600" />
+                    <div className="mb-4 h-4 w-5/6 rounded bg-gradient-to-r from-gray-700 to-gray-600" />
+                    
+                    {/* Badges skeleton */}
+                    <div className="flex gap-2">
+                      <div className="h-6 w-20 rounded-full bg-gradient-to-r from-gray-700 to-gray-600" />
+                      <div className="h-6 w-24 rounded-full bg-gradient-to-r from-gray-700 to-gray-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Уровни волной - слева направо */}
+        {!isLoading && (
         <div className="relative px-4 md:px-8">
           {allLevels.map((level, index) => {
             // Show CTA only ONCE after the LAST free lesson (lesson 3)
@@ -455,6 +491,7 @@ export default function CoursesPage() {
             );
           })}
         </div>
+        )}
       </div>
     </div>
   );
