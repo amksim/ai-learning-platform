@@ -712,7 +712,7 @@ export default function AdminPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <span className="text-2xl font-bold text-purple-400">
-                              #{level.id}
+                              #{index + 1}
                             </span>
                             <h3 className="text-xl font-bold">{level.title}</h3>
                             {level.practice && (
