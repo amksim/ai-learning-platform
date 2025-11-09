@@ -35,6 +35,7 @@ export default function CoursesPage() {
   const { user } = useAuth();
   const { translate } = useTranslate();
   const [allLevels, setAllLevels] = useState<Level[]>(allCourseLevels);
+  const [isResettingSubscription, setIsResettingSubscription] = useState(false);
 
   // Helper function to get translated content
   const getTranslated = (level: Level) => {
@@ -43,6 +44,44 @@ export default function CoursesPage() {
     }
     // Fallback to original
     return { title: level.title, description: level.description };
+  };
+
+  // Функция сброса подписки для админа
+  const handleResetSubscription = async () => {
+    if (!user) return;
+    
+    const confirmed = confirm('Сбросить подписку? Тебе нужно будет заново оплатить доступ к курсу.');
+    if (!confirmed) return;
+    
+    setIsResettingSubscription(true);
+    
+    try {
+      // Сбрасываем в Supabase
+      const response = await fetch('/api/reset-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email }),
+      });
+      
+      if (response.ok) {
+        console.log('✅ Подписка сброшена в Supabase');
+        
+        // Сбрасываем локально
+        const updatedUser = { ...user, hasPaid: false };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        localStorage.removeItem('purchase');
+        
+        alert('✅ Подписка успешно сброшена! Страница обновится.');
+        window.location.reload();
+      } else {
+        throw new Error('Ошибка при сбросе подписки');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка сброса подписки:', error);
+      alert('❌ Ошибка при сбросе подписки. Попробуй еще раз.');
+    } finally {
+      setIsResettingSubscription(false);
+    }
   };
 
   useEffect(() => {
@@ -155,19 +194,24 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen py-12 sm:py-16 md:py-20">
       <div className="container mx-auto px-3 sm:px-4">
-        {/* Test Reset Button - Only for test account */}
-        {user?.email === "Kmak4551@gmail.com" && user.hasPaid && (
-          <div className="mb-6">
+        {/* Admin Reset Subscription Button */}
+        {user?.email === "kmak4551@gmail.com" && user.hasPaid && (
+          <div className="mb-6 flex justify-center">
             <button
-              onClick={() => {
-                const updatedUser = { ...user, hasPaid: false };
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-                localStorage.removeItem("purchase");
-                window.location.reload();
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-all"
+              onClick={handleResetSubscription}
+              disabled={isResettingSubscription}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold transition-all premium-shadow hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
             >
-              🔄 Тест: Сбросить оплату
+              {isResettingSubscription ? (
+                <>
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                  <span>Сброс...</span>
+                </>
+              ) : (
+                <>
+                  🔄 <span>Сбросить подписку (админ)</span>
+                </>
+              )}
             </button>
           </div>
         )}
