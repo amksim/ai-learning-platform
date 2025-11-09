@@ -202,7 +202,7 @@ export default function ProfilePage() {
                 </p>
                 <Link href="/courses">
                   <button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-all premium-shadow">
-                    Продолжить
+                    {t.common.continue}
                     <ArrowRight className="h-5 w-5" />
                   </button>
                 </Link>
@@ -234,8 +234,8 @@ export default function ProfilePage() {
                     completedLevels >= 1 ? 'text-green-400' : 'text-gray-500'
                   }`} />
                 </div>
-                <div className="text-sm font-bold mb-1">Первый шаг</div>
-                <div className="text-xs text-gray-400">Пройди 1 урок</div>
+                <div className="text-sm font-bold mb-1">{t.profile.first_step}</div>
+                <div className="text-xs text-gray-400">{t.profile.complete_1}</div>
               </div>
 
               {/* 10 Lessons */}
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                   }`} />
                 </div>
                 <div className="text-sm font-bold mb-1">Разгон</div>
-                <div className="text-xs text-gray-400">Пройди 10 уроков</div>
+                <div className="text-xs text-gray-400">{t.profile.complete_10}</div>
               </div>
 
               {/* 50 Lessons */}
@@ -272,8 +272,8 @@ export default function ProfilePage() {
                     completedLevels >= 50 ? 'text-purple-400' : 'text-gray-500'
                   }`} />
                 </div>
-                <div className="text-sm font-bold mb-1">Эксперт</div>
-                <div className="text-xs text-gray-400">Пройди 50 уроков</div>
+                <div className="text-sm font-bold mb-1">{t.profile.expert}</div>
+                <div className="text-xs text-gray-400">{t.profile.complete_50}</div>
               </div>
 
               {/* Complete */}
@@ -291,8 +291,8 @@ export default function ProfilePage() {
                     completedLevels >= totalLevels ? 'text-yellow-400' : 'text-gray-500'
                   }`} />
                 </div>
-                <div className="text-sm font-bold mb-1">Мастер</div>
-                <div className="text-xs text-gray-400">Пройди все уроки</div>
+                <div className="text-sm font-bold mb-1">{t.profile.master}</div>
+                <div className="text-xs text-gray-400">{t.profile.complete_all}</div>
               </div>
             </div>
           </CardContent>
@@ -308,14 +308,14 @@ export default function ProfilePage() {
                     <Target className="h-8 w-8 text-green-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Следующая цель</p>
-                    <p className="text-2xl font-bold text-white">Урок {completedLevels + 1}</p>
-                    <p className="text-sm text-gray-400 mt-1">Начал: {formattedDate}</p>
+                    <p className="text-sm text-gray-400 mb-1">{t.profile.next_goal}</p>
+                    <p className="text-2xl font-bold text-white">{t.courses.lesson} {completedLevels + 1}</p>
+                    <p className="text-sm text-gray-400 mt-1">{t.profile.joined}: {formattedDate}</p>
                   </div>
                 </div>
                 <Link href="/courses">
                   <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all premium-shadow text-lg">
-                    Начать
+                    {t.common.start}
                     <ArrowRight className="h-6 w-6" />
                   </button>
                 </Link>

@@ -50,7 +50,7 @@ export default function CoursesPage() {
   const handleResetSubscription = async () => {
     if (!user) return;
     
-    const confirmed = confirm('Сбросить подписку? Тебе нужно будет заново оплатить доступ к курсу.');
+    const confirmed = confirm(t.admin.reset_confirm);
     if (!confirmed) return;
     
     setIsResettingSubscription(true);
@@ -71,14 +71,14 @@ export default function CoursesPage() {
         localStorage.setItem('user', JSON.stringify(updatedUser));
         localStorage.removeItem('purchase');
         
-        alert('✅ Подписка успешно сброшена! Страница обновится.');
+        alert(t.admin.reset_success);
         window.location.reload();
       } else {
         throw new Error('Ошибка при сбросе подписки');
       }
     } catch (error) {
       console.error('❌ Ошибка сброса подписки:', error);
-      alert('❌ Ошибка при сбросе подписки. Попробуй еще раз.');
+      alert(t.admin.reset_error);
     } finally {
       setIsResettingSubscription(false);
     }
@@ -205,11 +205,11 @@ export default function CoursesPage() {
               {isResettingSubscription ? (
                 <>
                   <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                  <span>Сброс...</span>
+                  <span>{t.buttons.resetting}</span>
                 </>
               ) : (
                 <>
-                  🔄 <span>Сбросить подписку (админ)</span>
+                  🔄 <span>{t.buttons.reset_subscription}</span>
                 </>
               )}
             </button>

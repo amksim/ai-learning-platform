@@ -218,7 +218,7 @@ export default function HomePage() {
           <div className="mt-12 text-center">
             <Link href="/courses">
               <Button size="lg" className="gap-2">
-                Начать обучение
+                {t.buttons.start_learning}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -275,7 +275,7 @@ export default function HomePage() {
             {t.home.testimonials_title}
           </h2>
           <p className="mb-12 text-center text-gray-400 max-w-2xl mx-auto">
-            Более 500+ выпускников уже создают проекты с AI
+            {t.reviews.subtitle}
           </p>
           
           <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -310,7 +310,7 @@ export default function HomePage() {
                 variant="outline"
                 className="gap-2 glass border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950 transition-all premium-shadow"
               >
-                Показать все {reviews.length} отзывов
+                {t.reviews.show_all_reviews.replace('{count}', reviews.length.toString())}
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </div>
@@ -324,7 +324,7 @@ export default function HomePage() {
                 variant="outline"
                 className="gap-2 glass border-2 border-purple-300 hover:border-purple-500"
               >
-                Скрыть отзывы
+                {t.reviews.hide_reviews}
               </Button>
             </div>
           )}
@@ -442,13 +442,13 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <Link href="/courses">
                   <Button size="lg" className="gap-2 premium-shadow neon-glow bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 px-8 py-6 text-lg">
-                    Начать обучение
+                    {t.buttons.start_learning}
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/projects">
                   <Button size="lg" variant="outline" className="glass px-8 py-6 text-lg border-2 border-purple-300 hover:border-purple-500">
-                    Смотреть проекты
+                    {t.buttons.view_all_projects}
                   </Button>
                 </Link>
               </div>
