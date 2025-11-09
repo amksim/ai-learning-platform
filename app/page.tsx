@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 export default function HomePage() {
   const { t } = useLanguage();
   const { reviews } = useReviews();
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const tracks = [
     {
@@ -55,8 +57,8 @@ export default function HomePage() {
     },
   ];
 
-  // Берём последние 6 отзывов
-  const displayedReviews = reviews.slice(0, 6);
+  // Показываем 6 или все отзывы в зависимости от состояния
+  const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 6);
 
   const studentProjects = [
     {
@@ -269,21 +271,21 @@ export default function HomePage() {
       {/* Testimonials Section */}
       <section className="py-12 md:py-20 lg:py-32">
         <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
+          <h2 className="mb-4 text-center text-3xl font-bold md:text-4xl">
             {t.home.testimonials_title}
           </h2>
+          <p className="mb-12 text-center text-gray-400 max-w-2xl mx-auto">
+            Более 500+ выпускников уже создают проекты с AI
+          </p>
           
-          <div className="grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {displayedReviews.map((review) => (
-              <Card key={review.id} className="h-full glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all">
-                <CardHeader className="p-3 sm:p-4 md:p-6">
-                  <div className="mb-2 flex gap-0.5 sm:gap-1">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <CardTitle className="text-sm sm:text-base md:text-lg font-bold">{review.name}</CardTitle>
-                  <p className="text-[10px] sm:text-xs text-gray-500">
+              <Card key={review.id} className="h-full glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all hover:scale-[1.02]">
+                <CardHeader className="p-4 sm:p-5 md:p-6">
+                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    {review.name}
+                  </CardTitle>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                     {new Date(review.date).toLocaleDateString('ru-RU', { 
                       day: 'numeric', 
                       month: 'long', 
@@ -291,18 +293,39 @@ export default function HomePage() {
                     })}
                   </p>
                 </CardHeader>
-                <CardContent className="p-3 sm:p-4 md:p-6">
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{review.text}</p>
+                <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
+                  <p className="text-sm sm:text-base text-gray-800 dark:text-gray-100 leading-relaxed">
+                    {review.text}
+                  </p>
                 </CardContent>
               </Card>
             ))}
           </div>
           
-          {reviews.length > 6 && (
-            <div className="mt-8 text-center">
-              <p className="text-gray-600">
-                И ещё {reviews.length - 6} отзывов от наших учеников
-              </p>
+          {!showAllReviews && reviews.length > 6 && (
+            <div className="mt-12 text-center">
+              <Button 
+                onClick={() => setShowAllReviews(true)}
+                size="lg"
+                variant="outline"
+                className="gap-2 glass border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950 transition-all premium-shadow"
+              >
+                Показать все {reviews.length} отзывов
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+          
+          {showAllReviews && (
+            <div className="mt-12 text-center">
+              <Button 
+                onClick={() => setShowAllReviews(false)}
+                size="lg"
+                variant="outline"
+                className="gap-2 glass border-2 border-purple-300 hover:border-purple-500"
+              >
+                Скрыть отзывы
+              </Button>
             </div>
           )}
         </div>
