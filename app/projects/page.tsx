@@ -33,7 +33,7 @@ const projects: Project[] = [
     author: "Сергей К.",
     description: "Прогноз погоды с OpenWeather API и анимациями",
     category: "apps",
-    image: "",
+    image: "☁️",
     score: 88,
     link: "https://weather.com",
   },
@@ -43,7 +43,7 @@ const projects: Project[] = [
     author: "София Д.",
     description: "Минималистичное портфолио с плавными переходами",
     category: "websites",
-    image: "",
+    image: "💼",
     score: 92,
     link: "https://brittanychiang.com",
   },
@@ -53,7 +53,7 @@ const projects: Project[] = [
     author: "Максим П.",
     description: "Ретро-игра с таблицей лидеров и разными уровнями",
     category: "games",
-    image: "",
+    image: "🐍",
     score: 85,
     link: "https://playsnake.org",
   },
@@ -63,7 +63,7 @@ const projects: Project[] = [
     author: "Ольга Р.",
     description: "Научный калькулятор с историей вычислений",
     category: "apps",
-    image: "",
+    image: "🔢",
     score: 90,
     link: "https://calculator-app.vercel.app",
   },
@@ -73,7 +73,7 @@ const projects: Project[] = [
     author: "Татьяна П.",
     description: "Яркий сайт с меню десертов и онлайн-заказом",
     category: "websites",
-    image: "",
+    image: "🧁",
     score: 88,
     link: "https://demo.wplook.com/food-restaurant",
   },
@@ -83,7 +83,7 @@ const projects: Project[] = [
     author: "Дмитрий В.",
     description: "Аддиктивная игра с числами, попробуй набрать 2048!",
     category: "games",
-    image: "",
+    image: "2️⃣",
     score: 85,
     link: "https://play2048.co",
   },
@@ -93,7 +93,7 @@ const projects: Project[] = [
     author: "Виктория З.",
     description: "Приложение для задач с категориями и дедлайнами",
     category: "apps",
-    image: "",
+    image: "✅",
     score: 82,
     link: "https://todomvc.com/examples/react",
   },
@@ -103,7 +103,7 @@ const projects: Project[] = [
     author: "Екатерина Н.",
     description: "Современный магазин с фильтрами и корзиной",
     category: "websites",
-    image: "",
+    image: "👕",
     score: 90,
     link: "https://react-shopping-cart-67954.firebaseapp.com",
   },
@@ -113,7 +113,7 @@ const projects: Project[] = [
     author: "Анна М.",
     description: "Легендарная аркада с призраками и бонусами",
     category: "games",
-    image: "",
+    image: "👻",
     score: 92,
     link: "https://freepacman.org",
   },
@@ -123,7 +123,7 @@ const projects: Project[] = [
     author: "Павел Б.",
     description: "Красивый плеер с визуализацией и плейлистами",
     category: "apps",
-    image: "",
+    image: "🎵",
     score: 88,
     link: "https://music-player-demo.surge.sh",
   },
@@ -133,7 +133,7 @@ const projects: Project[] = [
     author: "Кирилл М.",
     description: "Стильная посадочная страница с формой подписки",
     category: "websites",
-    image: "",
+    image: "🚀",
     score: 85,
     link: "https://cruip.com/demos/solid",
   },
@@ -143,7 +143,7 @@ const projects: Project[] = [
     author: "Мария Л.",
     description: "Сложная игра про летающую птичку",
     category: "games",
-    image: "",
+    image: "🐦",
     score: 82,
     link: "https://flappybird.io",
   },
@@ -153,7 +153,7 @@ const projects: Project[] = [
     author: "Андрей Г.",
     description: "Помощник для продуктивной работы 25/5",
     category: "apps",
-    image: "",
+    image: "⏰",
     score: 90,
     link: "https://pomofocus.io",
   },
@@ -163,7 +163,7 @@ const projects: Project[] = [
     author: "Алексей Ш.",
     description: "Личный блог с картой стран и фотогалереей",
     category: "websites",
-    image: "",
+    image: "🌍",
     score: 85,
     link: "https://nomadlist.com",
   },
@@ -173,7 +173,7 @@ const projects: Project[] = [
     author: "Елена С.",
     description: "Классическая японская головоломка с подсказками",
     category: "games",
-    image: "",
+    image: "🔵",
     score: 85,
     link: "https://sudoku.com",
   },
@@ -183,7 +183,7 @@ const projects: Project[] = [
     author: "Николай Ф.",
     description: "Учёт расходов и доходов с графиками",
     category: "apps",
-    image: "",
+    image: "💸",
     score: 82,
     link: "https://expense-tracker-app.netlify.app",
   },
@@ -193,7 +193,7 @@ const projects: Project[] = [
     author: "Роман Ф.",
     description: "Галерея работ с лайтбоксом и категориями",
     category: "websites",
-    image: "",
+    image: "📷",
     score: 85,
     link: "https://www.awwwards.com/sites/photography-portfolio",
   },
@@ -203,7 +203,7 @@ const projects: Project[] = [
     author: "Игорь Н.",
     description: "Классические шахматы с ботом и мультиплеером",
     category: "games",
-    image: "",
+    image: "♟️",
     score: 92,
     link: "https://lichess.org",
   },
@@ -213,7 +213,7 @@ const projects: Project[] = [
     author: "Юлия Т.",
     description: "Актуальные курсы валют с историей",
     category: "apps",
-    image: "",
+    image: "💱",
     score: 90,
     link: "https://www.xe.com",
   },
@@ -223,7 +223,7 @@ const projects: Project[] = [
     author: "Марина С.",
     description: "Туристический портал с поиском туров и отелей",
     category: "websites",
-    image: "",
+    image: "✈️",
     score: 88,
     link: "https://travel-site-demo.netlify.app",
   },
@@ -943,9 +943,15 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:gap-8 md:grid-cols-3">
           {allProjectsToShow.map((project) => {
             const CategoryIcon = getCategoryIcon(project.category);
+            // Устанавливаем эмодзи по умолчанию если нет
+            const emoji = project.image || (
+              project.category === "games" ? "🎮" :
+              project.category === "apps" ? "📱" :
+              "🌐"
+            );
             
             return (
               <a 
@@ -955,40 +961,36 @@ export default function ProjectsPage() {
                 rel="noopener noreferrer"
                 className="block"
               >
-                <Card className="group glass border-2 border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-[1.02] premium-shadow cursor-pointer h-full">
-                  <CardContent className="p-4 flex flex-col h-full">
-                    {/* Icon */}
-                    <div className="mb-3 flex h-20 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 text-4xl border-2 border-purple-400/20">
-                      {project.image}
+                <Card className="group h-full glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer">
+                  {/* Большой эмодзи с градиентным фоном */}
+                  <div className="relative h-32 sm:h-40 md:h-48 flex items-center justify-center bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 group-hover:from-purple-200 group-hover:via-pink-200 group-hover:to-blue-200 transition-all">
+                    <div className="text-5xl sm:text-6xl md:text-8xl transform group-hover:scale-110 transition-transform duration-300">
+                      {emoji}
                     </div>
-                    
-                    {/* Category Badge */}
-                    <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-medium text-purple-400 border border-purple-500/20">
+                    {/* Бейдж категории */}
+                    <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm text-xs font-semibold text-purple-600 shadow-lg flex items-center gap-1.5">
                       <CategoryIcon className="h-3 w-3" />
                       {getCategoryLabel(project.category)}
                     </div>
-                    
-                    {/* Title */}
-                    <h3 className="font-bold text-sm mb-1 line-clamp-2 text-white">{project.title}</h3>
-                    
-                    {/* Author */}
-                    <p className="text-xs text-gray-400 mb-2">от {project.author}</p>
-                    
-                    {/* Description */}
-                    <p className="line-clamp-2 text-xs text-gray-300 mb-3 flex-grow">
+                  </div>
+                  
+                  <CardContent className="p-3 sm:p-4 md:p-6">
+                    <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-2">от {project.author}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">
                       {project.description}
                     </p>
-                    
-                    {/* Footer */}
-                    <div className="flex items-center justify-center">
-                      <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-semibold">
-                        <Trophy className="h-4 w-4" />
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-xs font-semibold">
+                        <Trophy className="h-3 w-3" />
                         <span>{project.score}/100</span>
                       </div>
                     </div>
-                </CardContent>
-              </Card>
-            </a>
+                  </CardContent>
+                </Card>
+              </a>
             );
           })}
         </div>
