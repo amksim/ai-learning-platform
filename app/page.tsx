@@ -225,22 +225,40 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-accent/50 py-12 md:py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-4 text-center text-3xl font-bold md:text-4xl">
-            {t.home.features_title}
-          </h2>
+      <section className="relative bg-accent/50 py-12 md:py-20 lg:py-32 overflow-hidden">
+        {/* Фоновый градиент */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-pink-900/10 to-blue-900/10" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                {t.home.features_title}
+              </span>
+            </h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              Самая современная платформа для изучения программирования с AI
+            </p>
+          </div>
           
-          <div className="mt-12 grid grid-cols-2 gap-4 md:gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => {
+          <div className="mt-12 grid grid-cols-2 gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={feature.title} className="flex flex-col items-center text-center">
-                  <div className="mb-3 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-primary/10">
-                    <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <div 
+                  key={feature.title} 
+                  className="group flex flex-col items-center text-center p-6 rounded-2xl glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 hover:scale-105"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="mb-4 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-2xl neon-glow group-hover:scale-110 transition-transform">
+                    <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                   </div>
-                  <h3 className="mb-1 sm:mb-2 text-sm sm:text-base md:text-lg font-semibold">{feature.title}</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{feature.description}</p>
+                  <h3 className="mb-3 text-base sm:text-lg md:text-xl font-bold group-hover:text-purple-600 transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               );
             })}
