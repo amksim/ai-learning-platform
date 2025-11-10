@@ -6,7 +6,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Check, Clock, CreditCard, X, Sparkles, Zap, Trophy, Loader2 } from "lucide-react";
-import { getTotalLessonsCount } from "@/lib/getLessonsCount";
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -20,9 +19,28 @@ export default function PaymentPage() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель для админа
   const [isResetting, setIsResetting] = useState(false);
+  const [totalLessons, setTotalLessons] = useState(0); // Динамическое количество уроков
   
   // Проверяем является ли пользователь админом
   const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+  // Загружаем количество уроков из API
+  useEffect(() => {
+    const loadLessonsCount = async () => {
+      try {
+        const response = await fetch('/api/courses');
+        const data = await response.json();
+        if (data.courses) {
+          setTotalLessons(data.courses.length);
+        }
+      } catch (error) {
+        console.error('Failed to load lessons count:', error);
+        setTotalLessons(100); // Fallback
+      }
+    };
+    
+    loadLessonsCount();
+  }, []);
 
   useEffect(() => {
     // Не проверяем пока загружается
@@ -143,7 +161,6 @@ export default function PaymentPage() {
 
   const discountPrice = 100;
   const originalPrice = 150;
-  const totalLessons = getTotalLessonsCount();
 
   // Show loading while checking auth
   if (loading) {
