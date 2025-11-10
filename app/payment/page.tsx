@@ -99,7 +99,7 @@ export default function PaymentPage() {
         ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
         : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y');
       
-      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.01)' : 'PRODUCTION ($100)');
+      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($399)');
       console.log('💰 Price ID:', priceId);
       console.log('📡 Calling /api/checkout...');
       
@@ -365,7 +365,7 @@ export default function PaymentPage() {
                             : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
                         }`}
                       >
-                        $100 (LIVE)
+                        $399 (LIVE)
                       </button>
                       <button
                         onClick={() => setUseTestPrice(true)}
@@ -379,7 +379,7 @@ export default function PaymentPage() {
                         }`}
                         title={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST ? 'Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify env' : ''}
                       >
-                        $0.50 (TEST)
+                        $0.99 (TEST)
                       </button>
                     </div>
                     {!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
@@ -403,7 +403,7 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      {useTestPrice ? 'Pay $0.50 (TEST)' : 'Pay $100 - Get Full Access'}
+                      {useTestPrice ? 'Pay $0.99 (TEST)' : 'Pay $399 - Get Full Access'}
                     </>
                   )}
                 </button>

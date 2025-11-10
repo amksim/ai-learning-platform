@@ -436,7 +436,7 @@ export default function LessonPage() {
               onClick={() => router.push("/payment")}
               className="gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
             >
-              💰 Купить полный курс $100
+              💰 Купить полный курс $399
               <ArrowRight className="h-4 w-4" />
             </Button>
           ) : (

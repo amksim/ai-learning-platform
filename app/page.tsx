@@ -579,7 +579,7 @@ export default function HomePage() {
               
               <p className="max-w-2xl text-lg text-gray-300 font-medium">
                 Полный курс от нуля до профи. Создавай с AI без знания кода. 
-                Сайты, игры, приложения - всё в одном курсе за $100!
+                Сайты, игры, приложения - всё в одном курсе за $399!
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
