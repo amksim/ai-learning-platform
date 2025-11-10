@@ -37,7 +37,6 @@ export default function CoursesPage() {
   const [allLevels, setAllLevels] = useState<Level[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResettingSubscription, setIsResettingSubscription] = useState(false);
-  const [displayCount, setDisplayCount] = useState(10); // Показываем по 10 курсов
 
   // Helper function to get translated content
   const getTranslated = (level: Level) => {
@@ -269,7 +268,7 @@ export default function CoursesPage() {
         {/* Уровни волной - слева направо */}
         {!isLoading && (
         <div className="relative px-4 md:px-8">
-          {allLevels.slice(0, displayCount).map((level, index) => {
+          {allLevels.map((level, index) => {
             // Show CTA only ONCE after the LAST free lesson (lesson 3)
             const isLastFreeLesson = level.isFree && 
               (index === allLevels.length - 1 || !allLevels[index + 1]?.isFree);
@@ -491,20 +490,6 @@ export default function CoursesPage() {
               </div>
             );
           })}
-
-          {/* Кнопка "Загрузить ещё" */}
-          {displayCount < allLevels.length && (
-            <div className="flex justify-center mt-12 mb-8">
-              <button
-                onClick={() => setDisplayCount(prev => prev + 10)}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white font-bold rounded-xl transition-all transform hover:scale-105 premium-shadow neon-glow flex items-center gap-2"
-              >
-                <span>⬇️</span>
-                Загрузить ещё 10 уроков 
-                <span className="opacity-75">({allLevels.length - displayCount} осталось)</span>
-              </button>
-            </div>
-          )}
         </div>
         )}
       </div>
