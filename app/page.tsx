@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User } from "lucide-react";
+import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User, Trophy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -151,6 +151,21 @@ export default function HomePage() {
         {/* Анимированный фоновый градиент */}
         <div className="absolute inset-0 ai-gradient opacity-10" />
         
+        {/* Бейдж "Первая платформа" - слева по центру */}
+        <div className="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 z-20">
+          <div className="glass premium-shadow rounded-2xl px-4 py-3 border-2 border-orange-500/30 backdrop-blur-xl max-w-[200px]">
+            <div className="flex items-start gap-2">
+              <Trophy className="h-5 w-5 text-orange-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[10px] leading-tight text-orange-400 font-bold mb-1">№1 В СНГ</p>
+                <p className="text-[11px] leading-tight text-gray-300">
+                  Первая платформа для обучения созданию игр и приложений с AI
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Виджет статистики - справа по центру */}
         <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 z-20">
           <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-purple-500/30 backdrop-blur-xl">
@@ -214,8 +229,23 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* Мобильная версия бейджа "Первая платформа" */}
+            <div className="lg:hidden mt-6 flex justify-center">
+              <div className="glass premium-shadow rounded-xl px-4 py-3 border-2 border-orange-500/30 max-w-[280px]">
+                <div className="flex items-start gap-2">
+                  <Trophy className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-[10px] leading-tight text-orange-400 font-bold mb-1">№1 В СНГ</p>
+                    <p className="text-[10px] leading-tight text-gray-300">
+                      Первая платформа для обучения созданию игр и приложений с AI
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Мобильная версия виджета статистики */}
-            <div className="lg:hidden mt-8 flex gap-4 justify-center">
+            <div className="lg:hidden mt-4 flex gap-4 justify-center">
               <div className="glass premium-shadow rounded-xl p-4 border-2 border-blue-500/30 min-w-[140px]">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="h-4 w-4 text-blue-400" />
