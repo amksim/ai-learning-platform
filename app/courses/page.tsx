@@ -216,13 +216,12 @@ export default function CoursesPage() {
         {!isLoading && (
         <div className="relative px-4 md:px-8">
           {allLevels.map((level, index) => {
-            // Show CTA only ONCE after the LAST free lesson (lesson 3)
+            // Show CTA only ONCE after the LAST free lesson
             const isLastFreeLesson = level.isFree && 
               (index === allLevels.length - 1 || !allLevels[index + 1]?.isFree);
             const hasMorePaidLessons = allLevels.some((l, i) => i > index && !l.isFree);
-            // Also show after lesson 3 specifically if user hasn't paid
-            const isAfterLesson3 = level.id === 3;
-            const showCTAAfter = (isLastFreeLesson || isAfterLesson3) && hasMorePaidLessons && !user?.hasPaid;
+            // Show CTA only after last free lesson if user hasn't paid
+            const showCTAAfter = isLastFreeLesson && hasMorePaidLessons && !user?.hasPaid;
             const unlocked = isLevelUnlocked(level.id, level.isFree);
             const completed = isLevelCompleted(level.id);
             // Handle icon from localStorage or original source
