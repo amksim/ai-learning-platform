@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,6 +12,15 @@ export default function HomePage() {
   const { t } = useLanguage();
   const { reviews } = useReviews();
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [stats, setStats] = useState({ totalUsers: 0, activeStudents: 0 });
+
+  // Загрузка статистики
+  useEffect(() => {
+    fetch('/api/stats')
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error('Failed to load stats:', err));
+  }, []);
 
   const tracks = [
     {
@@ -141,6 +150,38 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-12 md:py-20 lg:py-32">
         {/* Анимированный фоновый градиент */}
         <div className="absolute inset-0 ai-gradient opacity-10" />
+        
+        {/* Виджет статистики - справа по центру */}
+        <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 z-20">
+          <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-purple-500/30 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="h-5 w-5 text-purple-400" />
+              <h3 className="text-sm font-bold text-purple-400">Статистика</h3>
+            </div>
+            
+            {/* Всего пользователей */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="h-4 w-4 text-blue-400" />
+                <p className="text-xs text-gray-400">Пользователей</p>
+              </div>
+              <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                {stats.totalUsers}
+              </p>
+            </div>
+            
+            {/* Активных учеников */}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <User className="h-4 w-4 text-green-400" />
+                <p className="text-xs text-gray-400">Учатся сейчас</p>
+              </div>
+              <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                {stats.activeStudents}
+              </p>
+            </div>
+          </div>
+        </div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col items-center text-center">

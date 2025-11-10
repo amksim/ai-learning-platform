@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Trash2, Edit, Save, X, ArrowUp, ArrowDown, Sparkles, Code, Lock, TrendingUp, Settings, Terminal, Database, Zap, Trophy, Rocket, CheckCircle } from "lucide-react";
+import { Plus, Trash2, Edit, Save, X, ArrowUp, ArrowDown, Sparkles, Code, Lock, TrendingUp, Settings, Terminal, Database, Zap, Trophy, Rocket, CheckCircle, Users, User } from "lucide-react";
 import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
 import { useAuth } from "@/contexts/AuthContext";
 import { autoTranslateCourseContent } from "@/lib/translateContent";
@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [insertAfter, setInsertAfter] = useState<number | null>(null);
   const [newTopic, setNewTopic] = useState("");
+  const [stats, setStats] = useState({ totalUsers: 147, activeStudents: 89 });
+  const [isEditingStats, setIsEditingStats] = useState(false);
 
   // Admin access protection
   useEffect(() => {
@@ -109,7 +111,39 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadCourses();
+    loadStats();
   }, []);
+
+  // Загрузка статистики
+  const loadStats = async () => {
+    try {
+      const response = await fetch('/api/stats');
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  };
+
+  // Обновление статистики
+  const updateStats = async () => {
+    try {
+      const response = await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stats)
+      });
+      
+      if (response.ok) {
+        alert('✅ Статистика обновлена!');
+        setIsEditingStats(false);
+        loadStats();
+      }
+    } catch (error) {
+      console.error('Failed to update stats:', error);
+      alert('❌ Ошибка при обновлении статистики');
+    }
+  };
 
   // Trigger refresh on courses page
   const triggerRefresh = () => {
@@ -369,6 +403,79 @@ export default function AdminPage() {
               Админ-панель курса
             </span>
           </h1>
+
+          {/* Управление статистикой */}
+          <Card className="mb-6 glass border-2 border-purple-500/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-purple-400" />
+                Статистика платформы
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditingStats ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Всего пользователей</label>
+                    <input
+                      type="number"
+                      value={stats.totalUsers}
+                      onChange={(e) => setStats({...stats, totalUsers: Number(e.target.value)})}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-800 border-2 border-gray-700 focus:border-purple-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Учатся сейчас</label>
+                    <input
+                      type="number"
+                      value={stats.activeStudents}
+                      onChange={(e) => setStats({...stats, activeStudents: Number(e.target.value)})}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-800 border-2 border-gray-700 focus:border-purple-500 outline-none"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={updateStats}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      Сохранить
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingStats(false);
+                        loadStats();
+                      }}
+                      className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Отмена
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-8">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Всего пользователей</p>
+                      <p className="text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Учатся сейчас</p>
+                      <p className="text-3xl font-bold text-green-400">{stats.activeStudents}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsEditingStats(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Изменить
+                  </button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
           
           <div className="flex flex-wrap gap-4">
             <button
