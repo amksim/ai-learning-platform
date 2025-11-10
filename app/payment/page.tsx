@@ -70,24 +70,24 @@ export default function PaymentPage() {
 
     setIsResetting(true);
     try {
-      const { supabase } = await import('@/lib/supabase');
+      // Используем API endpoint для сброса
+      const response = await fetch('/api/reset-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user?.email }),
+      });
 
-      const { error } = await supabase
-        .from('users')
-        .update({ 
-          has_paid: false,
-          stripe_customer_id: null,
-          subscription_type: null
-        })
-        .eq('email', user?.email);
-
-      if (error) {
-        console.error('Error resetting subscription:', error);
-        alert('Failed to reset subscription: ' + error.message);
-        return;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to reset subscription');
       }
 
       alert('✅ Subscription reset successfully! Refreshing page...');
+      
+      // Очищаем локальный кеш
+      localStorage.removeItem('user');
+      localStorage.removeItem('purchase');
+      
       window.location.reload();
     } catch (error: any) {
       console.error('Error resetting subscription:', error);
