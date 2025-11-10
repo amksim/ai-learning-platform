@@ -182,14 +182,16 @@ export default function HomePage() {
         
         {/* Бейдж "Первая платформа" - слева по центру */}
         <div className="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 z-20 animate-float">
-          <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-orange-500/50 backdrop-blur-xl max-w-[220px] hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-orange-900/20 via-yellow-900/20 to-red-900/20">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-yellow-500 neon-glow">
-                <Trophy className="h-6 w-6 text-white" />
+          <div className="glass premium-shadow neon-glow rounded-2xl p-8 border-2 border-orange-400/60 backdrop-blur-xl w-[240px] hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-orange-600/30 via-amber-600/30 to-yellow-600/30">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-center p-3 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 neon-glow shadow-2xl">
+                <Trophy className="h-10 w-10 text-white drop-shadow-lg" />
               </div>
-              <div>
-                <p className="text-xs leading-tight text-orange-400 font-bold mb-2 tracking-wide">🏆 №1 В СНГ</p>
-                <p className="text-sm leading-tight text-gray-200 font-medium">
+              <div className="text-center">
+                <p className="text-base leading-tight text-orange-300 font-extrabold mb-3 tracking-wider drop-shadow-lg">
+                  🏆 №1 В СНГ
+                </p>
+                <p className="text-base leading-snug text-gray-100 font-bold">
                   Первая платформа для обучения созданию игр и приложений с AI
                 </p>
               </div>
@@ -270,14 +272,14 @@ export default function HomePage() {
 
             {/* Мобильная версия бейджа "Первая платформа" */}
             <div className="lg:hidden mt-6 flex justify-center">
-              <div className="glass premium-shadow neon-glow rounded-xl px-5 py-4 border-2 border-orange-500/50 max-w-[300px] bg-gradient-to-br from-orange-900/20 via-yellow-900/20 to-red-900/20">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 neon-glow">
-                    <Trophy className="h-5 w-5 text-white" />
+              <div className="glass premium-shadow neon-glow rounded-xl p-6 border-2 border-orange-400/60 max-w-[320px] bg-gradient-to-br from-orange-600/30 via-amber-600/30 to-yellow-600/30">
+                <div className="flex flex-col gap-3 items-center text-center">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 neon-glow shadow-lg">
+                    <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                   <div>
-                    <p className="text-xs leading-tight text-orange-400 font-bold mb-1.5 tracking-wide">🏆 №1 В СНГ</p>
-                    <p className="text-xs leading-tight text-gray-200 font-medium">
+                    <p className="text-sm leading-tight text-orange-300 font-extrabold mb-2 tracking-wider drop-shadow-lg">🏆 №1 В СНГ</p>
+                    <p className="text-sm leading-snug text-gray-100 font-bold">
                       Первая платформа для обучения созданию игр и приложений с AI
                     </p>
                   </div>
