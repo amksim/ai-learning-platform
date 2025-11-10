@@ -46,7 +46,7 @@ export default function HomePage() {
           activeStudents: newValue
         };
       });
-    }, 8000); // Меняем каждые 8 секунд (более реалистично)
+    }, 600000); // Меняем каждые 10 минут
 
     return () => clearInterval(interval);
   }, [stats.totalUsers, baseActiveStudents]);
@@ -230,6 +230,9 @@ export default function HomePage() {
               <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent transition-all duration-500">
                 {stats.activeStudents}
               </p>
+              <p className="text-[9px] text-gray-500 mt-2 opacity-70">
+                ⏱️ Обновление каждые 10 минут
+              </p>
             </div>
           </div>
         </div>
@@ -301,8 +304,14 @@ export default function HomePage() {
                 <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                   {stats.activeStudents}
                 </p>
+                <p className="text-[8px] text-gray-500 mt-1.5 opacity-70">
+                  ⏱️ Обновление каждые 10 мин
+                </p>
               </div>
             </div>
+            <p className="lg:hidden text-[9px] text-gray-500 text-center mt-2 opacity-70">
+              ⏱️ Обновление каждые 10 минут
+            </p>
           </div>
         </div>
 
