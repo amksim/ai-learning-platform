@@ -159,7 +159,7 @@ export const translations = {
     },
     reviews: {
       title: "Отзывы учеников",
-      subtitle: "Более 500+ выпускников уже создают проекты с AI",
+      subtitle: "Реальные отзывы тех, кто прошёл обучение",
       show_all_reviews: "Показать все {count} отзывов",
       hide_reviews: "Скрыть отзывы",
       write_review: "Написать отзыв",
@@ -353,7 +353,7 @@ export const translations = {
     },
     reviews: {
       title: "Student Testimonials",
-      subtitle: "Over 500+ graduates already creating projects with AI",
+      subtitle: "Real reviews from those who completed the course",
       show_all_reviews: "Show all {count} reviews",
       hide_reviews: "Hide reviews",
       write_review: "Write a review",
@@ -547,7 +547,7 @@ export const translations = {
     },
     reviews: {
       title: "Відгуки учнів",
-      subtitle: "Понад 500+ випускників вже створюють проєкти з AI",
+      subtitle: "Реальні відгуки тих, хто пройшов навчання",
       show_all_reviews: "Показати всі відгуки",
       hide_reviews: "Сховати відгуки",
       write_review: "Написати відгук",
@@ -740,7 +740,7 @@ export const translations = {
     },
     reviews: {
       title: "Recenzii",
-      subtitle: "Peste 500+ absolvenți creează deja proiecte cu AI",
+      subtitle: "Recenzii reale de la cei care au absolvit cursul",
       show_all_reviews: "Arată toate recenziile",
       hide_reviews: "Ascunde recenziile",
       write_review: "Scrie o recenzie",
@@ -933,7 +933,7 @@ export const translations = {
     },
     reviews: {
       title: "Opinie",
-      subtitle: "Ponad 500+ absolwentów już tworzy projekty z AI",
+      subtitle: "Prawdziwe opinie tych, którzy ukończyli kurs",
       show_all_reviews: "Pokaż wszystkie opinie",
       hide_reviews: "Ukryj opinie",
       write_review: "Napisz opinię",
