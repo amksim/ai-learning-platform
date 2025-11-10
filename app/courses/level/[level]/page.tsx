@@ -241,8 +241,17 @@ export default function LessonPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-accent/10 py-20">
-      <div className="container mx-auto max-w-4xl px-4">
+    <div className="min-h-screen relative overflow-hidden py-20">
+      {/* Animated premium background effects */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900/40 to-black" />
+        <div className="absolute left-1/4 top-20 h-96 w-96 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-3xl animate-pulse" />
+        <div className="absolute right-1/4 top-40 h-96 w-96 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 opacity-20 blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute left-1/3 bottom-20 h-64 w-64 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 opacity-15 blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute right-1/3 bottom-40 h-80 w-80 rounded-full bg-gradient-to-r from-orange-400 to-yellow-400 opacity-10 blur-3xl animate-pulse" style={{ animationDelay: "3s" }} />
+      </div>
+      
+      <div className="container mx-auto max-w-4xl px-4 relative z-10">
         {/* Header */}
         <div className="mb-8">
           <button
