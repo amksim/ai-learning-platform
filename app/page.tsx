@@ -213,6 +213,28 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
+
+            {/* Мобильная версия виджета статистики */}
+            <div className="lg:hidden mt-8 flex gap-4 justify-center">
+              <div className="glass premium-shadow rounded-xl p-4 border-2 border-blue-500/30 min-w-[140px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4 text-blue-400" />
+                  <p className="text-xs text-gray-400">Пользователей</p>
+                </div>
+                <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  {stats.totalUsers}
+                </p>
+              </div>
+              <div className="glass premium-shadow rounded-xl p-4 border-2 border-green-500/30 min-w-[140px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4 text-green-400" />
+                  <p className="text-xs text-gray-400">Учатся сейчас</p>
+                </div>
+                <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  {stats.activeStudents}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
