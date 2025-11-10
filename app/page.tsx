@@ -373,21 +373,22 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {displayedReviews.map((review) => (
-              <Card key={review.id} className="h-full glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all hover:scale-[1.02]">
-                <CardHeader className="p-4 sm:p-5 md:p-6">
-                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {review.name}
-                  </CardTitle>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(review.date).toLocaleDateString('ru-RU', { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}
-                  </p>
+              <Card key={review.id} className="h-full glass premium-shadow neon-glow border-2 border-purple-500/30 hover:border-purple-400 transition-all hover:scale-[1.02] backdrop-blur-xl bg-gradient-to-br from-purple-900/10 via-pink-900/10 to-blue-900/10 relative overflow-hidden">
+                {/* Декоративная иконка цитаты */}
+                <div className="absolute top-4 right-4 text-6xl text-purple-500/10 font-serif leading-none">"</div>
+                
+                <CardHeader className="p-4 sm:p-5 md:p-6 relative z-10">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+                      {review.name.charAt(0).toUpperCase()}
+                    </div>
+                    <CardTitle className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                      {review.name}
+                    </CardTitle>
+                  </div>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
-                  <p className="text-sm sm:text-base text-gray-800 dark:text-gray-100 leading-relaxed">
+                <CardContent className="p-4 sm:p-5 md:p-6 pt-0 relative z-10">
+                  <p className="text-sm sm:text-base text-gray-200 leading-relaxed italic">
                     {review.text}
                   </p>
                 </CardContent>
