@@ -148,24 +148,37 @@ export default function LessonPage() {
           const level = sortedCourses.find((l: any) => l.id === levelId);
           setCurrentLevel(level);
           
+          // ВАЖНО: Логируем для отладки
+          console.log('🔍 Lesson Access Check:', {
+            lessonId: levelId,
+            lessonTitle: level?.title,
+            isFree: level?.isFree,
+            userLoggedIn: !!user,
+            userHasPaid: user?.hasPaid
+          });
+          
           // Free lessons don't require login
           if (level?.isFree) {
+            console.log('✅ Free lesson - access granted');
             setLoading(false);
             return;
           }
           
           // Paid lessons require login and payment
           if (!user) {
+            console.log('❌ Paid lesson - user not logged in, redirecting to /login');
             router.push("/login");
             return;
           }
           
           // Check if user has paid for the course
           if (!user.hasPaid) {
+            console.log('❌ Paid lesson - user has not paid, redirecting to /payment');
             router.push("/payment");
             return;
           }
           
+          console.log('✅ Paid lesson - user has access');
           setLoading(false);
         }
       } catch (error) {

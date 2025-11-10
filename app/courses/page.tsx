@@ -122,6 +122,13 @@ export default function CoursesPage() {
           });
           
           console.log('📊 Sorted courses: Free first, then paid');
+          
+          // ВАЖНО: Логируем бесплатные уроки для отладки
+          const freeLessons = sortedCourses.filter((c: any) => c.isFree);
+          const paidLessons = sortedCourses.filter((c: any) => !c.isFree);
+          console.log('🎁 Free lessons:', freeLessons.map((l: any) => `#${l.id}: ${l.title}`));
+          console.log('💰 Paid lessons:', paidLessons.map((l: any) => `#${l.id}: ${l.title}`));
+          
           setAllLevels(sortedCourses);
           
           // Если база пустая - показываем сообщение
