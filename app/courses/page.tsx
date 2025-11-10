@@ -236,13 +236,13 @@ export default function CoursesPage() {
         {/* Skeleton Loader */}
         {isLoading && (
           <div className="relative px-4 md:px-8 space-y-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((num) => (
               <div 
-                key={i} 
-                className={`flex items-center gap-6 ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+                key={num} 
+                className={`flex items-center gap-6 ${num % 2 === 0 ? 'justify-start' : 'justify-end'}`}
               >
                 <div className="w-full max-w-md">
-                  <div className="glass rounded-2xl border-2 border-gray-700 p-6 animate-pulse">
+                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border-2 border-gray-700 p-6 animate-pulse">
                     {/* Icon skeleton */}
                     <div className="mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-600" />
                     
