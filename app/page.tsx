@@ -13,14 +13,37 @@ export default function HomePage() {
   const { reviews } = useReviews();
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [stats, setStats] = useState({ totalUsers: 0, activeStudents: 0 });
+  const [baseActiveStudents, setBaseActiveStudents] = useState(0);
 
   // Загрузка статистики
   useEffect(() => {
     fetch('/api/stats')
       .then(res => res.json())
-      .then(data => setStats(data))
+      .then(data => {
+        setStats(data);
+        setBaseActiveStudents(data.activeStudents);
+      })
       .catch(err => console.error('Failed to load stats:', err));
   }, []);
+
+  // Динамическое изменение "Учатся сейчас" - варьируется около половины от totalUsers
+  useEffect(() => {
+    if (!stats.totalUsers) return;
+
+    const interval = setInterval(() => {
+      // Варьируем от 40% до 60% от totalUsers
+      const min = Math.floor(stats.totalUsers * 0.4);
+      const max = Math.floor(stats.totalUsers * 0.6);
+      const randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+      
+      setStats(prev => ({
+        ...prev,
+        activeStudents: randomValue
+      }));
+    }, 3000); // Меняем каждые 3 секунды
+
+    return () => clearInterval(interval);
+  }, [stats.totalUsers]);
 
   const tracks = [
     {
@@ -152,13 +175,15 @@ export default function HomePage() {
         <div className="absolute inset-0 ai-gradient opacity-10" />
         
         {/* Бейдж "Первая платформа" - слева по центру */}
-        <div className="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 z-20">
-          <div className="glass premium-shadow rounded-2xl px-4 py-3 border-2 border-orange-500/30 backdrop-blur-xl max-w-[200px]">
-            <div className="flex items-start gap-2">
-              <Trophy className="h-5 w-5 text-orange-400 flex-shrink-0 mt-0.5" />
+        <div className="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 z-20 animate-float">
+          <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-orange-500/50 backdrop-blur-xl max-w-[220px] hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-orange-900/20 via-yellow-900/20 to-red-900/20">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-yellow-500 neon-glow">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
               <div>
-                <p className="text-[10px] leading-tight text-orange-400 font-bold mb-1">№1 В СНГ</p>
-                <p className="text-[11px] leading-tight text-gray-300">
+                <p className="text-xs leading-tight text-orange-400 font-bold mb-2 tracking-wide">🏆 №1 В СНГ</p>
+                <p className="text-sm leading-tight text-gray-200 font-medium">
                   Первая платформа для обучения созданию игр и приложений с AI
                 </p>
               </div>
@@ -167,18 +192,20 @@ export default function HomePage() {
         </div>
 
         {/* Виджет статистики - справа по центру */}
-        <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 z-20">
-          <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-purple-500/30 backdrop-blur-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-purple-400" />
-              <h3 className="text-sm font-bold text-purple-400">Статистика</h3>
+        <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 z-20 animate-float-delayed">
+          <div className="glass premium-shadow neon-glow rounded-2xl p-6 border-2 border-purple-500/50 backdrop-blur-xl hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 neon-glow">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
+              <h3 className="text-sm font-bold text-purple-400 tracking-wide">📊 Статистика</h3>
             </div>
             
             {/* Всего пользователей */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-2">
                 <Users className="h-4 w-4 text-blue-400" />
-                <p className="text-xs text-gray-400">Пользователей</p>
+                <p className="text-xs text-gray-300 font-medium">Пользователей</p>
               </div>
               <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 {stats.totalUsers}
@@ -187,11 +214,14 @@ export default function HomePage() {
             
             {/* Активных учеников */}
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <User className="h-4 w-4 text-green-400" />
-                <p className="text-xs text-gray-400">Учатся сейчас</p>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="relative">
+                  <User className="h-4 w-4 text-green-400" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
+                </div>
+                <p className="text-xs text-gray-300 font-medium">Учатся сейчас</p>
               </div>
-              <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent transition-all duration-500">
                 {stats.activeStudents}
               </p>
             </div>
@@ -231,12 +261,14 @@ export default function HomePage() {
 
             {/* Мобильная версия бейджа "Первая платформа" */}
             <div className="lg:hidden mt-6 flex justify-center">
-              <div className="glass premium-shadow rounded-xl px-4 py-3 border-2 border-orange-500/30 max-w-[280px]">
-                <div className="flex items-start gap-2">
-                  <Trophy className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" />
+              <div className="glass premium-shadow neon-glow rounded-xl px-5 py-4 border-2 border-orange-500/50 max-w-[300px] bg-gradient-to-br from-orange-900/20 via-yellow-900/20 to-red-900/20">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 neon-glow">
+                    <Trophy className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <p className="text-[10px] leading-tight text-orange-400 font-bold mb-1">№1 В СНГ</p>
-                    <p className="text-[10px] leading-tight text-gray-300">
+                    <p className="text-xs leading-tight text-orange-400 font-bold mb-1.5 tracking-wide">🏆 №1 В СНГ</p>
+                    <p className="text-xs leading-tight text-gray-200 font-medium">
                       Первая платформа для обучения созданию игр и приложений с AI
                     </p>
                   </div>
