@@ -36,7 +36,6 @@ export default function CoursesPage() {
   const { translate } = useTranslate();
   const [allLevels, setAllLevels] = useState<Level[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isResettingSubscription, setIsResettingSubscription] = useState(false);
 
   // Helper function to get translated content
   const getTranslated = (level: Level) => {
@@ -47,43 +46,6 @@ export default function CoursesPage() {
     return { title: level.title, description: level.description };
   };
 
-  // Функция сброса подписки для админа
-  const handleResetSubscription = async () => {
-    if (!user) return;
-    
-    const confirmed = confirm(t.admin.reset_confirm);
-    if (!confirmed) return;
-    
-    setIsResettingSubscription(true);
-    
-    try {
-      // Сбрасываем в Supabase
-      const response = await fetch('/api/reset-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email }),
-      });
-      
-      if (response.ok) {
-        console.log('✅ Подписка сброшена в Supabase');
-        
-        // Сбрасываем локально
-        const updatedUser = { ...user, hasPaid: false };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        localStorage.removeItem('purchase');
-        
-        alert(t.admin.reset_success);
-        window.location.reload();
-      } else {
-        throw new Error('Ошибка при сбросе подписки');
-      }
-    } catch (error) {
-      console.error('❌ Ошибка сброса подписки:', error);
-      alert(t.admin.reset_error);
-    } finally {
-      setIsResettingSubscription(false);
-    }
-  };
 
   useEffect(() => {
     // Load courses from API (Supabase)
@@ -204,28 +166,6 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen py-12 sm:py-16 md:py-20">
       <div className="container mx-auto px-3 sm:px-4">
-        {/* Admin Reset Subscription Button */}
-        {user?.email === "kmak4551@gmail.com" && user.hasPaid && (
-          <div className="mb-6 flex justify-center">
-            <button
-              onClick={handleResetSubscription}
-              disabled={isResettingSubscription}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold transition-all premium-shadow hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
-            >
-              {isResettingSubscription ? (
-                <>
-                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                  <span>{t.buttons.resetting}</span>
-                </>
-              ) : (
-                <>
-                  🔄 <span>{t.buttons.reset_subscription}</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
         <div className="mb-12 text-center">
           <h1 className="mb-3 text-4xl font-bold md:text-5xl">
             <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">

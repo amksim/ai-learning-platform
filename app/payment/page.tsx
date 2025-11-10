@@ -18,7 +18,6 @@ export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель для админа
-  const [isResetting, setIsResetting] = useState(false);
   const [totalLessons, setTotalLessons] = useState(0); // Динамическое количество уроков
   
   // Проверяем является ли пользователь админом
@@ -58,44 +57,6 @@ export default function PaymentPage() {
     }
   }, [user, loading, router, isAdmin]);
 
-  const handleResetSubscription = async () => {
-    if (!isAdmin) {
-      alert('Only admin can reset subscription');
-      return;
-    }
-
-    if (!confirm('Are you sure you want to reset your subscription? You will need to pay again.')) {
-      return;
-    }
-
-    setIsResetting(true);
-    try {
-      // Используем API endpoint для сброса
-      const response = await fetch('/api/reset-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user?.email }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to reset subscription');
-      }
-
-      alert('✅ Subscription reset successfully! Refreshing page...');
-      
-      // Очищаем локальный кеш
-      localStorage.removeItem('user');
-      localStorage.removeItem('purchase');
-      
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error resetting subscription:', error);
-      alert('Failed to reset subscription: ' + error.message);
-    } finally {
-      setIsResetting(false);
-    }
-  };
 
   const handlePayment = async () => {
     if (isProcessing) return;
@@ -424,27 +385,6 @@ export default function PaymentPage() {
                     </>
                   )}
                 </button>
-
-                {/* АДМИНСКАЯ КНОПКА СБРОСА ПОДПИСКИ */}
-                {isAdmin && user?.hasPaid && (
-                  <button
-                    onClick={handleResetSubscription}
-                    disabled={isResetting}
-                    className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 flex items-center justify-center gap-2 premium-shadow text-sm mb-4"
-                  >
-                    {isResetting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Resetting...
-                      </>
-                    ) : (
-                      <>
-                        <X className="h-4 w-4" />
-                        Reset Subscription (Admin)
-                      </>
-                    )}
-                  </button>
-                )}
 
                 <p className="text-xs text-center text-gray-400">
                   Click the button to get instant access to all lessons
