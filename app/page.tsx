@@ -28,22 +28,28 @@ export default function HomePage() {
 
   // Динамическое изменение "Учатся сейчас" - варьируется около половины от totalUsers
   useEffect(() => {
-    if (!stats.totalUsers) return;
+    if (!stats.totalUsers || !baseActiveStudents) return;
 
     const interval = setInterval(() => {
-      // Варьируем от 40% до 60% от totalUsers
-      const min = Math.floor(stats.totalUsers * 0.4);
-      const max = Math.floor(stats.totalUsers * 0.6);
-      const randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
-      
-      setStats(prev => ({
-        ...prev,
-        activeStudents: randomValue
-      }));
-    }, 3000); // Меняем каждые 3 секунды
+      setStats(prev => {
+        // Плавное изменение на ±1-5 человек от текущего значения
+        const change = Math.floor(Math.random() * 11) - 5; // от -5 до +5
+        let newValue = prev.activeStudents + change;
+        
+        // Ограничиваем диапазон 40-60% от totalUsers
+        const min = Math.floor(stats.totalUsers * 0.4);
+        const max = Math.floor(stats.totalUsers * 0.6);
+        newValue = Math.max(min, Math.min(max, newValue));
+        
+        return {
+          ...prev,
+          activeStudents: newValue
+        };
+      });
+    }, 8000); // Меняем каждые 8 секунд (более реалистично)
 
     return () => clearInterval(interval);
-  }, [stats.totalUsers]);
+  }, [stats.totalUsers, baseActiveStudents]);
 
   const tracks = [
     {
