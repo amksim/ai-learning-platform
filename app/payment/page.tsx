@@ -193,7 +193,7 @@ export default function PaymentPage() {
               {/* Special Offer Badge */}
               <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-pink-500/20 border-2 border-orange-500/30 mb-6">
                 <Sparkles className="h-5 w-5 text-orange-400" />
-                <span className="text-lg font-bold text-orange-400">Специальное предложение</span>
+                <span className="text-lg font-bold text-orange-400">🌍 Единственный в мире курс</span>
               </div>
 
               {/* Price Display */}

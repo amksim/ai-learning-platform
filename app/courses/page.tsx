@@ -443,8 +443,11 @@ export default function CoursesPage() {
                           <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                             Отличная работа! 🎉
                           </h3>
-                          <p className="text-gray-300 text-base">
+                          <p className="text-gray-300 text-base mb-2">
                             Вы завершили все бесплатные уроки. Готовы продолжить путь к мастерству?
+                          </p>
+                          <p className="text-orange-400 text-sm font-bold">
+                            🌍 Единственный в мире курс по созданию программ с AI!
                           </p>
                         </div>
 

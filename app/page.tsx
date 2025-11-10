@@ -189,10 +189,10 @@ export default function HomePage() {
               </div>
               <div className="text-center">
                 <p className="text-base leading-tight text-orange-300 font-extrabold mb-3 tracking-wider drop-shadow-lg">
-                  🏆 №1 В СНГ
+                  🌍 ПЕРВАЯ В МИРЕ
                 </p>
                 <p className="text-base leading-snug text-gray-100 font-bold">
-                  Первая платформа для обучения созданию игр и приложений с AI
+                  Единственная платформа для создания сайтов, игр и приложений с AI
                 </p>
               </div>
             </div>
@@ -278,9 +278,9 @@ export default function HomePage() {
                     <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                   <div>
-                    <p className="text-sm leading-tight text-orange-300 font-extrabold mb-2 tracking-wider drop-shadow-lg">🏆 №1 В СНГ</p>
+                    <p className="text-sm leading-tight text-orange-300 font-extrabold mb-2 tracking-wider drop-shadow-lg">🌍 ПЕРВАЯ В МИРЕ</p>
                     <p className="text-sm leading-snug text-gray-100 font-bold">
-                      Первая платформа для обучения созданию игр и приложений с AI
+                      Единственная платформа для создания сайтов, игр и приложений с AI
                     </p>
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export default function HomePage() {
               </h2>
               
               <p className="max-w-2xl text-lg text-gray-300 font-medium">
-                Полный курс от нуля до профи. Создавай с AI без знания кода. 
+                🌍 Единственный в мире курс! Создавай с AI без знания кода. 
                 Сайты, игры, приложения - всё в одном курсе за $399!
               </p>
               
