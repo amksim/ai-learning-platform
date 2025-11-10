@@ -199,14 +199,14 @@ export default function PaymentPage() {
               {/* Price Display */}
               <div className="mb-8">
                 <div className="flex items-center justify-center gap-6 mb-4">
-                  <div className="text-4xl sm:text-5xl text-gray-500 line-through opacity-60">
-                    $150
-                  </div>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400 mb-2">
+                  Экономия $200 🎉
+                </p>  
                   <div className="text-6xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent drop-shadow-2xl">
-                    $100
+                    $399
                   </div>
                 </div>
-                <p className="text-xl text-green-400 font-bold">Экономия $50 - Лучшее предложение!</p>
+                <p className="text-xl text-green-400 font-bold">Экономия $200 - Лучшее предложение!</p>
               </div>
 
               {/* Buy Button */}
@@ -324,15 +324,16 @@ export default function PaymentPage() {
                 <div className="mb-6 p-6 rounded-2xl bg-gray-900/50 border-2 border-green-500/30">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-gray-400">Обычная цена:</span>
-                    <span className="text-2xl text-gray-400 line-through">$150</span>
+                    <span className="text-2xl text-gray-400 line-through">$599</span>
                   </div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-white font-bold">Скидка 33%:</span>
-                    <span className="text-2xl text-green-400 font-bold">-$50</span>
+                    <span className="text-2xl text-green-400 font-bold">-$200</span>
                   </div>
-                  <div className="border-t border-gray-700 pt-4 flex items-center justify-between">
-                    <span className="text-xl font-bold text-white">Итого:</span>
-                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$100</span>
+                  <div className="h-px bg-gradient-to-r from-transparent via-green-500 to-transparent mb-4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-bold text-xl">Итого:</span>
+                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$399</span>
                   </div>
                 </div>
 

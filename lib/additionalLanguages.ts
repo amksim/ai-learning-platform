@@ -494,7 +494,7 @@ Object.keys(additionalLanguages).forEach((lang) => {
       lesson: "Lesson",
       free_lesson: "Free",
       locked_lesson: "Paid Lesson",
-      locked_desc: "This lesson is available after purchasing the course for $100",
+      locked_desc: "This lesson is available after purchasing the course for $399",
       complete_free: "Complete free lessons, then buy full access!",
     };
   }
@@ -559,7 +559,7 @@ Object.keys(additionalLanguages).forEach((lang) => {
       lifetime_access: "Lifetime access to all lessons",
       instant_activation: "Instant activation after payment",
       secure_payment: "100% secure payment",
-      pay_button: "Pay $100",
+      pay_button: "Pay $399",
       pay_instant: "By clicking the button, you'll get instant access to all lessons",
     };
   }

@@ -458,12 +458,12 @@ export default function CoursesPage() {
                         {/* Price */}
                         <div className="text-center mb-6">
                           <div className="flex items-center justify-center gap-4 mb-3">
-                            <span className="text-3xl text-gray-500 line-through">$150</span>
+                            <span className="text-3xl text-gray-500 line-through">$599</span>
                             <span className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                              $100
+                              $399
                             </span>
                           </div>
-                          <p className="text-lg text-green-400 font-bold mb-4">Экономия $50!</p>
+                          <p className="text-lg text-green-400 font-bold mb-4">Экономия $200!</p>
                           <p className="text-sm text-gray-400">Единоразовый платеж • Пожизненный доступ</p>
                         </div>
 

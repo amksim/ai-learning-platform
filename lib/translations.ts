@@ -52,7 +52,7 @@ export const translations = {
       lesson: "Урок",
       free_lesson: "Бесплатный",
       locked_lesson: "Платный урок",
-      locked_desc: "Этот урок доступен после покупки курса за $100",
+      locked_desc: "Этот урок доступен после покупки курса за $399",
       complete_free: "Пройди бесплатные уроки, затем купи полный доступ!",
     },
     profile: {
@@ -113,7 +113,7 @@ export const translations = {
       lifetime_access: "Пожизненный доступ ко всем урокам",
       instant_activation: "Мгновенная активация после оплаты",
       secure_payment: "100% безопасная оплата",
-      pay_button: "Оплатить $100",
+      pay_button: "Оплатить $399",
       pay_instant: "Нажимая кнопку, ты получишь мгновенный доступ ко всем урокам",
     },
     auth: {
@@ -175,7 +175,7 @@ export const translations = {
       start_learning: "Начать обучение",
       learn_more: "Узнать больше",
       view_all_projects: "Смотреть все проекты",
-      buy_course: "Купить полный курс $100",
+      buy_course: "Купить полный курс $399",
       reset_subscription: "Сбросить подписку (админ)",
       resetting: "Сброс...",
       view_project: "Посмотреть проект",
@@ -246,7 +246,7 @@ export const translations = {
       lesson: "Lesson",
       free_lesson: "Free",
       locked_lesson: "Paid Lesson",
-      locked_desc: "This lesson is available after purchasing the course for $100",
+      locked_desc: "This lesson is available after purchasing the course for $399",
       complete_free: "Complete free lessons, then buy full access!",
     },
     profile: {
@@ -307,7 +307,7 @@ export const translations = {
       lifetime_access: "Lifetime access to all lessons",
       instant_activation: "Instant activation after payment",
       secure_payment: "100% secure payment",
-      pay_button: "Pay $100",
+      pay_button: "Pay $399",
       pay_instant: "By clicking the button, you'll get instant access to all lessons",
     },
     auth: {
@@ -369,7 +369,7 @@ export const translations = {
       start_learning: "Start Learning",
       learn_more: "Learn More",
       view_all_projects: "View all projects",
-      buy_course: "Buy full course $100",
+      buy_course: "Buy full course $399",
       reset_subscription: "Reset subscription (admin)",
       resetting: "Resetting...",
       view_project: "View project",
@@ -440,7 +440,7 @@ export const translations = {
       lesson: "Урок",
       free_lesson: "Безкоштовний",
       locked_lesson: "Платний урок",
-      locked_desc: "Цей урок доступний після покупки курсу за $100",
+      locked_desc: "Цей урок доступний після покупки курсу за $399",
       complete_free: "Пройди безкоштовні уроки, потім купи повний доступ!",
     },
     profile: {
@@ -501,7 +501,7 @@ export const translations = {
       lifetime_access: "Довічний доступ до всіх уроків",
       instant_activation: "Миттєва активація після оплати",
       secure_payment: "100% безпечна оплата",
-      pay_button: "Оплатити $100",
+      pay_button: "Оплатити $399",
       pay_instant: "Натискаючи кнопку, ти отримаєш миттєвий доступ до всіх уроків",
     },
     auth: {
@@ -633,7 +633,7 @@ export const translations = {
       lesson: "Lecția",
       free_lesson: "Gratuit",
       locked_lesson: "Lecție plătită",
-      locked_desc: "Această lecție este disponibilă după achiziționarea cursului pentru $100",
+      locked_desc: "Această lecție este disponibilă după achiziționarea cursului pentru $399",
       complete_free: "Completează lecțiile gratuite, apoi cumpără acces complet!",
     },
     profile: {
@@ -694,7 +694,7 @@ export const translations = {
       lifetime_access: "Acces pe viață la toate lecțiile",
       instant_activation: "Activare instantanee după plată",
       secure_payment: "Plată 100% sigură",
-      pay_button: "Plătește $100",
+      pay_button: "Plătește $399",
       pay_instant: "Apăsând butonul, vei obține acces instant la toate lecțiile",
     },
     auth: {
@@ -826,7 +826,7 @@ export const translations = {
       lesson: "Lekcja",
       free_lesson: "Darmowa",
       locked_lesson: "Płatna lekcja",
-      locked_desc: "Ta lekcja jest dostępna po zakupie kursu za $100",
+      locked_desc: "Ta lekcja jest dostępna po zakupie kursu za $399",
       complete_free: "Ukończ darmowe lekcje, potem kup pełny dostęp!",
     },
     profile: {
@@ -887,7 +887,7 @@ export const translations = {
       lifetime_access: "Dożywotni dostęp do wszystkich lekcji",
       instant_activation: "Natychmiastowa aktywacja po płatności",
       secure_payment: "100% bezpieczna płatność",
-      pay_button: "Zapłać $100",
+      pay_button: "Zapłać $399",
       pay_instant: "Klikając przycisk, otrzymasz natychmiastowy dostęp do wszystkich lekcji",
     },
     auth: {
