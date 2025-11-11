@@ -21,10 +21,14 @@ export async function POST(request: NextRequest) {
     
     console.log('🔄 Сброс подписки для:', email);
     
-    // Обновляем has_paid на false в Supabase
+    // Обновляем subscription_status на free в Supabase
     const { data, error } = await supabase
       .from('profiles')
-      .update({ has_paid: false })
+      .update({ 
+        subscription_status: 'free',
+        subscription_end_date: null,
+        stripe_customer_id: null
+      })
       .eq('email', email)
       .select();
     

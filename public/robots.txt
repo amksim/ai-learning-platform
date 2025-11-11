@@ -1,0 +1,29 @@
+# Разрешаем всем поисковикам сканировать сайт
+User-agent: *
+Allow: /
+
+# Запрещаем сканировать админ панель
+Disallow: /admin/
+
+# Запрещаем сканировать API routes
+Disallow: /api/
+
+# Запрещаем сканировать приватные страницы
+Disallow: /profile/
+Disallow: /payment/success/
+
+# Указываем sitemap
+Sitemap: https://ai-learning45.netlify.app/sitemap.xml
+
+# Настройки для конкретных ботов
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
