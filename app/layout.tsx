@@ -64,8 +64,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Добавь сюда Google Search Console verification code когда получишь
-    // google: 'your-google-verification-code',
+    google: '-tSZEEecC5Xxa_4fg537DPAZpgoEf0-duKYE8tmIPmk',
   },
 };
 
