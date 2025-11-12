@@ -14,7 +14,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/:path((?!sitemap\\.xml|robots\\.txt).*)',
         headers: [
           // Защита от XSS атак
           {
