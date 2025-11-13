@@ -20,9 +20,9 @@ export default function ProfilePage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [totalLevels, setTotalLevels] = useState(100);
+  const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
   const [isEditingTelegram, setIsEditingTelegram] = useState(false);
-  const [telegramInput, setTelegramInput] = useState(user?.telegram_username || ""); // По умолчанию 100, обновится из API
+  const [telegramInput, setTelegramInput] = useState(user?.telegram_username || "");
 
   // Загружаем реальное количество уроков из API
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function ProfilePage() {
             )}
           </div>
           
-          {/* Status Badge */
+          {/* Status Badge */}
           <div className="mt-4 inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30">
             <Trophy className="h-5 w-5 text-purple-400" />
             <span className="font-bold text-purple-400">
