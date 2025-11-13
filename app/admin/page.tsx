@@ -7,6 +7,7 @@ import { Plus, Trash2, Edit, Save, X, ArrowUp, ArrowDown, Sparkles, Code, Lock, 
 import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
 import { useAuth } from "@/contexts/AuthContext";
 import { autoTranslateCourseContent } from "@/lib/translateContent";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 // Available icons
 const iconOptions = [
@@ -83,6 +84,7 @@ export default function AdminPage() {
           practiceDescription: course.practice_description,
           isFree: course.is_free || false,
           translations: course.translations || {},
+          images: course.images || [],
           displayOrder: course.display_order || course.id
         }));
         
@@ -200,6 +202,7 @@ export default function AdminPage() {
         practice: editForm.practice || false,
         practice_description: editForm.practiceDescription,
         is_free: editForm.isFree || false,
+        images: editForm.images || [],
         translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
       };
       
@@ -276,6 +279,7 @@ export default function AdminPage() {
         practice: editForm.practice || false,
         practice_description: editForm.practiceDescription || "",
         is_free: editForm.isFree || false,
+        images: editForm.images || [],
         display_order: displayOrder,
         translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
       };
@@ -741,6 +745,14 @@ export default function AdminPage() {
                     Бесплатные уроки доступны без регистрации и оплаты. 
                     Ты решаешь сколько сделать бесплатных.
                   </p>
+                </div>
+
+                {/* Images */}
+                <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-500/5">
+                  <ImageUploader
+                    images={editForm.images || []}
+                    onChange={(images) => setEditForm({ ...editForm, images })}
+                  />
                 </div>
 
                 {/* Action Buttons */}

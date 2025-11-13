@@ -1,4 +1,5 @@
 import { Sparkles, Code, Smartphone, Gamepad2, Layers, FileCode, Palette, Zap, Boxes, Globe, Settings, Terminal, GitBranch, Database, Lock, CreditCard, TrendingUp, Layout, Monitor, Check } from "lucide-react";
+import { LessonImageData } from "@/components/LessonImage";
 
 export interface Level {
   id: number;
@@ -13,6 +14,7 @@ export interface Level {
   practiceDescription?: string; // Описание практики
   isFree?: boolean; // Бесплатный урок или платный
   translations?: Record<string, { title: string; description: string }>; // Auto-translated content
+  images?: LessonImageData[]; // Картинки урока
 }
 
 // 🌊 ПОЛНЫЙ КУРС "СОЗДАВАЙ С AI" - НАЧАЛЬНАЯ СТРУКТУРА

@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { getTranslatedContent } from "@/lib/translateContent";
+import LessonImage from "@/components/LessonImage";
 
 // Lesson content is now loaded from localStorage
 // Default lessons are managed in admin panel
@@ -349,6 +350,15 @@ export default function LessonPage() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+                
+                {/* Lesson Images */}
+                {currentLevel?.images && currentLevel.images.length > 0 && (
+                  <div className="mt-6">
+                    {currentLevel.images.map((image: any, imgIndex: number) => (
+                      <LessonImage key={imgIndex} image={image} />
+                    ))}
                   </div>
                 )}
               </CardContent>
