@@ -9,6 +9,7 @@ interface User {
   email: string;
   full_name: string | null;
   progress: number;
+  completedLessons: number[]; // Массив ID пройденных уроков
   joinedDate: string;
   hasPaid: boolean;
   subscription_status: 'free' | 'premium';
@@ -52,11 +53,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         if (profile) {
+          // Загружаем прогресс из базы
+          const { data: progressData } = await supabase
+            .from('user_progress')
+            .select('*')
+            .eq('user_id', authUser.id)
+            .eq('completed', true);
+
+          const completedCount = progressData?.length || 0;
+          const completedLessonIds = progressData?.map(p => p.lesson_index) || [];
+
           setUser({
             id: authUser.id,
             email: authUser.email!,
             full_name: profile.full_name || 'User',
-            progress: 0,
+            progress: completedCount,
+            completedLessons: completedLessonIds,
             joinedDate: profile.created_at || new Date().toISOString(),
             hasPaid: profile.subscription_status === 'premium',
             subscription_status: profile.subscription_status || 'free',
@@ -210,6 +222,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function updateProgress(courseSlug: string, lessonIndex: number, codeSubmission?: string) {
     if (!user) return;
 
+    // Проверяем - уже пройден?
+    if (user.completedLessons.includes(lessonIndex)) {
+      console.log('✅ Урок уже пройден:', lessonIndex);
+      return;
+    }
+
+    console.log('💾 Сохраняем прогресс:', lessonIndex);
+
+    // Сохраняем в базу
     await supabase
       .from('user_progress')
       .upsert({
@@ -218,8 +239,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lesson_index: lessonIndex,
         completed: true,
         code_submission: codeSubmission || null,
-        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
       });
+
+    // Обновляем локально
+    setUser(prev => prev ? {
+      ...prev,
+      progress: prev.progress + 1,
+      completedLessons: [...prev.completedLessons, lessonIndex]
+    } : null);
+
+    console.log('✅ Прогресс сохранен!');
   }
 
   // Завершение покупки

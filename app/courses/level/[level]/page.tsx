@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, ArrowRight, ArrowLeft, BookOpen } from "lucide-react";
+import { CheckCircle, ArrowRight, ArrowLeft, BookOpen, Clock } from "lucide-react";
 import { Level } from "@/lib/courseLevels";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,6 +110,8 @@ export default function LessonPage() {
   const [currentLevel, setCurrentLevel] = useState<any>(null);
   const [allLevels, setAllLevels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(7); // 7 секунд задержка
+  const [canProceed, setCanProceed] = useState(false);
   
   const levelId = parseInt(params.level as string);
 
@@ -189,6 +191,18 @@ export default function LessonPage() {
     
     loadCourses();
   }, [user, router, levelId]);
+
+  // Таймер обратного отсчета (7 секунд)
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanProceed(true);
+    }
+  }, [timeLeft]);
 
   // Calculate lesson navigation
   const nextLessonId = levelId + 1;
@@ -436,10 +450,20 @@ export default function LessonPage() {
                     }
                     router.push(`/courses/level/${nextLessonId}`);
                   }}
-                  className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  disabled={!canProceed}
+                  className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Следующий урок
-                  <ArrowRight className="h-4 w-4" />
+                  {!canProceed ? (
+                    <>
+                      <Clock className="h-4 w-4 animate-pulse" />
+                      Подождите {timeLeft}с
+                    </>
+                  ) : (
+                    <>
+                      Следующий урок
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               );
             })()

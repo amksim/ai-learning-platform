@@ -160,7 +160,7 @@ export default function CoursesPage() {
 
   const isLevelCompleted = (levelId: number) => {
     if (!user) return false;
-    return levelId <= user.progress;
+    return user.completedLessons.includes(levelId);
   };
 
   return (
