@@ -147,25 +147,41 @@ export default function CoursesPage() {
   };
 
   const isLevelUnlocked = (levelId: number, isFree?: boolean) => {
-    // Бесплатные уроки ВСЕГДА показываются открытыми (визуально)
-    if (isFree) return true;
+    // НОВАЯ ЛОГИКА:
     
-    // Для незалогиненных - платные уроки заблокированы
-    if (!user) return false;
+    // 1. Для НЕ залогиненных: только урок 1 открыт
+    if (!user) {
+      return levelId === 1;
+    }
     
-    // Для залогиненных: проверяем последовательность прохождения
-    // Урок доступен если:
-    // 1. Это первый урок (levelId === 1)
-    // 2. ИЛИ предыдущий урок пройден
+    // 2. Для залогиненных БЕЗ подписки:
+    //    - Уроки 1-2 (бесплатные) открыты, но проходить по порядку
+    //    - Урок 3+ закрыты (требуют оплату)
+    if (!user.hasPaid) {
+      // Урок 1 всегда открыт
+      if (levelId === 1) return true;
+      
+      // Урок 2 открыт только если урок 1 пройден
+      if (isFree && levelId === 2) {
+        return user.completedLessons.includes(1);
+      }
+      
+      // Остальные бесплатные уроки (если есть) - по порядку
+      if (isFree && levelId > 2) {
+        return user.completedLessons.includes(levelId - 1);
+      }
+      
+      // Платные уроки заблокированы
+      return false;
+    }
+    
+    // 3. Для залогиненных С подпиской:
+    //    - Все уроки открыты визуально
+    //    - Но проходить можно только по порядку
     if (levelId === 1) return true;
     
-    const previousLessonCompleted = user.completedLessons.includes(levelId - 1);
-    
-    // Платные уроки требуют оплаты + последовательное прохождение
-    if (user.hasPaid && previousLessonCompleted) return true;
-    
-    // Если не оплатил - платные уроки заблокированы
-    return false;
+    // Следующий урок открыт только если предыдущий пройден
+    return user.completedLessons.includes(levelId - 1);
   };
 
   const isLevelCompleted = (levelId: number) => {
@@ -291,35 +307,35 @@ export default function CoursesPage() {
                 <div className={`flex ${isLeft ? 'justify-start' : 'justify-end'}`}>
                   <div className="relative">
                     <Link 
-                      href={unlocked ? `/courses/level/${level.id}` : "#"}
+                      href={`/courses/level/${level.id}`}
                       onClick={(e) => {
-                        // Если не залогинен - перенаправляем на логин
+                        // НОВАЯ ЛОГИКА КЛИКА:
+                        
+                        // 1. Если не залогинен → редирект на логин (для ВСЕХ уроков)
                         if (!user) {
                           e.preventDefault();
+                          localStorage.setItem('redirectAfterLogin', `/courses/level/${level.id}`);
                           router.push("/login");
                           return;
                         }
                         
-                        // Проверяем последовательность для бесплатных уроков
-                        if (level.isFree && level.id > 1) {
-                          const previousCompleted = user.completedLessons.includes(level.id - 1);
-                          if (!previousCompleted) {
-                            e.preventDefault();
-                            alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
+                        // 2. Если урок заблокирован - не даем кликнуть
+                        if (!unlocked) {
+                          e.preventDefault();
+                          
+                          // Если платный урок и не оплатил
+                          if (!level.isFree && !user.hasPaid) {
+                            router.push("/payment");
                             return;
                           }
+                          
+                          // Если просто не пройден предыдущий урок
+                          alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
+                          return;
                         }
                         
-                        // Проверяем доступ к платным урокам
-                        if (!level.isFree && !unlocked) {
-                          e.preventDefault();
-                          if (!user.hasPaid) {
-                            router.push("/payment");
-                          } else {
-                            alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
-                          }
-                        }
-                      }}
+                        // 3. Урок разблокирован - разрешаем переход
+                      }}  
                     >
                       {/* Круг */}
                       <div className={`relative flex h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 items-center justify-center rounded-full border-4 transition-all duration-300 glass ${

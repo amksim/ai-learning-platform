@@ -175,6 +175,17 @@ export default function LessonPage() {
             }
             console.log('✅ Free lesson - access granted');
             setLoading(false);
+            
+            // КРИТИЧНО: Автоматически сохраняем прогресс при загрузке урока
+            if (user && !user.completedLessons.includes(levelId)) {
+              console.log('📝 Автоматически сохраняем прогресс урока:', levelId);
+              try {
+                await updateProgress("main-course", levelId);
+                console.log('✅ Прогресс автоматически сохранен!');
+              } catch (error) {
+                console.error('❌ Ошибка автосохранения прогресса:', error);
+              }
+            }
             return;
           }
           
@@ -195,6 +206,18 @@ export default function LessonPage() {
           
           console.log('✅ Paid lesson - user has access');
           setLoading(false);
+          
+          // КРИТИЧНО: Автоматически сохраняем прогресс при загрузке урока
+          // Это делает урок пройденным сразу при просмотре
+          if (user && !user.completedLessons.includes(levelId)) {
+            console.log('📝 Автоматически сохраняем прогресс урока:', levelId);
+            try {
+              await updateProgress("main-course", levelId);
+              console.log('✅ Прогресс автоматически сохранен!');
+            } catch (error) {
+              console.error('❌ Ошибка автосохранения прогресса:', error);
+            }
+          }
         }
       } catch (error) {
         console.error('Error loading courses:', error);
@@ -203,7 +226,7 @@ export default function LessonPage() {
     };
     
     loadCourses();
-  }, [user, router, levelId]);
+  }, [user, router, levelId, updateProgress]);
 
   // Calculate lesson navigation
   const nextLessonId = levelId + 1;
@@ -447,25 +470,9 @@ export default function LessonPage() {
               // Next lesson is available - show next button
               return (
                 <Button 
-                  onClick={async () => {
-                    console.log('🎯 Кнопка "Следующий урок" нажата');
-                    console.log('📊 User:', user?.email, 'LevelId:', levelId);
-                    
-                    if (user) {
-                      try {
-                        console.log('💾 Вызываем updateProgress...');
-                        await updateProgress("main-course", levelId);
-                        console.log('✅ updateProgress завершен успешно');
-                      } catch (error) {
-                        console.error('❌ Ошибка при сохранении прогресса:', error);
-                        alert('Ошибка сохранения прогресса: ' + error);
-                        return;
-                      }
-                    } else {
-                      console.warn('⚠️ Пользователь не залогинен, прогресс НЕ сохраняется');
-                    }
-                    
-                    console.log('➡️ Переход на урок:', nextLessonId);
+                  onClick={() => {
+                    console.log('➡️ Переход к следующему уроку:', nextLessonId);
+                    // Прогресс уже сохранен автоматически при загрузке урока
                     router.push(`/courses/level/${nextLessonId}`);
                   }}
                   className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"

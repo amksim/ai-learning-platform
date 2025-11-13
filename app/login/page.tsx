@@ -137,8 +137,14 @@ export default function LoginPage() {
         );
       }
 
-      // Перенаправление
-      window.location.href = '/courses';
+      // Перенаправление - проверяем есть ли сохраненный URL
+      const redirectUrl = localStorage.getItem('redirectAfterLogin');
+      if (redirectUrl) {
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectUrl;
+      } else {
+        window.location.href = '/courses';
+      }
     } catch (error: any) {
       console.error('Auth error:', error);
       
