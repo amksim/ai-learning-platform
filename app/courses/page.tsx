@@ -147,14 +147,22 @@ export default function CoursesPage() {
   };
 
   const isLevelUnlocked = (levelId: number, isFree?: boolean) => {
-    // ВСЕ уроки требуют логин (для сохранения прогресса)
-    if (!user) return false;
-    
-    // Бесплатные уроки доступны всем залогиненным
+    // Бесплатные уроки ВСЕГДА показываются открытыми (визуально)
     if (isFree) return true;
     
-    // Платные уроки требуют оплаты
-    if (user.hasPaid) return true;
+    // Для незалогиненных - платные уроки заблокированы
+    if (!user) return false;
+    
+    // Для залогиненных: проверяем последовательность прохождения
+    // Урок доступен если:
+    // 1. Это первый урок (levelId === 1)
+    // 2. ИЛИ предыдущий урок пройден
+    if (levelId === 1) return true;
+    
+    const previousLessonCompleted = user.completedLessons.includes(levelId - 1);
+    
+    // Платные уроки требуют оплаты + последовательное прохождение
+    if (user.hasPaid && previousLessonCompleted) return true;
     
     // Если не оплатил - платные уроки заблокированы
     return false;
@@ -285,9 +293,31 @@ export default function CoursesPage() {
                     <Link 
                       href={unlocked ? `/courses/level/${level.id}` : "#"}
                       onClick={(e) => {
+                        // Если не залогинен - перенаправляем на логин
                         if (!user) {
                           e.preventDefault();
                           router.push("/login");
+                          return;
+                        }
+                        
+                        // Проверяем последовательность для бесплатных уроков
+                        if (level.isFree && level.id > 1) {
+                          const previousCompleted = user.completedLessons.includes(level.id - 1);
+                          if (!previousCompleted) {
+                            e.preventDefault();
+                            alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
+                            return;
+                          }
+                        }
+                        
+                        // Проверяем доступ к платным урокам
+                        if (!level.isFree && !unlocked) {
+                          e.preventDefault();
+                          if (!user.hasPaid) {
+                            router.push("/payment");
+                          } else {
+                            alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
+                          }
                         }
                       }}
                     >

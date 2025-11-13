@@ -166,17 +166,32 @@ export default function LessonPage() {
             return;
           }
           
-          // Free lessons доступны всем залогиненным
+          // Free lessons доступны залогиненным, но по порядку!
           if (level?.isFree) {
+            // Проверяем последовательность: если это не первый урок, проверяем прохождение предыдущего
+            if (levelId > 1 && !user.completedLessons.includes(levelId - 1)) {
+              console.log('❌ Previous lesson not completed - redirecting to /courses');
+              alert(`⚠️ Сначала пройдите урок ${levelId - 1}!`);
+              router.push("/courses");
+              return;
+            }
             console.log('✅ Free lesson - access granted');
             setLoading(false);
             return;
           }
           
-          // Paid lessons require payment
+          // Paid lessons require payment + sequential completion
           if (!user.hasPaid) {
             console.log('❌ Paid lesson - user has not paid, redirecting to /payment');
             router.push("/payment");
+            return;
+          }
+          
+          // Проверяем последовательность для платных уроков
+          if (levelId > 1 && !user.completedLessons.includes(levelId - 1)) {
+            console.log('❌ Previous lesson not completed - redirecting to /courses');
+            alert(`⚠️ Сначала пройдите урок ${levelId - 1}!`);
+            router.push("/courses");
             return;
           }
           
