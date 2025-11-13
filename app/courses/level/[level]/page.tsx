@@ -448,10 +448,24 @@ export default function LessonPage() {
               return (
                 <Button 
                   onClick={async () => {
+                    console.log('🎯 Кнопка "Следующий урок" нажата');
+                    console.log('📊 User:', user?.email, 'LevelId:', levelId);
+                    
                     if (user) {
-                      await updateProgress("main-course", levelId);
-                      console.log('✅ Прогресс сохранен, переходим дальше');
+                      try {
+                        console.log('💾 Вызываем updateProgress...');
+                        await updateProgress("main-course", levelId);
+                        console.log('✅ updateProgress завершен успешно');
+                      } catch (error) {
+                        console.error('❌ Ошибка при сохранении прогресса:', error);
+                        alert('Ошибка сохранения прогресса: ' + error);
+                        return;
+                      }
+                    } else {
+                      console.warn('⚠️ Пользователь не залогинен, прогресс НЕ сохраняется');
                     }
+                    
+                    console.log('➡️ Переход на урок:', nextLessonId);
                     router.push(`/courses/level/${nextLessonId}`);
                   }}
                   className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"

@@ -235,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('💾 Сохраняем прогресс:', lessonIndex);
 
     // Сохраняем в базу
-    await supabase
+    const { data, error } = await supabase
       .from('user_progress')
       .upsert({
         user_id: user.id,
@@ -244,7 +244,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         completed: true,
         code_submission: codeSubmission || null,
         completed_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id,lesson_index'
       });
+
+    if (error) {
+      console.error('❌ Ошибка сохранения прогресса:', error);
+      throw error;
+    }
+
+    console.log('✅ Прогресс сохранен в базу:', data);
 
     // Обновляем локально
     setUser(prev => prev ? {
@@ -253,7 +262,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       completedLessons: [...prev.completedLessons, lessonIndex]
     } : null);
 
-    console.log('✅ Прогресс сохранен!');
+    console.log('✅ Прогресс обновлен локально!');
   }
 
   // Обновление профиля
