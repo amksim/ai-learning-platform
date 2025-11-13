@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [telegramUsername, setTelegramUsername] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +44,7 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        await signup(email, password, name);
+        await signup(email, password, name, telegramUsername || undefined);
         toast.success(`Добро пожаловать, ${name}!`);
       } else {
         await login(email, password);
@@ -111,20 +112,38 @@ export default function LoginPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isSignup && (
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium">
-                      Имя
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ваше имя"
-                      required={isSignup}
-                      className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-sm font-medium">
+                        Имя
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Ваше имя"
+                        required={isSignup}
+                        className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="telegram" className="text-sm font-medium">
+                        Telegram (необязательно)
+                      </label>
+                      <input
+                        id="telegram"
+                        type="text"
+                        value={telegramUsername}
+                        onChange={(e) => setTelegramUsername(e.target.value.replace('@', ''))}
+                        placeholder="username (без @)"
+                        className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Для связи и поддержки
+                      </p>
+                    </div>
+                  </>
                 )}
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">
@@ -189,6 +208,7 @@ export default function LoginPage() {
                   onClick={() => {
                     setIsSignup(!isSignup);
                     setName("");
+                    setTelegramUsername("");
                     setConfirmPassword("");
                   }}
                 >

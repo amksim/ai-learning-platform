@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Trophy, Target, ArrowRight, Star, Send, Award, Zap, TrendingUp, CheckCircle, Flame, Book } from "lucide-react";
+import { Calendar, Trophy, Target, ArrowRight, Star, Send, Award, Zap, TrendingUp, CheckCircle, Flame, Book, Edit2, Check, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReviews } from "@/contexts/ReviewsContext";
@@ -13,14 +13,16 @@ import { Button } from "@/components/ui/Button";
 export default function ProfilePage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { addReview, hasUserReviewed } = useReviews();
   
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
+  const [totalLevels, setTotalLevels] = useState(100);
+  const [isEditingTelegram, setIsEditingTelegram] = useState(false);
+  const [telegramInput, setTelegramInput] = useState(user?.telegram_username || ""); // По умолчанию 100, обновится из API
 
   // Загружаем реальное количество уроков из API
   useEffect(() => {
@@ -102,7 +104,73 @@ export default function ProfilePage() {
           </h1>
           <p className="text-gray-400">{user.email}</p>
           
-          {/* Status Badge */}
+          {/* Telegram Username */}
+          <div className="mt-2 flex items-center justify-center gap-2">
+            {!isEditingTelegram ? (
+              <>
+                {user.telegram_username ? (
+                  <p className="text-purple-400 flex items-center gap-2">
+                    <Send className="h-4 w-4" />
+                    @{user.telegram_username}
+                    <button
+                      onClick={() => {
+                        setIsEditingTelegram(true);
+                        setTelegramInput(user.telegram_username || "");
+                      }}
+                      className="text-gray-400 hover:text-purple-400 transition-colors"
+                    >
+                      <Edit2 className="h-3 w-3" />
+                    </button>
+                  </p>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingTelegram(true)}
+                    className="text-sm text-gray-400 hover:text-purple-400 transition-colors flex items-center gap-1"
+                  >
+                    <Send className="h-3 w-3" />
+                    Добавить Telegram
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-purple-400">@</span>
+                <input
+                  type="text"
+                  value={telegramInput}
+                  onChange={(e) => setTelegramInput(e.target.value.replace('@', ''))}
+                  placeholder="username"
+                  className="w-32 px-2 py-1 text-sm rounded border border-purple-500/30 bg-gray-900/50 text-white focus:outline-none focus:border-purple-500"
+                  autoFocus
+                />
+                <button
+                  onClick={async () => {
+                    try {
+                      await updateProfile({ telegram_username: telegramInput || undefined });
+                      setIsEditingTelegram(false);
+                    } catch (error) {
+                      console.error('Error updating telegram:', error);
+                      alert('Ошибка обновления Telegram');
+                    }
+                  }}
+                  className="text-green-400 hover:text-green-300 transition-colors"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingTelegram(false);
+                    setTelegramInput(user.telegram_username || "");
+                  }}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Status Badge */
           <div className="mt-4 inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30">
             <Trophy className="h-5 w-5 text-purple-400" />
             <span className="font-bold text-purple-400">

@@ -8,6 +8,7 @@ interface User {
   id: string;
   email: string;
   full_name: string | null;
+  telegram_username: string | null;
   progress: number;
   completedLessons: number[]; // Массив ID пройденных уроков
   joinedDate: string;
@@ -20,11 +21,12 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, telegramUsername?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   sendMagicLink: (email: string) => Promise<void>;
   updateProgress: (courseSlug: string, lessonIndex: number, codeSubmission?: string) => Promise<void>;
+  updateProfile: (updates: { full_name?: string; telegram_username?: string }) => Promise<void>;
   completePurchase: (customerId: string, type: 'monthly' | 'yearly') => Promise<void>;
 }
 
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: authUser.id,
             email: authUser.email!,
             full_name: profile.full_name || 'User',
+            telegram_username: profile.telegram_username || null,
             progress: completedCount,
             completedLessons: completedLessonIds,
             joinedDate: profile.created_at || new Date().toISOString(),
@@ -85,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Регистрация
-  async function signup(email: string, password: string, name: string) {
+  async function signup(email: string, password: string, name: string, telegramUsername?: string) {
     console.log('📝 Регистрация:', email);
 
     try {
@@ -139,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: authData.user.id,
           email: email,
           full_name: name,
+          telegram_username: telegramUsername || null,
           subscription_status: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -252,6 +256,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('✅ Прогресс сохранен!');
   }
 
+  // Обновление профиля
+  async function updateProfile(updates: { full_name?: string; telegram_username?: string }) {
+    if (!user) return;
+
+    console.log('📝 Обновляем профиль:', updates);
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('❌ Error updating profile:', error);
+      throw error;
+    }
+
+    // Обновляем локально
+    setUser(prev => prev ? { ...prev, ...updates } : null);
+    console.log('✅ Профиль обновлен!');
+  }
+
   // Завершение покупки
   async function completePurchase(customerId: string, type: 'monthly' | 'yearly') {
     if (!user) return;
@@ -282,6 +310,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         sendMagicLink,
         updateProgress,
+        updateProfile,
         completePurchase,
       }}
     >

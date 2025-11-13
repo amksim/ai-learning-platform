@@ -6,6 +6,7 @@ CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
+  telegram_username TEXT,
   avatar_url TEXT,
   subscription_status TEXT DEFAULT 'free' CHECK (subscription_status IN ('free', 'premium')),
   subscription_end_date TIMESTAMPTZ,
