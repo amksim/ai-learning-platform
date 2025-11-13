@@ -88,10 +88,9 @@ export default function AdminPage() {
           displayOrder: course.display_order || course.id
         }));
         
-        // СОРТИРОВКА: Бесплатные наверху, потом платные
+        // СОРТИРОВКА: По display_order (порядок который ты выбрал)
+        // Бесплатные и платные могут быть в ЛЮБОМ порядке
         const sortedCourses = formattedCourses.sort((a: any, b: any) => {
-          if (a.isFree && !b.isFree) return -1;
-          if (!a.isFree && b.isFree) return 1;
           return a.displayOrder - b.displayOrder;
         });
         

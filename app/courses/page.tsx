@@ -76,16 +76,13 @@ export default function CoursesPage() {
             displayOrder: course.display_order || course.id
           }));
           
-          // СОРТИРОВКА: Бесплатные ВСЕГДА наверху, потом платные
+          // СОРТИРОВКА: По display_order (порядок который выбрал админ)
+          // Бесплатные и платные могут быть в ЛЮБОМ порядке
           const sortedCourses = formattedCourses.sort((a: any, b: any) => {
-            // Если один бесплатный, а другой платный - бесплатный наверх
-            if (a.isFree && !b.isFree) return -1;
-            if (!a.isFree && b.isFree) return 1;
-            // Если оба одинаковые (оба бесплатные или оба платные) - по display_order
             return a.displayOrder - b.displayOrder;
           });
           
-          console.log('📊 Sorted courses: Free first, then paid');
+          console.log('📊 Sorted courses by display order');
           
           // ВАЖНО: Логируем бесплатные уроки для отладки
           const freeLessons = sortedCourses.filter((c: any) => c.isFree);
