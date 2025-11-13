@@ -15,6 +15,7 @@ export interface Level {
   isFree?: boolean; // Бесплатный урок или платный
   translations?: Record<string, { title: string; description: string }>; // Auto-translated content
   images?: LessonImageData[]; // Картинки урока
+  displayOrder?: number; // Порядок отображения
 }
 
 // 🌊 ПОЛНЫЙ КУРС "СОЗДАВАЙ С AI" - НАЧАЛЬНАЯ СТРУКТУРА

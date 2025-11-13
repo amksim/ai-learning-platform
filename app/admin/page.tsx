@@ -249,7 +249,8 @@ export default function AdminPage() {
       practice: false,
       practiceDescription: "",
       isFree: previousLesson?.isFree || false,
-      blockName: previousLesson?.blockName || "" // Copy blockName to keep in same category
+      blockName: previousLesson?.blockName || "", // Copy blockName to keep in same category
+      images: []
     });
   };
 
@@ -262,9 +263,28 @@ export default function AdminPage() {
     try {
       // Определяем display_order
       let displayOrder = levels.length + 1;
+      
       if (insertAfter !== null) {
-        const insertIndex = levels.findIndex(l => l.id === insertAfter);
-        displayOrder = insertIndex + 2; // +2 потому что вставляем ПОСЛЕ
+        // Находим урок после которого вставляем
+        const afterLesson = levels.find(l => l.id === insertAfter);
+        if (afterLesson && afterLesson.displayOrder) {
+          displayOrder = afterLesson.displayOrder + 1;
+          
+          // ВАЖНО! Сдвигаем все последующие уроки на +1
+          // Это предотвращает конфликты display_order
+          const lessonsToUpdate = levels.filter(l => (l.displayOrder ?? 0) >= displayOrder);
+          
+          for (const lesson of lessonsToUpdate) {
+            await fetch('/api/courses', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: lesson.id,
+                display_order: (lesson.displayOrder ?? 0) + 1
+              })
+            });
+          }
+        }
       }
       
       const newCourse = {
@@ -494,47 +514,14 @@ export default function AdminPage() {
                   icon: 'Sparkles',
                   practice: false,
                   practiceDescription: "",
-                  isFree: false // По умолчанию платный
+                  isFree: false, // По умолчанию платный, но можно изменить галочкой
+                  images: []
                 });
               }}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all"
             >
               <Plus className="h-5 w-5" />
               Добавить урок
-            </button>
-            <button
-              onClick={() => {
-                setShowAddForm(true);
-                setInsertAfter(null);
-                setEditForm({
-                  title: "",
-                  description: "",
-                  difficulty: "beginner",
-                  topics: [],
-                  category: "foundation",
-                  icon: 'Sparkles',
-                  practice: false,
-                  practiceDescription: "",
-                  isFree: true // Бесплатный урок
-                });
-              }}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all"
-            >
-              <Sparkles className="h-5 w-5" />
-              Добавить бесплатный
-            </button>
-            <button
-              onClick={() => {
-                if (confirm("Вы уверены? Это удалит ВСЕ уроки!")) {
-                  localStorage.removeItem("courseLevels");
-                  setLevels([]);
-                  window.dispatchEvent(new CustomEvent('courseLevelsUpdated', { detail: [] }));
-                }
-              }}
-              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all"
-            >
-              <Trash2 className="h-5 w-5" />
-              Очистить все
             </button>
           </div>
         </div>
