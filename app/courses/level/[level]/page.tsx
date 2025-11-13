@@ -159,21 +159,21 @@ export default function LessonPage() {
             userHasPaid: user?.hasPaid
           });
           
-          // Free lessons don't require login
+          // ВАЖНО: Теперь ВСЕ уроки требуют логин (для сохранения прогресса)
+          if (!user) {
+            console.log('❌ User not logged in - redirecting to /login');
+            router.push("/login");
+            return;
+          }
+          
+          // Free lessons доступны всем залогиненным
           if (level?.isFree) {
             console.log('✅ Free lesson - access granted');
             setLoading(false);
             return;
           }
           
-          // Paid lessons require login and payment
-          if (!user) {
-            console.log('❌ Paid lesson - user not logged in, redirecting to /login');
-            router.push("/login");
-            return;
-          }
-          
-          // Check if user has paid for the course
+          // Paid lessons require payment
           if (!user.hasPaid) {
             console.log('❌ Paid lesson - user has not paid, redirecting to /payment');
             router.push("/payment");
@@ -402,9 +402,10 @@ export default function LessonPage() {
                   <p className="text-sm text-gray-300">Вы завершили все уроки</p>
                 </div>
                 <Button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (user) {
-                      updateProgress("main-course", levelId);
+                      await updateProgress("main-course", levelId);
+                      console.log('✅ Последний урок завершен, прогресс сохранен');
                     }
                     setTimeout(() => {
                       router.push("/profile");
@@ -427,9 +428,10 @@ export default function LessonPage() {
                 // Next lesson is paid but user hasn't paid - show payment button
                 return (
                   <Button 
-                    onClick={() => {
+                    onClick={async () => {
                       if (user) {
-                        updateProgress("main-course", levelId);
+                        await updateProgress("main-course", levelId);
+                        console.log('✅ Бесплатный урок завершен, переход на оплату');
                       }
                       router.push("/payment");
                     }}
@@ -444,9 +446,10 @@ export default function LessonPage() {
               // Next lesson is available - show next button
               return (
                 <Button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (user) {
-                      updateProgress("main-course", levelId);
+                      await updateProgress("main-course", levelId);
+                      console.log('✅ Прогресс сохранен, переходим дальше');
                     }
                     router.push(`/courses/level/${nextLessonId}`);
                   }}

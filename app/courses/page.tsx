@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Lock, Check, Star, TrendingUp, Code, Sparkles, Zap, Trophy, Target, Rocket, Shield, Heart, Users, Award, CheckCircle, Settings, Terminal, Database } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +32,7 @@ const iconMap: Record<string, any> = {
 };
 
 export default function CoursesPage() {
+  const router = useRouter();
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { translate } = useTranslate();
@@ -145,13 +147,13 @@ export default function CoursesPage() {
   };
 
   const isLevelUnlocked = (levelId: number, isFree?: boolean) => {
-    // Бесплатные уроки всегда доступны
-    if (isFree) return true;
-    
-    // Платные уроки требуют регистрации
+    // ВСЕ уроки требуют логин (для сохранения прогресса)
     if (!user) return false;
     
-    // Если пользователь оплатил - ВСЕ платные уроки доступны
+    // Бесплатные уроки доступны всем залогиненным
+    if (isFree) return true;
+    
+    // Платные уроки требуют оплаты
     if (user.hasPaid) return true;
     
     // Если не оплатил - платные уроки заблокированы
@@ -280,7 +282,15 @@ export default function CoursesPage() {
                 {/* Контейнер уровня */}
                 <div className={`flex ${isLeft ? 'justify-start' : 'justify-end'}`}>
                   <div className="relative">
-                    <Link href={unlocked ? `/courses/level/${level.id}` : "#"}>
+                    <Link 
+                      href={unlocked ? `/courses/level/${level.id}` : "#"}
+                      onClick={(e) => {
+                        if (!user) {
+                          e.preventDefault();
+                          router.push("/login");
+                        }
+                      }}
+                    >
                       {/* Круг */}
                       <div className={`relative flex h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 items-center justify-center rounded-full border-4 transition-all duration-300 glass ${
                         completed 
