@@ -251,7 +251,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_progress')
         .update({
           completed: true,
-          code_submission: codeSubmission || null,
           completed_at: new Date().toISOString(),
         })
         .eq('user_id', user.id)
@@ -267,7 +266,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           course_slug: courseSlug,
           lesson_index: lessonIndex,
           completed: true,
-          code_submission: codeSubmission || null,
           completed_at: new Date().toISOString(),
         });
       error = result.error;
