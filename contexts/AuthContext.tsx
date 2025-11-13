@@ -255,14 +255,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log('✅ Прогресс сохранен в базу:', data);
 
-    // Обновляем локально
-    setUser(prev => prev ? {
-      ...prev,
-      progress: prev.progress + 1,
-      completedLessons: [...prev.completedLessons, lessonIndex]
-    } : null);
+    // КРИТИЧНО: Перезагружаем данные из базы для синхронизации
+    await checkUser();
 
-    console.log('✅ Прогресс обновлен локально!');
+    console.log('✅ Прогресс обновлен и синхронизирован с базой!');
   }
 
   // Обновление профиля
@@ -284,9 +280,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
 
-    // Обновляем локально
-    setUser(prev => prev ? { ...prev, ...updates } : null);
-    console.log('✅ Профиль обновлен!');
+    console.log('✅ Профиль обновлен в базе!');
+
+    // КРИТИЧНО: Перезагружаем данные из базы для синхронизации
+    await checkUser();
+
+    console.log('✅ Профиль синхронизирован!');
   }
 
   // Завершение покупки
@@ -296,7 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + (type === 'yearly' ? 12 : 1));
 
-    await supabase
+    const { error } = await supabase
       .from('profiles')
       .update({
         subscription_status: 'premium',
@@ -306,7 +305,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .eq('id', user.id);
 
+    if (error) {
+      console.error('❌ Error updating subscription:', error);
+      throw error;
+    }
+
+    console.log('✅ Подписка обновлена в базе!');
+
+    // КРИТИЧНО: Перезагружаем данные из базы для синхронизации
     await checkUser();
+
+    console.log('✅ Подписка синхронизирована!');
   }
 
   return (
