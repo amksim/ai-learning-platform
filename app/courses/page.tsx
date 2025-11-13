@@ -420,10 +420,21 @@ export default function CoursesPage() {
                     <div className={`mt-4 ${isLeft ? 'text-left' : 'text-right'} max-w-[120px] sm:max-w-[140px] md:max-w-[160px]`}>
                       <p className="text-xs text-gray-400 mb-1">{t.courses.lesson} {index + 1}</p>
                       <p className="text-xs sm:text-sm font-bold line-clamp-2">{getTranslated(level).title}</p>
-                      {completed && (
+                      
+                      {/* Статус урока */}
+                      {completed ? (
                         <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 border border-green-400/50">
                           <Check className="h-3 w-3 text-green-400" />
-                          <span className="text-xs font-bold text-green-400">Пройден</span>
+                          <span className="text-xs font-bold text-green-400">✅ Пройден</span>
+                        </div>
+                      ) : unlocked ? (
+                        <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/20 border border-orange-400/50">
+                          <span className="text-xs font-bold text-orange-400">⏳ Не пройден</span>
+                        </div>
+                      ) : (
+                        <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-500/20 border border-gray-400/50">
+                          <Lock className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs font-bold text-gray-400">🔒 Закрыто</span>
                         </div>
                       )}
                     </div>

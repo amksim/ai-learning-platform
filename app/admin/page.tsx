@@ -801,8 +801,27 @@ export default function AdminPage() {
           {levels.map((level, index) => {
             const LevelIcon = iconOptions.find(opt => opt.name === level.icon)?.component || Sparkles;
             
+            // Показываем разделитель между бесплатными и платными
+            const prevLevel = index > 0 ? levels[index - 1] : null;
+            const showDivider = prevLevel && prevLevel.isFree && !level.isFree;
+            
             return (
               <div key={level.id}>
+                {/* Разделитель между бесплатными и платными */}
+                {showDivider && (
+                  <div className="mb-8 mt-8">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                      <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass border-2 border-blue-500 premium-shadow">
+                        <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                          💎 Премиум уроки
+                        </span>
+                      </div>
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                    </div>
+                  </div>
+                )}
+                
                 {level.blockName && (
                   <div className="mb-4 mt-8">
                     <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass border-2 border-purple-400 premium-shadow">
