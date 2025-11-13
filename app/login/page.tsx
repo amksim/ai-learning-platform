@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail } from "lucide-react";
+import { Mail, AlertCircle, CheckCircle, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -26,29 +26,115 @@ export default function LoginPage() {
     try {
       if (isSignup) {
         if (!name.trim()) {
-          toast.error("Введите имя");
+          toast.error(
+            (t) => (
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Введите имя</p>
+                  <p className="text-sm opacity-90">Поле имени обязательно для заполнения</p>
+                </div>
+              </div>
+            ),
+            {
+              duration: 4000,
+              style: {
+                background: '#ef4444',
+                color: '#fff',
+                padding: '16px',
+              },
+            }
+          );
           setLoading(false);
           return;
         }
         if (password !== confirmPassword) {
-          toast.error("❌ Пароли не совпадают!\n\nПроверьте оба поля пароля", {
-            duration: 4000,
-          });
+          toast.error(
+            (t) => (
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Пароли не совпадают!</p>
+                  <p className="text-sm opacity-90">Проверьте оба поля пароля</p>
+                </div>
+              </div>
+            ),
+            {
+              duration: 4000,
+              style: {
+                background: '#ef4444',
+                color: '#fff',
+                padding: '16px',
+              },
+            }
+          );
           setLoading(false);
           return;
         }
         if (password.length < 6) {
-          toast.error("❌ Пароль должен быть минимум 6 символов", {
-            duration: 4000,
-          });
+          toast.error(
+            (t) => (
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Пароль слишком короткий</p>
+                  <p className="text-sm opacity-90">Минимум 6 символов</p>
+                </div>
+              </div>
+            ),
+            {
+              duration: 4000,
+              style: {
+                background: '#ef4444',
+                color: '#fff',
+                padding: '16px',
+              },
+            }
+          );
           setLoading(false);
           return;
         }
         await signup(email, password, name, telegramUsername || undefined);
-        toast.success(`Добро пожаловать, ${name}!`);
+        toast.success(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Добро пожаловать, {name}!</p>
+                <p className="text-sm opacity-90">Регистрация прошла успешно</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 3000,
+            style: {
+              background: '#10b981',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
       } else {
         await login(email, password);
-        toast.success("Вы вошли!");
+        toast.success(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Вы вошли!</p>
+                <p className="text-sm opacity-90">Перенаправление на курсы...</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 2000,
+            style: {
+              background: '#10b981',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
       }
 
       // Перенаправление
@@ -61,30 +147,130 @@ export default function LoginPage() {
           error.message?.includes('registered') ||
           error.message?.includes('duplicate') ||
           error.message?.includes('существует')) {
-        toast.error("❌ Этот email уже зарегистрирован!\n\nИспользуйте кнопку 'Войти' ниже", {
-          duration: 5000,
-          style: {
-            background: '#ef4444',
-            color: '#fff',
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Email уже зарегистрирован</p>
+                <p className="text-sm opacity-90">Используйте кнопку 'Войти' ниже</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 5000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              padding: '16px',
+            },
           }
-        });
+        );
         // Автоматически переключаем на вход
         setTimeout(() => {
           setIsSignup(false);
           setPassword(''); // Очищаем пароль для безопасности
         }, 1500);
       } else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid')) {
-        toast.error("❌ Неверный email или пароль\nПроверьте данные и попробуйте ещё раз", {
-          duration: 4000,
-        });
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Неверный email или пароль</p>
+                <p className="text-sm opacity-90">Проверьте данные и попробуйте ещё раз</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 4000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
       } else if (error.message?.includes('security purposes') || error.message?.includes('rate limit')) {
-        toast.error("⏱️ Слишком много попыток входа\n\nПодождите 1 минуту и попробуйте снова", {
-          duration: 5000,
-        });
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Слишком много попыток</p>
+                <p className="text-sm opacity-90">Подождите 1 минуту и попробуйте снова</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 5000,
+            style: {
+              background: '#f59e0b',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Подтвердите email</p>
+                <p className="text-sm opacity-90">Проверьте почту и подтвердите регистрацию</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 6000,
+            style: {
+              background: '#3b82f6',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
+      } else if (error.message?.includes('User not found') || error.message?.includes('not found')) {
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Пользователь не найден</p>
+                <p className="text-sm opacity-90">Проверьте email или зарегистрируйтесь</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 4000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
       } else {
-        toast.error(error.message || "Ошибка входа. Попробуйте позже.", {
-          duration: 4000,
-        });
+        toast.error(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Произошла ошибка</p>
+                <p className="text-sm opacity-90">{error.message || "Попробуйте позже"}</p>
+              </div>
+            </div>
+          ),
+          {
+            duration: 4000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              padding: '16px',
+            },
+          }
+        );
       }
     } finally {
       setLoading(false);
