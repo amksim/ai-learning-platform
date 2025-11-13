@@ -13,6 +13,7 @@ export default function LoginPage() {
   const { signup, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,6 +26,20 @@ export default function LoginPage() {
       if (isSignup) {
         if (!name.trim()) {
           toast.error("Введите имя");
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          toast.error("❌ Пароли не совпадают!\n\nПроверьте оба поля пароля", {
+            duration: 4000,
+          });
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          toast.error("❌ Пароль должен быть минимум 6 символов", {
+            duration: 4000,
+          });
           setLoading(false);
           return;
         }
@@ -140,6 +155,23 @@ export default function LoginPage() {
                     className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
+                {isSignup && (
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium">
+                      Подтвердите пароль
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Повторите пароль"
+                      required={isSignup}
+                      minLength={6}
+                      className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                )}
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
                     "Загрузка..."
@@ -157,6 +189,7 @@ export default function LoginPage() {
                   onClick={() => {
                     setIsSignup(!isSignup);
                     setName("");
+                    setConfirmPassword("");
                   }}
                 >
                   {isSignup ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
