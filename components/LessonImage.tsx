@@ -34,11 +34,9 @@ export default function LessonImage({ image }: LessonImageProps) {
 
   return (
     <>
-      <div
-        className={`my-6 ${positionClasses[image.position]} ${sizeClasses[image.size]}`}
-      >
+      <div className="w-full">
         <div
-          className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
+          className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 shadow-lg hover:shadow-purple-500/30 glass bg-gradient-to-br from-purple-500/5 to-pink-500/5"
           onClick={() => setShowModal(true)}
         >
           {/* Image */}

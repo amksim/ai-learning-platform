@@ -338,7 +338,7 @@ export default function LessonPage() {
         {/* Lesson Content */}
         <div className="space-y-6 mb-8">
           {lesson.sections.filter((section: any) => section.title !== "Практическое задание").map((section: any, index: number) => (
-            <Card key={index}>
+            <Card key={index} className="glass premium-shadow border-2 border-purple-400/20 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
@@ -363,24 +363,28 @@ export default function LessonPage() {
                   </div>
                 )}
                 
-                {/* Lesson Images */}
+                {/* Lesson Images - Grid Layout (2 columns) */}
                 {currentLevel?.images && currentLevel.images.length > 0 && (
                   <div className="mt-6">
-                    {currentLevel.images.map((image: any, imgIndex: number) => (
-                      <LessonImage key={`img-${imgIndex}`} image={image} />
-                    ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentLevel.images.map((image: any, imgIndex: number) => (
+                        <LessonImage key={`img-${imgIndex}`} image={image} />
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {/* Lesson Videos */}
+                {/* Lesson Videos - Grid Layout (2 columns) */}
                 {currentLevel?.videos && currentLevel.videos.length > 0 && (
                   <div className="mt-6">
                     <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <span>🎬</span> Видео материалы
                     </h4>
-                    {currentLevel.videos.map((video: any, videoIndex: number) => (
-                      <LessonVideo key={`video-${videoIndex}`} video={video} />
-                    ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentLevel.videos.map((video: any, videoIndex: number) => (
+                        <LessonVideo key={`video-${videoIndex}`} video={video} />
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>

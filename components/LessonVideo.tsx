@@ -69,10 +69,8 @@ export default function LessonVideo({ video }: LessonVideoProps) {
 
   return (
     <>
-      <div
-        className={`my-6 ${positionClasses[video.position]} ${sizeClasses[video.size]}`}
-      >
-        <div className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-blue-500/20">
+      <div className="w-full">
+        <div className="relative group overflow-hidden rounded-lg border-2 border-blue-500/30 hover:border-blue-500/60 transition-all duration-300 shadow-lg hover:shadow-blue-500/30 glass bg-gradient-to-br from-blue-500/5 to-purple-500/5">
           {/* Video Player */}
           <div className="relative aspect-video">
             {isExternal ? (
@@ -103,33 +101,27 @@ export default function LessonVideo({ video }: LessonVideoProps) {
 
             {/* Fullscreen button for external videos */}
             {isExternal && (
-              <div className="absolute top-2 right-2">
+              <div className="absolute top-2 right-2 z-10">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowModal(true);
                   }}
-                  className="p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                  className="p-2 bg-black/70 hover:bg-black/90 rounded-full transition-colors backdrop-blur-sm"
                 >
-                  <Maximize2 className="h-4 w-4 text-white" />
+                  <Maximize2 className="h-5 w-5 text-white" />
                 </button>
               </div>
             )}
 
-            {/* Size indicator */}
-            <div className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs text-white">
-              {video.size === 'small' ? '320px' :
-               video.size === 'medium' ? '768px' :
-               video.size === 'large' ? '1024px' : '100%'}
+            {/* Video Title Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
+              <h5 className="text-white font-semibold text-sm">{video.title}</h5>
+              {video.caption && (
+                <p className="text-white/80 text-xs mt-1">{video.caption}</p>
+              )}
             </div>
           </div>
-
-          {/* Caption */}
-          {video.caption && (
-            <p className="mt-2 text-sm text-gray-400 text-center italic">
-              {video.caption}
-            </p>
-          )}
         </div>
       </div>
 
