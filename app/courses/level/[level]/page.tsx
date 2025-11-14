@@ -150,11 +150,17 @@ export default function LessonPage() {
           const level = sortedCourses.find((l: any) => l.id === levelId);
           setCurrentLevel(level);
           
+          // Find current lesson position in sorted array
+          const lessonIndex = sortedCourses.findIndex((l: any) => l.id === levelId);
+          const previousLesson = lessonIndex > 0 ? sortedCourses[lessonIndex - 1] : null;
+          
           // ВАЖНО: Логируем для отладки
           console.log('🔍 Lesson Access Check:', {
             lessonId: levelId,
+            lessonPosition: lessonIndex + 1,
             lessonTitle: level?.title,
             isFree: level?.isFree,
+            previousLessonId: previousLesson?.id,
             userLoggedIn: !!user,
             userHasPaid: user?.hasPaid
           });
@@ -169,9 +175,9 @@ export default function LessonPage() {
           // Free lessons доступны залогиненным, но по порядку!
           if (level?.isFree) {
             // Проверяем последовательность: если это не первый урок, проверяем прохождение предыдущего
-            if (levelId > 1 && !user.completedLessons.includes(levelId - 1)) {
+            if (previousLesson && !user.completedLessons.includes(previousLesson.id)) {
               console.log('❌ Previous lesson not completed - redirecting to /courses');
-              alert(`⚠️ Сначала пройдите урок ${levelId - 1}!`);
+              alert(`⚠️ Сначала пройдите предыдущий урок: "${previousLesson.title}"!`);
               router.push("/courses");
               return;
             }
@@ -199,9 +205,9 @@ export default function LessonPage() {
           }
           
           // Проверяем последовательность для платных уроков
-          if (levelId > 1 && !user.completedLessons.includes(levelId - 1)) {
+          if (previousLesson && !user.completedLessons.includes(previousLesson.id)) {
             console.log('❌ Previous lesson not completed - redirecting to /courses');
-            alert(`⚠️ Сначала пройдите урок ${levelId - 1}!`);
+            alert(`⚠️ Сначала пройдите предыдущий урок: "${previousLesson.title}"!`);
             router.push("/courses");
             return;
           }
@@ -230,11 +236,12 @@ export default function LessonPage() {
     loadCourses();
   }, [user, router, levelId, updateProgress]);
 
-  // Calculate lesson navigation
-  const nextLessonId = levelId + 1;
-  const hasNextLesson = allLevels.some((l: any) => l.id === nextLessonId);
-  const maxId = allLevels.length > 0 ? Math.max(...allLevels.map((l: any) => l.id)) : levelId;
-  const isLastLesson = levelId === maxId;
+  // Calculate lesson navigation based on display_order, not ID
+  const currentIndex = allLevels.findIndex((l: any) => l.id === levelId);
+  const currentLessonNumber = currentIndex + 1; // Position in sorted array (1-based)
+  const nextLesson = allLevels[currentIndex + 1];
+  const hasNextLesson = !!nextLesson;
+  const isLastLesson = currentIndex === allLevels.length - 1;
   
   if (loading) {
     return (
@@ -317,11 +324,11 @@ export default function LessonPage() {
           
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-              {levelId}
+              {currentLessonNumber}
             </div>
             <div>
               <h1 className="text-3xl font-bold md:text-4xl">{lesson.title}</h1>
-              <p className="text-muted-foreground">Уровень {levelId}</p>
+              <p className="text-muted-foreground">Уровень {currentLessonNumber}</p>
             </div>
           </div>
         </div>
@@ -467,7 +474,6 @@ export default function LessonPage() {
           ) : hasNextLesson ? (
             // Has next lesson - check if it's paid and user hasn't paid
             (() => {
-              const nextLesson = allLevels.find((l: any) => l.id === nextLessonId);
               const nextIsPaid = nextLesson && !nextLesson.isFree;
               const shouldShowPayment = nextIsPaid && !user?.hasPaid;
               
@@ -494,9 +500,9 @@ export default function LessonPage() {
               return (
                 <Button 
                   onClick={() => {
-                    console.log('➡️ Переход к следующему уроку:', nextLessonId);
+                    console.log('➡️ Переход к следующему уроку:', nextLesson?.id);
                     // Прогресс уже сохранен автоматически при загрузке урока
-                    router.push(`/courses/level/${nextLessonId}`);
+                    router.push(`/courses/level/${nextLesson?.id}`);
                   }}
                   className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 >
