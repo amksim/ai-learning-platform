@@ -66,11 +66,26 @@ export default function LessonVideo({ video }: LessonVideoProps) {
   const [isMuted, setIsMuted] = useState(false);
   
   const { embedUrl, isExternal } = getEmbedUrl(video.url);
+  
+  // Debug logging
+  console.log('🎬 Video Debug:', {
+    originalUrl: video.url,
+    embedUrl,
+    isExternal,
+    title: video.title
+  });
 
   return (
     <>
       <div className="w-full">
-        <div className="relative group overflow-hidden rounded-lg border-2 border-blue-500/30 hover:border-blue-500/60 transition-all duration-300 shadow-lg hover:shadow-blue-500/30 glass bg-gradient-to-br from-blue-500/5 to-purple-500/5">
+        <div 
+          className="relative group overflow-hidden rounded-lg border-2 border-blue-500/30 hover:border-blue-500/60 transition-all duration-300 shadow-lg hover:shadow-blue-500/30"
+          style={{
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        >
           {/* Video Player */}
           <div className="relative aspect-video">
             {isExternal ? (
@@ -119,6 +134,9 @@ export default function LessonVideo({ video }: LessonVideoProps) {
               <h5 className="text-white font-semibold text-sm">{video.title}</h5>
               {video.caption && (
                 <p className="text-white/80 text-xs mt-1">{video.caption}</p>
+              )}
+              {!isExternal && embedUrl && (
+                <p className="text-red-400 text-xs mt-1">⚠️ Не YouTube: {embedUrl.substring(0, 50)}...</p>
               )}
             </div>
           </div>

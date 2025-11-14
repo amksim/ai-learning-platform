@@ -338,7 +338,15 @@ export default function LessonPage() {
         {/* Lesson Content */}
         <div className="space-y-6 mb-8">
           {lesson.sections.filter((section: any) => section.title !== "Практическое задание").map((section: any, index: number) => (
-            <Card key={index} className="glass premium-shadow border-2 border-purple-400/20 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 backdrop-blur-xl">
+            <Card 
+              key={index} 
+              className="premium-shadow border-2 border-purple-400/30 shadow-xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />

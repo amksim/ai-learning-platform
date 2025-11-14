@@ -36,7 +36,12 @@ export default function LessonImage({ image }: LessonImageProps) {
     <>
       <div className="w-full">
         <div
-          className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 shadow-lg hover:shadow-purple-500/30 glass bg-gradient-to-br from-purple-500/5 to-pink-500/5"
+          className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 shadow-lg hover:shadow-purple-500/30"
+          style={{
+            background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
           onClick={() => setShowModal(true)}
         >
           {/* Image */}
