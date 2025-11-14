@@ -86,6 +86,7 @@ export default function AdminPage() {
           isFree: course.is_free || false,
           translations: course.translations || {},
           images: course.images || [],
+          videos: course.videos || [],
           displayOrder: course.display_order || course.id
         }));
         
