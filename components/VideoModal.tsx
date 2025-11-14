@@ -103,7 +103,7 @@ export default function VideoModal({ videoUrl, videoTitle, poster, onClose }: Vi
         </div>
 
         {/* Video Container */}
-        <div className="flex-1 relative bg-black rounded-lg overflow-hidden">
+        <div className="flex-1 relative bg-black rounded-2xl overflow-hidden shadow-2xl">
           {isExternal ? (
             // YouTube/Vimeo iframe (fullscreen mode)
             <iframe

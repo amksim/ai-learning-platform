@@ -41,7 +41,7 @@ export default function ImageModal({ imageUrl, alt, onClose }: ImageModalProps) 
         <img
           src={imageUrl}
           alt={alt}
-          className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
+          className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-2xl shadow-2xl"
         />
       </div>
 

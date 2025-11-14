@@ -33,6 +33,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    console.log('➕ Creating new course');
+    console.log('📦 Data keys:', Object.keys(body));
+    console.log('🎬 Videos count:', body.videos?.length || 0);
+    console.log('📸 Images count:', body.images?.length || 0);
+    
     const { data, error } = await supabase
       .from('courses')
       .insert([body])
@@ -40,13 +45,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating course:', error);
+      console.error('❌ Error creating course:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('✅ Course created successfully');
     return NextResponse.json({ course: data });
   } catch (error: any) {
-    console.error('Unexpected error:', error);
+    console.error('❌ Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -56,6 +62,11 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, ...updates } = body;
+
+    console.log('📝 Updating course:', id);
+    console.log('📦 Updates keys:', Object.keys(updates));
+    console.log('🎬 Videos count:', updates.videos?.length || 0);
+    console.log('📸 Images count:', updates.images?.length || 0);
 
     if (!id) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
@@ -69,13 +80,14 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating course:', error);
+      console.error('❌ Error updating course:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('✅ Course updated successfully');
     return NextResponse.json({ course: data });
   } catch (error: any) {
-    console.error('Unexpected error:', error);
+    console.error('❌ Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
