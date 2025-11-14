@@ -136,7 +136,9 @@ export default function LessonPage() {
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
             translations: course.translations || {},
-            displayOrder: course.display_order || course.id
+            displayOrder: course.display_order || course.id,
+            images: course.images || [],
+            videos: course.videos || []
           }));
           
           // СОРТИРОВКА: Бесплатные наверху, потом платные

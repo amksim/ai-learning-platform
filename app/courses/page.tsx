@@ -73,7 +73,9 @@ export default function CoursesPage() {
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
             translations: course.translations || {},
-            displayOrder: course.display_order || course.id
+            displayOrder: course.display_order || course.id,
+            images: course.images || [],
+            videos: course.videos || []
           }));
           
           // СОРТИРОВКА: По display_order (порядок который выбрал админ)
