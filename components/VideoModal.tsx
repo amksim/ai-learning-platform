@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Volume2, VolumeX, Maximize2, Minimize2 } from "lucide-react";
 
 interface VideoModalProps {
@@ -15,7 +15,7 @@ export default function VideoModal({ videoUrl, videoTitle, poster, onClose }: Vi
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
-  const videoRef = useState<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Close on Escape key
   useEffect(() => {
