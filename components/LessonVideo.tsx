@@ -30,10 +30,42 @@ const positionClasses = {
   right: "ml-auto",
 };
 
+// Helper function to convert YouTube URL to embed URL
+const getEmbedUrl = (url: string): { embedUrl: string; isExternal: boolean } => {
+  // YouTube regular video
+  if (url.includes('youtube.com/watch')) {
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    return { embedUrl: `https://www.youtube.com/embed/${videoId}`, isExternal: true };
+  }
+  
+  // YouTube Shorts
+  if (url.includes('youtube.com/shorts/') || url.includes('youtu.be/shorts/')) {
+    const videoId = url.split('/shorts/')[1]?.split('?')[0];
+    return { embedUrl: `https://www.youtube.com/embed/${videoId}`, isExternal: true };
+  }
+  
+  // YouTube short URL (youtu.be)
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    return { embedUrl: `https://www.youtube.com/embed/${videoId}`, isExternal: true };
+  }
+  
+  // Vimeo
+  if (url.includes('vimeo.com/')) {
+    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+    return { embedUrl: `https://player.vimeo.com/video/${videoId}`, isExternal: true };
+  }
+  
+  // Direct video file or base64
+  return { embedUrl: url, isExternal: false };
+};
+
 export default function LessonVideo({ video }: LessonVideoProps) {
   const [showModal, setShowModal] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  
+  const { embedUrl, isExternal } = getEmbedUrl(video.url);
 
   return (
     <>
@@ -43,23 +75,35 @@ export default function LessonVideo({ video }: LessonVideoProps) {
         <div className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-blue-500/20">
           {/* Video Player */}
           <div className="relative aspect-video">
-            <video
-              className="w-full h-full object-cover rounded-lg"
-              poster={video.poster}
-              preload="metadata"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
-            >
-              <source src={video.url} type="video/mp4" />
-              <source src={video.url} type="video/webm" />
-              Ваш браузер не поддерживает видео.
-            </video>
+            {isExternal ? (
+              // YouTube/Vimeo iframe
+              <iframe
+                src={embedUrl}
+                className="w-full h-full rounded-lg"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={video.title}
+              />
+            ) : (
+              // Direct video file
+              <video
+                className="w-full h-full object-cover rounded-lg"
+                poster={video.poster}
+                preload="metadata"
+                controls
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
+              >
+                <source src={embedUrl} type="video/mp4" />
+                <source src={embedUrl} type="video/webm" />
+                Ваш браузер не поддерживает видео.
+              </video>
+            )}
 
-            {/* Overlay Controls */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {/* Top controls */}
-              <div className="absolute top-2 right-2 flex gap-2">
+            {/* Fullscreen button for external videos */}
+            {isExternal && (
+              <div className="absolute top-2 right-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -70,19 +114,7 @@ export default function LessonVideo({ video }: LessonVideoProps) {
                   <Maximize2 className="h-4 w-4 text-white" />
                 </button>
               </div>
-
-              {/* Center play button */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-blue-600/80 hover:bg-blue-600 rounded-full p-4 transition-colors">
-                  <Play className="h-8 w-8 text-white" />
-                </div>
-              </div>
-
-              {/* Bottom controls hint */}
-              <div className="absolute bottom-2 left-2 text-xs text-white/80">
-                Нажмите чтобы воспроизвести
-              </div>
-            </div>
+            )}
 
             {/* Size indicator */}
             <div className="absolute top-2 left-2 bg-blue-600/80 px-2 py-1 rounded text-xs text-white">
