@@ -8,6 +8,7 @@ import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
 import { useAuth } from "@/contexts/AuthContext";
 import { autoTranslateCourseContent } from "@/lib/translateContent";
 import ImageUploader from "@/components/admin/ImageUploader";
+import VideoUploader from "@/components/admin/VideoUploader";
 
 // Available icons
 const iconOptions = [
@@ -202,6 +203,7 @@ export default function AdminPage() {
         practice_description: editForm.practiceDescription,
         is_free: editForm.isFree || false,
         images: editForm.images || [],
+        videos: editForm.videos || [],
         translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
       };
       
@@ -250,7 +252,8 @@ export default function AdminPage() {
       practiceDescription: "",
       isFree: previousLesson?.isFree || false,
       blockName: previousLesson?.blockName || "", // Copy blockName to keep in same category
-      images: []
+      images: [],
+      videos: []
     });
   };
 
@@ -299,6 +302,7 @@ export default function AdminPage() {
         practice_description: editForm.practiceDescription || "",
         is_free: editForm.isFree || false,
         images: editForm.images || [],
+        videos: editForm.videos || [],
         display_order: displayOrder,
         translations: autoTranslateCourseContent(editForm.title || '', editForm.description || '')
       };
@@ -515,7 +519,8 @@ export default function AdminPage() {
                   practice: false,
                   practiceDescription: "",
                   isFree: false, // По умолчанию платный, но можно изменить галочкой
-                  images: []
+                  images: [],
+                  videos: []
                 });
               }}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all"
@@ -738,6 +743,14 @@ export default function AdminPage() {
                   <ImageUploader
                     images={editForm.images || []}
                     onChange={(images) => setEditForm({ ...editForm, images })}
+                  />
+                </div>
+
+                {/* Videos */}
+                <div className="border-2 border-green-500/30 rounded-lg p-4 bg-green-500/5">
+                  <VideoUploader
+                    videos={editForm.videos || []}
+                    onChange={(videos) => setEditForm({ ...editForm, videos })}
                   />
                 </div>
 

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/Button";
 import { getTranslatedContent } from "@/lib/translateContent";
 import LessonImage from "@/components/LessonImage";
+import LessonVideo from "@/components/LessonVideo";
 
 // Lesson content is now loaded from localStorage
 // Default lessons are managed in admin panel
@@ -357,7 +358,19 @@ export default function LessonPage() {
                 {currentLevel?.images && currentLevel.images.length > 0 && (
                   <div className="mt-6">
                     {currentLevel.images.map((image: any, imgIndex: number) => (
-                      <LessonImage key={imgIndex} image={image} />
+                      <LessonImage key={`img-${imgIndex}`} image={image} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Lesson Videos */}
+                {currentLevel?.videos && currentLevel.videos.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <span>🎬</span> Видео материалы
+                    </h4>
+                    {currentLevel.videos.map((video: any, videoIndex: number) => (
+                      <LessonVideo key={`video-${videoIndex}`} video={video} />
                     ))}
                   </div>
                 )}
