@@ -21,10 +21,10 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Проверяем размер файла (максимум 500MB для 30-минутных видео)
-    const maxSize = 500 * 1024 * 1024; // 500MB
+    // Проверяем размер файла (максимум 50MB - base64 увеличивает размер на 33%)
+    const maxSize = 50 * 1024 * 1024; // 50MB для base64
     if (file.size > maxSize) {
-      alert("Файл слишком большой! Максимальный размер: 500MB");
+      alert("⚠️ Файл слишком большой для прямой загрузки!\n\nДля больших видео (>50MB):\n1. Загрузи видео на YouTube (unlisted)\n2. Или используй Vimeo\n3. Вставь URL ниже\n\nМаксимум для прямой загрузки: 50MB");
       return;
     }
 
@@ -34,12 +34,23 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
       return;
     }
 
-    // Создаем URL для видео
-    const videoUrl = URL.createObjectURL(file);
-    setNewVideo({
-      ...newVideo,
-      url: videoUrl,
-    });
+    // ВАЖНО: Предупреждаем о длительной загрузке
+    alert("⏳ Загрузка может занять некоторое время...\n\nПожалуйста, подожди пока видео загрузится.");
+
+    // Конвертируем в base64 (как с картинками)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setNewVideo({
+        ...newVideo,
+        url: base64,
+      });
+      alert("✅ Видео загружено! Теперь можешь добавить описание и сохранить.");
+    };
+    reader.onerror = () => {
+      alert("❌ Ошибка загрузки видео. Попробуй файл поменьше или используй YouTube URL.");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,12 +163,28 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
           {/* Upload video */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Загрузить видео (макс. 500MB)
+              Видео (загрузить макс. 50MB или вставить URL)
             </label>
+            
+            {/* URL Input */}
+            <div className="mb-3">
+              <input
+                type="url"
+                placeholder="https://youtube.com/watch?v=... или https://vimeo.com/..."
+                value={newVideo.url?.startsWith('data:') ? '' : newVideo.url || ''}
+                onChange={(e) => setNewVideo({ ...newVideo, url: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500 focus:outline-none"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                💡 Для больших видео (30+ мин) используй YouTube или Vimeo
+              </p>
+            </div>
+            
+            {/* File Upload */}
             <div className="flex items-center gap-3">
               <label className="flex-1 flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
                 <Upload className="h-5 w-5" />
-                <span>Выбрать видеофайл</span>
+                <span>Или выбрать файл (&lt;50MB)</span>
                 <input
                   type="file"
                   accept="video/*"
