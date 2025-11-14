@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditingTelegram, setIsEditingTelegram] = useState(false);
   const [telegramInput, setTelegramInput] = useState(user?.telegram_username || "");
 
@@ -37,6 +38,8 @@ export default function ProfilePage() {
       } catch (error) {
         console.error('❌ Ошибка загрузки количества уроков:', error);
         // Оставляем дефолтное значение 100
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -50,9 +53,33 @@ export default function ProfilePage() {
     return null;
   }
 
-  const completedLevels = user.progress || 0;
-  const remainingLevels = totalLevels - completedLevels;
-  const progressPercent = Math.round((completedLevels / totalLevels) * 100);
+  const completedLevels = user.completedLessons?.length || user.progress || 0;
+  const remainingLevels = Math.max(0, totalLevels - completedLevels);
+  const progressPercent = totalLevels > 0 ? Math.round((completedLevels / totalLevels) * 100) : 0;
+  
+  // Генерируем достижения каждые 10 уроков
+  const generateAchievements = () => {
+    const achievements = [];
+    const maxAchievements = Math.ceil(totalLevels / 10); // Достижения каждые 10 уроков
+    
+    for (let i = 1; i <= maxAchievements; i++) {
+      const milestone = i * 10;
+      const isUnlocked = completedLevels >= milestone;
+      
+      achievements.push({
+        id: i,
+        milestone,
+        name: milestone === 10 ? 'Разгон' : milestone === 20 ? 'Продвинутый' : milestone === 30 ? 'Профи' : milestone === 50 ? 'Эксперт' : milestone === 100 ? 'Мастер' : `Уровень ${milestone}`,
+        icon: milestone === 10 ? Zap : milestone === 20 ? TrendingUp : milestone === 30 ? Star : milestone === 50 ? Award : milestone === 100 ? Trophy : Target,
+        color: milestone === 10 ? 'blue' : milestone === 20 ? 'green' : milestone === 30 ? 'purple' : milestone === 50 ? 'pink' : milestone === 100 ? 'yellow' : 'cyan',
+        isUnlocked
+      });
+    }
+    
+    return achievements;
+  };
+  
+  const achievements = generateAchievements();
   
   const hasCompletedAll = completedLevels >= totalLevels;
   const alreadyReviewed = hasUserReviewed(user.email);
@@ -279,88 +306,69 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Achievements / Badges */}
+        {/* Achievements / Badges - Horizontal Scroll */}
         <Card className="mb-8 glass border-2 border-purple-500/20 premium-shadow">
           <CardContent className="p-5 sm:p-6 md:p-8">
-            <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                {t.profile.achievements}
+            <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent flex items-center gap-2">
+              <Trophy className="h-6 w-6" />
+              {t.profile.achievements}
             </h2>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* First Lesson */}
-              <div className={`p-4 rounded-xl border-2 text-center transition-all ${
-                completedLevels >= 1 
-                  ? 'border-green-500/30 bg-green-500/10' 
-                  : 'border-gray-700 bg-gray-800/50 opacity-50'
-              }`}>
-                <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
+            {/* Горизонтальный скролл достижений */}
+            <div className="overflow-x-auto pb-4 -mx-2">
+              <div className="flex gap-3 px-2 min-w-max">
+                {/* Первый урок */}
+                <div className={`flex-shrink-0 w-24 p-2 rounded-lg border text-center transition-all ${
                   completedLevels >= 1 
-                    ? 'bg-green-500/20' 
-                    : 'bg-gray-700'
+                    ? 'border-green-500/30 bg-green-500/10' 
+                    : 'border-gray-700 bg-gray-800/50 opacity-50'
                 }`}>
-                  <CheckCircle className={`h-8 w-8 ${
-                    completedLevels >= 1 ? 'text-green-400' : 'text-gray-500'
-                  }`} />
+                  <div className={`w-10 h-10 mx-auto mb-1.5 rounded-full flex items-center justify-center ${
+                    completedLevels >= 1 
+                      ? 'bg-green-500/20' 
+                      : 'bg-gray-700'
+                  }`}>
+                    <CheckCircle className={`h-5 w-5 ${
+                      completedLevels >= 1 ? 'text-green-400' : 'text-gray-500'
+                    }`} />
+                  </div>
+                  <div className="text-xs font-bold mb-0.5">Старт</div>
+                  <div className="text-[10px] text-gray-400">1 урок</div>
                 </div>
-                <div className="text-sm font-bold mb-1">{t.profile.first_step}</div>
-                <div className="text-xs text-gray-400">{t.profile.complete_1}</div>
-              </div>
-
-              {/* 10 Lessons */}
-              <div className={`p-4 rounded-xl border-2 text-center transition-all ${
-                completedLevels >= 10 
-                  ? 'border-blue-500/30 bg-blue-500/10' 
-                  : 'border-gray-700 bg-gray-800/50 opacity-50'
-              }`}>
-                <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
-                  completedLevels >= 10 
-                    ? 'bg-blue-500/20' 
-                    : 'bg-gray-700'
-                }`}>
-                  <Zap className={`h-8 w-8 ${
-                    completedLevels >= 10 ? 'text-blue-400' : 'text-gray-500'
-                  }`} />
-                </div>
-                <div className="text-sm font-bold mb-1">Разгон</div>
-                <div className="text-xs text-gray-400">{t.profile.complete_10}</div>
-              </div>
-
-              {/* 50 Lessons */}
-              <div className={`p-4 rounded-xl border-2 text-center transition-all ${
-                completedLevels >= 50 
-                  ? 'border-purple-500/30 bg-purple-500/10' 
-                  : 'border-gray-700 bg-gray-800/50 opacity-50'
-              }`}>
-                <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
-                  completedLevels >= 50 
-                    ? 'bg-purple-500/20' 
-                    : 'bg-gray-700'
-                }`}>
-                  <Award className={`h-8 w-8 ${
-                    completedLevels >= 50 ? 'text-purple-400' : 'text-gray-500'
-                  }`} />
-                </div>
-                <div className="text-sm font-bold mb-1">{t.profile.expert}</div>
-                <div className="text-xs text-gray-400">{t.profile.complete_50}</div>
-              </div>
-
-              {/* Complete */}
-              <div className={`p-4 rounded-xl border-2 text-center transition-all ${
-                completedLevels >= totalLevels 
-                  ? 'border-yellow-500/30 bg-yellow-500/10' 
-                  : 'border-gray-700 bg-gray-800/50 opacity-50'
-              }`}>
-                <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
-                  completedLevels >= totalLevels 
-                    ? 'bg-yellow-500/20' 
-                    : 'bg-gray-700'
-                }`}>
-                  <Trophy className={`h-8 w-8 ${
-                    completedLevels >= totalLevels ? 'text-yellow-400' : 'text-gray-500'
-                  }`} />
-                </div>
-                <div className="text-sm font-bold mb-1">{t.profile.master}</div>
-                <div className="text-xs text-gray-400">{t.profile.complete_all}</div>
+                
+                {/* Динамические достижения каждые 10 уроков */}
+                {achievements.map((achievement) => {
+                  const IconComponent = achievement.icon;
+                  const colors = {
+                    blue: { border: 'border-blue-500/30', bg: 'bg-blue-500/10', iconBg: 'bg-blue-500/20', text: 'text-blue-400' },
+                    green: { border: 'border-green-500/30', bg: 'bg-green-500/10', iconBg: 'bg-green-500/20', text: 'text-green-400' },
+                    purple: { border: 'border-purple-500/30', bg: 'bg-purple-500/10', iconBg: 'bg-purple-500/20', text: 'text-purple-400' },
+                    pink: { border: 'border-pink-500/30', bg: 'bg-pink-500/10', iconBg: 'bg-pink-500/20', text: 'text-pink-400' },
+                    yellow: { border: 'border-yellow-500/30', bg: 'bg-yellow-500/10', iconBg: 'bg-yellow-500/20', text: 'text-yellow-400' },
+                    cyan: { border: 'border-cyan-500/30', bg: 'bg-cyan-500/10', iconBg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+                  };
+                  const color = colors[achievement.color as keyof typeof colors];
+                  
+                  return (
+                    <div key={achievement.id} className={`flex-shrink-0 w-24 p-2 rounded-lg border text-center transition-all ${
+                      achievement.isUnlocked 
+                        ? `${color.border} ${color.bg}` 
+                        : 'border-gray-700 bg-gray-800/50 opacity-50'
+                    }`}>
+                      <div className={`w-10 h-10 mx-auto mb-1.5 rounded-full flex items-center justify-center ${
+                        achievement.isUnlocked 
+                          ? color.iconBg 
+                          : 'bg-gray-700'
+                      }`}>
+                        <IconComponent className={`h-5 w-5 ${
+                          achievement.isUnlocked ? color.text : 'text-gray-500'
+                        }`} />
+                      </div>
+                      <div className="text-xs font-bold mb-0.5 truncate">{achievement.name}</div>
+                      <div className="text-[10px] text-gray-400">{achievement.milestone} уроков</div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </CardContent>
