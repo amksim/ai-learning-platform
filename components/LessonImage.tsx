@@ -48,7 +48,7 @@ export default function LessonImage({ image }: LessonImageProps) {
           <img
             src={image.url}
             alt={image.alt}
-            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105 rounded-2xl"
           />
 
           {/* Overlay on hover */}

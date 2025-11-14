@@ -4,3 +4,15 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Headers for Content Security Policy
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Allow YouTube and Vimeo iframes
+    Content-Security-Policy = """
+      frame-src 'self' https://www.youtube.com https://youtube.com https://player.vimeo.com;
+      frame-ancestors 'self';
+    """
+    # Allow embedding from YouTube
+    X-Frame-Options = "SAMEORIGIN"

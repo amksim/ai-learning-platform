@@ -51,7 +51,7 @@ const nextConfig = {
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://libretranslate.de https://*.google-analytics.com",
-              "frame-src 'self' https://js.stripe.com",
+              "frame-src 'self' https://js.stripe.com https://www.youtube.com https://youtube.com https://player.vimeo.com",
               "base-uri 'self'",
               "form-action 'self'",
             ].join('; ')

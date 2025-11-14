@@ -92,7 +92,7 @@ export default function LessonVideo({ video }: LessonVideoProps) {
               // YouTube/Vimeo iframe
               <iframe
                 src={embedUrl}
-                className="w-full h-full rounded-lg"
+                className="w-full h-full rounded-2xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={video.title}
@@ -100,7 +100,7 @@ export default function LessonVideo({ video }: LessonVideoProps) {
             ) : (
               // Direct video file
               <video
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-2xl"
                 poster={video.poster}
                 preload="metadata"
                 controls
