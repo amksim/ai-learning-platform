@@ -774,6 +774,7 @@ export default function AdminPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
+                      { code: 'ru', name: '🇷🇺 Русский' },
                       { code: 'en', name: '🇬🇧 Английский' },
                       { code: 'uk', name: '🇺🇦 Украинский' },
                       { code: 'de', name: '🇩🇪 Германский' },
