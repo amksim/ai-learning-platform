@@ -4,6 +4,7 @@
 export interface TranslatedContent {
   title: string;
   description: string;
+  videoUrl?: string; // URL видео на этом языке (опционально)
 }
 
 // Simple translation dictionary for common course terms
@@ -55,12 +56,15 @@ function translateText(text: string, targetLang: string): string {
 // Auto-translate course content to all languages
 export function autoTranslateCourseContent(
   russianTitle: string,
-  russianDescription: string
+  russianDescription: string,
+  existingTranslations?: Record<string, TranslatedContent>
 ): Record<string, TranslatedContent> {
   const result: Record<string, TranslatedContent> = {
     ru: {
       title: russianTitle,
       description: russianDescription,
+      // Сохраняем существующий videoUrl если есть
+      videoUrl: existingTranslations?.ru?.videoUrl,
     },
   };
 
@@ -68,6 +72,7 @@ export function autoTranslateCourseContent(
   result.uk = {
     title: russianTitle,
     description: russianDescription,
+    videoUrl: existingTranslations?.uk?.videoUrl,
   };
 
   // Translate to other languages
@@ -76,6 +81,8 @@ export function autoTranslateCourseContent(
       result[lang] = {
         title: translateText(russianTitle, lang),
         description: translateText(russianDescription, lang),
+        // Сохраняем существующий videoUrl если есть
+        videoUrl: existingTranslations?.[lang]?.videoUrl,
       };
     }
   });

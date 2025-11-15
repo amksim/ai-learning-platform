@@ -1,6 +1,7 @@
 import { Sparkles, Code, Smartphone, Gamepad2, Layers, FileCode, Palette, Zap, Boxes, Globe, Settings, Terminal, GitBranch, Database, Lock, CreditCard, TrendingUp, Layout, Monitor, Check } from "lucide-react";
 import { LessonImageData } from "@/components/LessonImage";
 import { LessonVideoData } from "@/components/LessonVideo";
+import { TranslatedContent } from "@/lib/translateContent";
 
 export interface Level {
   id: number;
@@ -14,7 +15,7 @@ export interface Level {
   practice?: boolean; // Есть ли практическое задание
   practiceDescription?: string; // Описание практики
   isFree?: boolean; // Бесплатный урок или платный
-  translations?: Record<string, { title: string; description: string }>; // Auto-translated content
+  translations?: Record<string, TranslatedContent>; // Auto-translated content with videoUrl support
   images?: LessonImageData[]; // Картинки урока
   videos?: LessonVideoData[]; // Видео урока
   displayOrder?: number; // Порядок отображения

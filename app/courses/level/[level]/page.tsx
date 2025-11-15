@@ -390,7 +390,12 @@ export default function LessonPage() {
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {currentLevel.videos.map((video: any, videoIndex: number) => (
-                        <LessonVideo key={`video-${videoIndex}`} video={video} />
+                        <LessonVideo 
+                          key={`video-${videoIndex}`} 
+                          video={video} 
+                          language={language}
+                          translations={currentLevel.translations}
+                        />
                       ))}
                     </div>
                   </div>

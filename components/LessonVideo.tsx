@@ -15,6 +15,8 @@ export interface LessonVideoData {
 
 interface LessonVideoProps {
   video: LessonVideoData;
+  language?: string; // Текущий язык пользователя
+  translations?: Record<string, { videoUrl?: string }>; // Переводы с URL видео
 }
 
 const sizeClasses = {
@@ -60,12 +62,17 @@ const getEmbedUrl = (url: string): { embedUrl: string; isExternal: boolean } => 
   return { embedUrl: url, isExternal: false };
 };
 
-export default function LessonVideo({ video }: LessonVideoProps) {
+export default function LessonVideo({ video, language = 'ru', translations }: LessonVideoProps) {
+  // Проверяем есть ли переведенное видео для текущего языка
+  const translatedVideoUrl = translations?.[language]?.videoUrl;
+  // Используем переведенное видео если есть, иначе оригинальное
+  const videoUrl = translatedVideoUrl || video.url;
+  
   const [showModal, setShowModal] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   
-  const { embedUrl, isExternal } = getEmbedUrl(video.url);
+  const { embedUrl, isExternal } = getEmbedUrl(videoUrl);
   
   // Debug logging
   console.log('🎬 Video Debug:', {
@@ -146,7 +153,7 @@ export default function LessonVideo({ video }: LessonVideoProps) {
       {/* Modal */}
       {showModal && (
         <VideoModal
-          videoUrl={video.url}
+          videoUrl={videoUrl}
           videoTitle={video.title}
           poster={video.poster}
           onClose={() => setShowModal(false)}
