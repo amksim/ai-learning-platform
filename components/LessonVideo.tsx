@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize2, X, CheckCircle2 } from "lucide-react";
 import VideoModal from "./VideoModal";
 
@@ -80,6 +80,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
+  const watchTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Загружаем статус просмотра из localStorage
   useEffect(() => {
@@ -90,13 +91,43 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
     }
   }, [lessonId, videoIndex]);
   
-  // Отмечаем видео как просмотренное при воспроизведении
-  const handleVideoPlay = () => {
-    setIsPlaying(true);
+  // Очистка таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (watchTimerRef.current) {
+        clearTimeout(watchTimerRef.current);
+      }
+    };
+  }, []);
+  
+  // Отмечаем видео как просмотренное ТОЛЬКО после 3 секунд просмотра
+  const markAsWatched = () => {
     if (lessonId && !isWatched) {
       const watchedKey = `video-watched-${lessonId}-${videoIndex}`;
       localStorage.setItem(watchedKey, 'true');
       setIsWatched(true);
+      console.log('✅ Видео отмечено как просмотренное!');
+    }
+  };
+  
+  // Для YouTube/Vimeo - запускаем таймер на 5 секунд после загрузки iframe
+  // (предполагаем что если пользователь не ушел за 5 сек, он смотрит)
+  const handleIframeReady = () => {
+    if (!isWatched && lessonId) {
+      console.log('⏱️ Запускаем 5-секундный таймер для YouTube/Vimeo...');
+      watchTimerRef.current = setTimeout(() => {
+        console.log('✅ 5 секунд прошло, отмечаем как просмотренное');
+        markAsWatched();
+      }, 5000); // 5 секунд - более честно для YouTube
+    }
+  };
+  
+  // Для прямого видео - отслеживаем время просмотра
+  const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (!isWatched && video.currentTime >= 3) {
+      console.log('✅ Пользователь посмотрел 3+ секунд');
+      markAsWatched();
     }
   };
   
@@ -156,7 +187,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
         >
           {/* Большая галочка для просмотренных видео */}
           {isWatched && (
-            <div className="absolute top-4 left-4 z-20 bg-green-500 rounded-full p-2 shadow-lg animate-bounce">
+            <div className="absolute top-4 left-4 z-20 bg-green-500 rounded-full p-2 shadow-lg">
               <CheckCircle2 className="h-8 w-8 text-white" strokeWidth={3} />
             </div>
           )}
@@ -173,7 +204,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
           {/* Video Player */}
           <div className="relative aspect-video">
             {isExternal ? (
-              // YouTube/Vimeo iframe - отмечаем как просмотренное при загрузке
+              // YouTube/Vimeo iframe - запускаем таймер на 3 секунды
               <iframe
                 key={embedUrl}
                 src={embedUrl}
@@ -181,18 +212,19 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={video.title}
-                onLoad={() => handleVideoPlay()}
+                onLoad={handleIframeReady}
               />
             ) : (
-              // Direct video file
+              // Direct video file - отслеживаем время просмотра
               <video
                 key={embedUrl}
                 className="w-full h-full object-cover rounded-2xl"
                 poster={video.poster}
                 preload="metadata"
                 controls
-                onPlay={handleVideoPlay}
+                onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
+                onTimeUpdate={handleVideoTimeUpdate}
                 onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
               >
                 <source src={embedUrl} type="video/mp4" />
