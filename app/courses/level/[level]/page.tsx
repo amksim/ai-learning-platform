@@ -408,17 +408,17 @@ export default function LessonPage() {
 
         {/* Practice Tasks - Combined and Beautiful */}
         {(lesson.sections.find((s: any) => s.title === "Практическое задание") || lesson.tasks.length > 0) && (
-          <Card className="mb-8 border-2 border-gradient-to-r from-purple-500/30 to-pink-500/30 bg-gradient-to-br from-purple-500/5 to-pink-500/5 premium-shadow">
+          <Card className="mb-8 border-2 border-purple-500/30 bg-gradient-to-br from-gray-800/80 via-purple-900/20 to-gray-800/80 premium-shadow backdrop-blur-sm">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
                   <span className="text-2xl">✨</span>
                 </div>
                 <div>
-                  <CardTitle className="text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <CardTitle className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     Практическое задание
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-300">
                     Выполни это задание, чтобы закрепить материал
                   </CardDescription>
                 </div>
@@ -426,8 +426,8 @@ export default function LessonPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {lesson.sections.find((s: any) => s.title === "Практическое задание") && (
-                <div className="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 border-2 border-purple-200 dark:border-purple-800">
-                  <p className="text-base leading-relaxed font-medium">
+                <div className="p-6 rounded-xl bg-gradient-to-br from-gray-700/40 via-purple-800/20 to-gray-700/40 border border-purple-400/30 backdrop-blur-sm">
+                  <p className="text-base leading-relaxed text-gray-200">
                     {lesson.sections.find((s: any) => s.title === "Практическое задание")?.content}
                   </p>
                 </div>
@@ -435,14 +435,14 @@ export default function LessonPage() {
               
               {lesson.tasks.length > 0 && (
                 <div className="space-y-3 mt-4">
-                  <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">📝 Шаги выполнения:</p>
+                  <p className="text-sm font-semibold text-purple-400">📝 Шаги выполнения:</p>
                   <ul className="space-y-2">
                     {lesson.tasks.map((task: string, index: number) => (
-                      <li key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
+                      <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gray-800/30 hover:bg-purple-900/30 transition-all border border-purple-500/20">
                         <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-sm font-bold text-white shadow-md">
                           {index + 1}
                         </div>
-                        <span className="text-muted-foreground pt-0.5">{task}</span>
+                        <span className="text-gray-300 pt-0.5">{task}</span>
                       </li>
                     ))}
                   </ul>
