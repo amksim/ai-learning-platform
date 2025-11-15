@@ -74,6 +74,13 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
       return;
     }
 
+    // Очищаем пустые переводы
+    const cleanedTranslations = newVideo.translations 
+      ? Object.fromEntries(
+          Object.entries(newVideo.translations).filter(([_, url]) => url && url.trim() !== '')
+        )
+      : undefined;
+
     onChange([
       ...videos,
       {
@@ -83,6 +90,7 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
         position: newVideo.position || "center",
         caption: newVideo.caption,
         poster: newVideo.poster,
+        translations: cleanedTranslations,
       } as LessonVideoData,
     ]);
 
@@ -123,34 +131,57 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
         {videos.map((video, index) => (
           <div
             key={index}
-            className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700"
+            className="p-3 bg-gray-800/50 rounded-lg border border-gray-700"
           >
-            {/* Preview */}
-            <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center">
-              <Video className="h-6 w-6 text-gray-400" />
+            <div className="flex items-start gap-3 mb-2">
+              {/* Preview */}
+              <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
+                <Video className="h-6 w-6 text-gray-400" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{video.title}</p>
+                <p className="text-sm text-gray-400">
+                  Размер: {video.size} | Позиция: {video.position}
+                </p>
+                {video.caption && (
+                  <p className="text-xs text-gray-500 italic">{video.caption}</p>
+                )}
+                {video.poster && (
+                  <p className="text-xs text-green-400">✓ Превью добавлено</p>
+                )}
+              </div>
+
+              {/* Remove button */}
+              <button
+                onClick={() => handleRemoveVideo(index)}
+                className="p-2 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
+              >
+                <X className="h-4 w-4 text-red-400" />
+              </button>
             </div>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{video.title}</p>
-              <p className="text-sm text-gray-400">
-                Размер: {video.size} | Позиция: {video.position}
-              </p>
-              {video.caption && (
-                <p className="text-xs text-gray-500 italic">{video.caption}</p>
-              )}
-              {video.poster && (
-                <p className="text-xs text-green-400">✓ Превью добавлено</p>
-              )}
-            </div>
-
-            {/* Remove button */}
-            <button
-              onClick={() => handleRemoveVideo(index)}
-              className="p-2 hover:bg-red-500/20 rounded transition-colors"
-            >
-              <X className="h-4 w-4 text-red-400" />
-            </button>
+            {/* Translations info */}
+            {video.translations && Object.keys(video.translations).length > 0 && (
+              <div className="mt-2 pt-2 border-t border-gray-700">
+                <p className="text-xs text-purple-400 mb-1">
+                  🌍 Переводы ({Object.keys(video.translations).length}):
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(video.translations).map(([lang, url]) => (
+                    url && (
+                      <span
+                        key={lang}
+                        className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs"
+                      >
+                        {lang.toUpperCase()}
+                      </span>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -293,6 +324,54 @@ export default function VideoUploader({ videos, onChange }: VideoUploaderProps) 
               <option value="center">По центру</option>
               <option value="right">Справа</option>
             </select>
+          </div>
+
+          {/* Video Translations */}
+          <div className="border-2 border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
+            <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
+              <span>🌍</span> Переводы ЭТОГО видео (опционально)
+            </h4>
+            <p className="text-xs text-gray-400 mb-3">
+              Укажите URL видео на других языках. Если перевод не указан, будет показано оригинальное видео.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { code: 'ru', name: '🇷🇺 Русский' },
+                { code: 'en', name: '🇬🇧 Английский' },
+                { code: 'uk', name: '🇺🇦 Украинский' },
+                { code: 'de', name: '🇩🇪 Германский' },
+                { code: 'pl', name: '🇵🇱 Польский' },
+                { code: 'nl', name: '🇳🇱 Нидерланды' },
+                { code: 'ro', name: '🇷🇴 Румыния/Молдова' },
+                { code: 'hu', name: '🇭🇺 Венгрия' },
+              ].map((lang) => (
+                <div key={lang.code} className="space-y-1">
+                  <label className="block text-xs font-medium text-gray-300">
+                    {lang.name}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://youtube.com/watch?v=..."
+                    value={newVideo.translations?.[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTranslations = {
+                        ...newVideo.translations,
+                        [lang.code]: e.target.value
+                      };
+                      setNewVideo({ ...newVideo, translations: newTranslations });
+                    }}
+                    className="w-full px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-purple-500 focus:outline-none text-xs"
+                  />
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-xs text-blue-300">
+                💡 <strong>Совет:</strong> Запишите это видео на разных языках, загрузите на YouTube и вставьте ссылки выше. Пользователи увидят видео на своем языке!
+              </p>
+            </div>
           </div>
 
           {/* Action buttons */}

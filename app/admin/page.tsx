@@ -763,58 +763,6 @@ export default function AdminPage() {
                   />
                 </div>
 
-                {/* Video Translations */}
-                <div className="border-2 border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
-                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                    <span>🌍</span> Переводы видео (опционально)
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Укажите URL видео на разных языках. Если перевод не указан, будет показано оригинальное видео.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { code: 'ru', name: '🇷🇺 Русский' },
-                      { code: 'en', name: '🇬🇧 Английский' },
-                      { code: 'uk', name: '🇺🇦 Украинский' },
-                      { code: 'de', name: '🇩🇪 Германский' },
-                      { code: 'pl', name: '🇵🇱 Польский' },
-                      { code: 'nl', name: '🇳🇱 Нидерланды' },
-                      { code: 'ro', name: '🇷🇴 Румыния/Молдова' },
-                      { code: 'hu', name: '🇭🇺 Венгрия' },
-                    ].map((lang) => (
-                      <div key={lang.code} className="space-y-2">
-                        <label className="block text-sm font-medium">
-                          {lang.name}
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="https://youtube.com/watch?v=..."
-                          value={editForm.translations?.[lang.code]?.videoUrl || ''}
-                          onChange={(e) => {
-                            const currentTranslation = editForm.translations?.[lang.code] || { title: '', description: '' };
-                            const newTranslations = {
-                              ...editForm.translations,
-                              [lang.code]: {
-                                ...currentTranslation,
-                                videoUrl: e.target.value || undefined
-                              }
-                            };
-                            setEditForm({ ...editForm, translations: newTranslations });
-                          }}
-                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:border-purple-500 focus:outline-none text-sm"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                    <p className="text-xs text-purple-300">
-                      💡 <strong>Совет:</strong> Запишите видео на разных языках, загрузите на YouTube и вставьте ссылки сюда. Пользователи автоматически увидят видео на своем языке!
-                    </p>
-                  </div>
-                </div>
-
                 {/* Action Buttons */}
                 <div className="flex gap-4 pt-4">
                   <button
