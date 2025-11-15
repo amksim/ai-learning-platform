@@ -497,7 +497,7 @@ export default function LessonPage() {
                 </div>
               </div>
               <a
-                href="https://t.me/yoursupport"
+                href="https://t.me/AlLearning_Help"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
