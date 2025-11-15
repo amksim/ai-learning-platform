@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, ArrowRight, ArrowLeft, BookOpen } from "lucide-react";
+import { CheckCircle, ArrowRight, ArrowLeft, BookOpen, ExternalLink } from "lucide-react";
 import { Level } from "@/lib/courseLevels";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,33 @@ import { Button } from "@/components/ui/Button";
 import { getTranslatedContent } from "@/lib/translateContent";
 import LessonImage from "@/components/LessonImage";
 import LessonVideo from "@/components/LessonVideo";
+
+// Функция для парсинга текста и создания кликабельных ссылок
+const parseTextWithLinks = (text: string) => {
+  // Regex для поиска URL
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    // Если это URL
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 underline decoration-blue-400/50 hover:decoration-blue-300 transition-all font-medium bg-blue-500/10 px-1.5 py-0.5 rounded hover:bg-blue-500/20"
+        >
+          {part}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      );
+    }
+    // Обычный текст
+    return <span key={index}>{part}</span>;
+  });
+};
 
 // Lesson content is now loaded from localStorage
 // Default lessons are managed in admin panel
@@ -428,7 +455,7 @@ export default function LessonPage() {
               {lesson.sections.find((s: any) => s.title === "Практическое задание") && (
                 <div className="p-6 rounded-xl bg-gradient-to-br from-gray-700/40 via-purple-800/20 to-gray-700/40 border border-purple-400/30 backdrop-blur-sm">
                   <p className="text-base leading-relaxed text-gray-200">
-                    {lesson.sections.find((s: any) => s.title === "Практическое задание")?.content}
+                    {parseTextWithLinks(lesson.sections.find((s: any) => s.title === "Практическое задание")?.content || "")}
                   </p>
                 </div>
               )}
@@ -442,7 +469,7 @@ export default function LessonPage() {
                         <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-sm font-bold text-white shadow-md">
                           {index + 1}
                         </div>
-                        <span className="text-gray-300 pt-0.5">{task}</span>
+                        <span className="text-gray-300 pt-0.5">{parseTextWithLinks(task)}</span>
                       </li>
                     ))}
                   </ul>
