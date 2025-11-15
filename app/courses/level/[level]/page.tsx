@@ -394,7 +394,8 @@ export default function LessonPage() {
                           key={`video-${videoIndex}`} 
                           video={video} 
                           language={language}
-                          translations={currentLevel.translations}
+                          videoIndex={videoIndex}
+                          lessonId={currentLevel.id}
                         />
                       ))}
                     </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize2, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play, Pause, Volume2, VolumeX, Maximize2, X, CheckCircle2 } from "lucide-react";
 import VideoModal from "./VideoModal";
 
 export interface LessonVideoData {
@@ -11,12 +11,14 @@ export interface LessonVideoData {
   position: "left" | "center" | "right";
   caption?: string;
   poster?: string; // Превью видео
+  translations?: Record<string, string>; // Переводы ЭТОГО видео: { en: "url", uk: "url", ... }
 }
 
 interface LessonVideoProps {
   video: LessonVideoData;
   language?: string; // Текущий язык пользователя
-  translations?: Record<string, { videoUrl?: string }>; // Переводы с URL видео
+  videoIndex?: number; // Индекс видео в уроке
+  lessonId?: number; // ID урока для сохранения прогресса
 }
 
 const sizeClasses = {
@@ -62,15 +64,35 @@ const getEmbedUrl = (url: string): { embedUrl: string; isExternal: boolean } => 
   return { embedUrl: url, isExternal: false };
 };
 
-export default function LessonVideo({ video, language = 'ru', translations }: LessonVideoProps) {
-  // Проверяем есть ли переведенное видео для текущего языка
-  const translatedVideoUrl = translations?.[language]?.videoUrl;
+export default function LessonVideo({ video, language = 'ru', videoIndex = 0, lessonId }: LessonVideoProps) {
+  // Проверяем есть ли переведенное видео для текущего языка в самом видео
+  const translatedVideoUrl = video.translations?.[language];
   // Используем переведенное видео если есть, иначе оригинальное
   const videoUrl = translatedVideoUrl || video.url;
   
   const [showModal, setShowModal] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isWatched, setIsWatched] = useState(false);
+  
+  // Загружаем статус просмотра из localStorage
+  useEffect(() => {
+    if (lessonId) {
+      const watchedKey = `video-watched-${lessonId}-${videoIndex}`;
+      const watched = localStorage.getItem(watchedKey) === 'true';
+      setIsWatched(watched);
+    }
+  }, [lessonId, videoIndex]);
+  
+  // Отмечаем видео как просмотренное при воспроизведении
+  const handleVideoPlay = () => {
+    setIsPlaying(true);
+    if (lessonId && !isWatched) {
+      const watchedKey = `video-watched-${lessonId}-${videoIndex}`;
+      localStorage.setItem(watchedKey, 'true');
+      setIsWatched(true);
+    }
+  };
   
   const { embedUrl, isExternal } = getEmbedUrl(videoUrl);
   
@@ -93,16 +115,24 @@ export default function LessonVideo({ video, language = 'ru', translations }: Le
             WebkitBackdropFilter: 'blur(16px)',
           }}
         >
+          {/* Большая галочка для просмотренных видео */}
+          {isWatched && (
+            <div className="absolute top-4 left-4 z-20 bg-green-500 rounded-full p-2 shadow-lg animate-bounce">
+              <CheckCircle2 className="h-8 w-8 text-white" strokeWidth={3} />
+            </div>
+          )}
+          
           {/* Video Player */}
           <div className="relative aspect-video">
             {isExternal ? (
-              // YouTube/Vimeo iframe
+              // YouTube/Vimeo iframe - отмечаем как просмотренное при загрузке
               <iframe
                 src={embedUrl}
                 className="w-full h-full rounded-2xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={video.title}
+                onLoad={() => handleVideoPlay()}
               />
             ) : (
               // Direct video file
@@ -111,7 +141,7 @@ export default function LessonVideo({ video, language = 'ru', translations }: Le
                 poster={video.poster}
                 preload="metadata"
                 controls
-                onPlay={() => setIsPlaying(true)}
+                onPlay={handleVideoPlay}
                 onPause={() => setIsPlaying(false)}
                 onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
               >
