@@ -67,8 +67,14 @@ const getEmbedUrl = (url: string): { embedUrl: string; isExternal: boolean } => 
 export default function LessonVideo({ video, language = 'ru', videoIndex = 0, lessonId }: LessonVideoProps) {
   // Проверяем есть ли переведенное видео для текущего языка в самом видео
   const translatedVideoUrl = video.translations?.[language];
-  // Используем переведенное видео если есть, иначе оригинальное
-  const videoUrl = translatedVideoUrl || video.url;
+  
+  // ЛОГИКА:
+  // - Если русский язык -> показываем оригинал (video.url)
+  // - Если другой язык И есть перевод -> показываем перевод
+  // - Если другой язык И НЕТ перевода -> НЕ показываем видео (null)
+  const videoUrl = language === 'ru' 
+    ? video.url 
+    : translatedVideoUrl;
   
   const [showModal, setShowModal] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -93,6 +99,36 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
       setIsWatched(true);
     }
   };
+  
+  // Если нет видео для текущего языка - показываем заглушку
+  if (!videoUrl) {
+    return (
+      <div className="w-full">
+        <div 
+          className="relative group overflow-hidden rounded-lg border-2 border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 p-8"
+          style={{
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        >
+          <div className="text-center">
+            <div className="mb-4">
+              <span className="text-6xl">🎬</span>
+            </div>
+            <h4 className="text-xl font-bold mb-2 text-yellow-400">{video.title}</h4>
+            <p className="text-gray-400 mb-4">
+              Видео на <strong className="text-yellow-400 uppercase">{language}</strong> языке пока не добавлено
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <span className="text-sm text-yellow-300">
+                💡 Переключитесь на русский язык чтобы посмотреть оригинал
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   const { embedUrl, isExternal } = getEmbedUrl(videoUrl);
   
