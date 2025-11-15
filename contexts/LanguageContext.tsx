@@ -18,7 +18,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const savedLanguage = localStorage.getItem("language");
     if (savedLanguage) {
       // Check if language is valid
-      const validLanguages: Language[] = ["ru", "en", "uk", "ro", "pl", "es", "de", "fr", "it", "pt", "nl", "sv", "no", "da", "fi", "tr", "ar", "zh", "ja", "ko", "hi", "th", "vi", "id"];
+      const validLanguages: Language[] = ["ru", "en", "uk", "de", "pl", "nl", "ro", "hu"];
       if (validLanguages.includes(savedLanguage as Language)) {
         setLanguage(savedLanguage as Language);
       }

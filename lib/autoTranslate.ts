@@ -5,32 +5,15 @@ export const languageNames: Record<string, string> = {
   ru: "Русский",
   en: "English",
   uk: "Українська",
-  es: "Español",
   de: "Deutsch",
-  fr: "Français",
-  it: "Italiano",
-  pt: "Português",
   pl: "Polski",
   nl: "Nederlands",
-  sv: "Svenska",
-  no: "Norsk",
-  da: "Dansk",
-  fi: "Suomi",
-  tr: "Türkçe",
-  ar: "العربية",
-  zh: "中文",
-  ja: "日本語",
-  ko: "한국어",
-  hi: "हिन्दी",
-  th: "ไทย",
-  vi: "Tiếng Việt",
-  id: "Bahasa Indonesia",
   ro: "Română",
+  hu: "Magyar",
 };
 
 // Simple translation map for common course-related terms
 const translationMap: Record<string, Record<string, string>> = {
-  // English
   en: {
     "Урок": "Lesson",
     "Описание": "Description",
@@ -42,19 +25,6 @@ const translationMap: Record<string, Record<string, string>> = {
     "Средний": "Intermediate",
     "Продвинутый": "Advanced",
   },
-  // Spanish
-  es: {
-    "Урок": "Lección",
-    "Описание": "Descripción",
-    "Практика": "Práctica",
-    "Задание": "Tarea",
-    "Бесплатный": "Gratis",
-    "Платный": "Pagado",
-    "Начальный": "Principiante",
-    "Средний": "Intermedio",
-    "Продвинутый": "Avanzado",
-  },
-  // German
   de: {
     "Урок": "Lektion",
     "Описание": "Beschreibung",
@@ -66,19 +36,50 @@ const translationMap: Record<string, Record<string, string>> = {
     "Средний": "Fortgeschritten",
     "Продвинутый": "Experte",
   },
-  // French
-  fr: {
-    "Урок": "Leçon",
-    "Описание": "Description",
-    "Практика": "Pratique",
-    "Задание": "Tâche",
-    "Бесплатный": "Gratuit",
-    "Платный": "Payant",
-    "Начальный": "Débutant",
-    "Средний": "Intermédiaire",
-    "Продвинутый": "Avancé",
+  pl: {
+    "Урок": "Lekcja",
+    "Описание": "Opis",
+    "Практика": "Praktyka",
+    "Задание": "Zadanie",
+    "Бесплатный": "Darmowy",
+    "Платный": "Płatny",
+    "Начальный": "Początkujący",
+    "Средний": "Średniozaawansowany",
+    "Продвинутый": "Zaawansowany",
   },
-  // Add more as needed - this is just for basic terms
+  nl: {
+    "Урок": "Les",
+    "Описание": "Beschrijving",
+    "Практика": "Praktijk",
+    "Задание": "Taak",
+    "Бесплатный": "Gratis",
+    "Платный": "Betaald",
+    "Начальный": "Beginner",
+    "Средний": "Gemiddeld",
+    "Продвинутый": "Gevorderd",
+  },
+  ro: {
+    "Урок": "Lecție",
+    "Описание": "Descriere",
+    "Практика": "Practică",
+    "Задание": "Sarcină",
+    "Бесплатный": "Gratuit",
+    "Платный": "Plătit",
+    "Начальный": "Începător",
+    "Средний": "Intermediar",
+    "Продвинутый": "Avansat",
+  },
+  hu: {
+    "Урок": "Lekció",
+    "Описание": "Leírás",
+    "Практика": "Gyakorlat",
+    "Задание": "Feladat",
+    "Бесплатный": "Ingyenes",
+    "Платный": "Fizetős",
+    "Начальный": "Kezdő",
+    "Средний": "Középhaladó",
+    "Продвинутый": "Haladó",
+  },
 };
 
 // Auto-translate function - keeps original if translation not available

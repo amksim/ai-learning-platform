@@ -11,33 +11,21 @@ export interface TranslatedContent {
 const translations: Record<string, Record<string, string>> = {
   // Common words
   "Урок": {
-    en: "Lesson", es: "Lección", de: "Lektion", fr: "Leçon", it: "Lezione",
-    pt: "Lição", pl: "Lekcja", nl: "Les", sv: "Lektion", no: "Leksjon",
-    da: "Lektion", fi: "Oppitunti", tr: "Ders", ar: "درس", zh: "课程",
-    ja: "レッスン", ko: "수업", hi: "पाठ", th: "บทเรียน", vi: "Bài học", id: "Pelajaran"
+    en: "Lesson", uk: "Урок", de: "Lektion", pl: "Lekcja", nl: "Les", ro: "Lecție", hu: "Lekció"
   },
   "Введение": {
-    en: "Introduction", es: "Introducción", de: "Einführung", fr: "Introduction", it: "Introduzione",
-    pt: "Introdução", pl: "Wprowadzenie", nl: "Inleiding", sv: "Introduktion", no: "Introduksjon",
-    da: "Introduktion", fi: "Johdanto", tr: "Giriş", ar: "مقدمة", zh: "介绍",
-    ja: "紹介", ko: "소개", hi: "परिचय", th: "บทนำ", vi: "Giới thiệu", id: "Pengenalan"
+    en: "Introduction", uk: "Вступ", de: "Einführung", pl: "Wprowadzenie", nl: "Inleiding", ro: "Introducere", hu: "Bevezetés"
   },
   "Основы": {
-    en: "Basics", es: "Básicos", de: "Grundlagen", fr: "Bases", it: "Basi",
-    pt: "Básico", pl: "Podstawy", nl: "Basis", sv: "Grunder", no: "Grunnleggende",
-    da: "Grundlæggende", fi: "Perusteet", tr: "Temel", ar: "الأساسيات", zh: "基础",
-    ja: "基本", ko: "기초", hi: "मूल बातें", th: "พื้นฐาน", vi: "Cơ bản", id: "Dasar"
+    en: "Basics", uk: "Основи", de: "Grundlagen", pl: "Podstawy", nl: "Basis", ro: "Bazele", hu: "Alapok"
   },
   "Практика": {
-    en: "Practice", es: "Práctica", de: "Praxis", fr: "Pratique", it: "Pratica",
-    pt: "Prática", pl: "Praktyka", nl: "Praktijk", sv: "Praktik", no: "Praksis",
-    da: "Praksis", fi: "Harjoitus", tr: "Pratik", ar: "ممارسة", zh: "实践",
-    ja: "練習", ko: "연습", hi: "अभ्यास", th: "ปฏิบัติ", vi: "Thực hành", id: "Praktek"
+    en: "Practice", uk: "Практика", de: "Praxis", pl: "Praktyka", nl: "Praktijk", ro: "Practică", hu: "Gyakorlat"
   },
 };
 
-// Supported languages
-const supportedLanguages = ["en", "uk", "es", "de", "fr", "it", "pt", "pl", "nl", "sv", "no", "da", "fi", "tr", "ar", "zh", "ja", "ko", "hi", "th", "vi", "id", "ro"];
+// Supported languages - only 8 selected languages
+const supportedLanguages = ["en", "uk", "de", "pl", "nl", "ro", "hu"];
 
 // Translate a single text
 function translateText(text: string, targetLang: string): string {

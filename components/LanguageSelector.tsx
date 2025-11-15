@@ -11,9 +11,7 @@ export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
   const languages: Language[] = [
-    "ru", "en", "uk", "es", "de", "fr", "it", "pt", "pl", "nl", 
-    "sv", "no", "da", "fi", "tr", "ar", "zh", "ja", "ko", "hi", 
-    "th", "vi", "id", "ro"
+    "ru", "en", "uk", "de", "pl", "nl", "ro", "hu"
   ];
 
   return (

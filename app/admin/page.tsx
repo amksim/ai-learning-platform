@@ -774,14 +774,13 @@ export default function AdminPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      { code: 'en', name: '🇬🇧 English' },
-                      { code: 'es', name: '🇪🇸 Español' },
-                      { code: 'de', name: '🇩🇪 Deutsch' },
-                      { code: 'fr', name: '🇫🇷 Français' },
-                      { code: 'it', name: '🇮🇹 Italiano' },
-                      { code: 'pt', name: '🇵🇹 Português' },
-                      { code: 'pl', name: '🇵🇱 Polski' },
-                      { code: 'uk', name: '🇺🇦 Українська' },
+                      { code: 'en', name: '🇬🇧 Английский' },
+                      { code: 'uk', name: '🇺🇦 Украинский' },
+                      { code: 'de', name: '🇩🇪 Германский' },
+                      { code: 'pl', name: '🇵🇱 Польский' },
+                      { code: 'nl', name: '🇳🇱 Нидерланды' },
+                      { code: 'ro', name: '🇷🇴 Румыния/Молдова' },
+                      { code: 'hu', name: '🇭🇺 Венгрия' },
                     ].map((lang) => (
                       <div key={lang.code} className="space-y-2">
                         <label className="block text-sm font-medium">
