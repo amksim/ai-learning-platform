@@ -99,9 +99,12 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
   // Debug logging
   console.log('🎬 Video Debug:', {
     originalUrl: video.url,
+    translatedUrl: translatedVideoUrl,
+    currentLanguage: language,
     embedUrl,
     isExternal,
-    title: video.title
+    title: video.title,
+    allTranslations: video.translations
   });
 
   return (
@@ -122,11 +125,21 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
             </div>
           )}
           
+          {/* Индикатор языка видео */}
+          {translatedVideoUrl && (
+            <div className="absolute top-4 right-4 z-20 bg-blue-500/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
+              <p className="text-white text-xs font-bold uppercase flex items-center gap-1">
+                <span>🌍</span> {language}
+              </p>
+            </div>
+          )}
+          
           {/* Video Player */}
           <div className="relative aspect-video">
             {isExternal ? (
               // YouTube/Vimeo iframe - отмечаем как просмотренное при загрузке
               <iframe
+                key={embedUrl}
                 src={embedUrl}
                 className="w-full h-full rounded-2xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -137,6 +150,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
             ) : (
               // Direct video file
               <video
+                key={embedUrl}
                 className="w-full h-full object-cover rounded-2xl"
                 poster={video.poster}
                 preload="metadata"
