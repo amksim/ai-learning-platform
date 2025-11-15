@@ -19,9 +19,6 @@ export interface Level {
   images?: LessonImageData[]; // Картинки урока
   videos?: LessonVideoData[]; // Видео урока
   displayOrder?: number; // Порядок отображения
-  supportEmail?: string; // Email поддержки
-  supportTelegram?: string; // Telegram поддержки
-  supportDiscord?: string; // Discord поддержки
 }
 
 // 🌊 ПОЛНЫЙ КУРС "СОЗДАВАЙ С AI" - НАЧАЛЬНАЯ СТРУКТУРА

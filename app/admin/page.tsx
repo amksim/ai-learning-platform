@@ -87,9 +87,6 @@ export default function AdminPage() {
           translations: course.translations || {},
           images: course.images || [],
           videos: course.videos || [],
-          supportEmail: course.support_email || "",
-          supportTelegram: course.support_telegram || "",
-          supportDiscord: course.support_discord || "",
           displayOrder: course.display_order || course.id
         }));
         
@@ -208,9 +205,6 @@ export default function AdminPage() {
         is_free: editForm.isFree || false,
         images: editForm.images || [],
         videos: editForm.videos || [],
-        support_email: editForm.supportEmail || "",
-        support_telegram: editForm.supportTelegram || "",
-        support_discord: editForm.supportDiscord || "",
         translations: autoTranslateCourseContent(
           editForm.title || '', 
           editForm.description || '',
@@ -264,10 +258,7 @@ export default function AdminPage() {
       isFree: previousLesson?.isFree || false,
       blockName: previousLesson?.blockName || "", // Copy blockName to keep in same category
       images: [],
-      videos: [],
-      supportEmail: "",
-      supportTelegram: "",
-      supportDiscord: ""
+      videos: []
     });
   };
 
@@ -317,9 +308,6 @@ export default function AdminPage() {
         is_free: editForm.isFree || false,
         images: editForm.images || [],
         videos: editForm.videos || [],
-        support_email: editForm.supportEmail || "",
-        support_telegram: editForm.supportTelegram || "",
-        support_discord: editForm.supportDiscord || "",
         display_order: displayOrder,
         translations: autoTranslateCourseContent(
           editForm.title || '', 
@@ -737,46 +725,6 @@ export default function AdminPage() {
                       />
                     </div>
                   )}
-                </div>
-
-                {/* Support Contacts */}
-                <div className="border-2 border-cyan-500/30 rounded-lg p-4 bg-cyan-500/5">
-                  <h3 className="text-lg font-bold text-cyan-400 mb-3">💬 Контакты поддержки</h3>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Если оставишь пустым - блок поддержки не будет показан в уроке
-                  </p>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-bold mb-2 text-cyan-400">📧 Email</label>
-                      <input
-                        type="email"
-                        value={editForm.supportEmail || ""}
-                        onChange={(e) => setEditForm({ ...editForm, supportEmail: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border-2 border-cyan-700 focus:border-cyan-500 text-white transition-all"
-                        placeholder="support@yourdomain.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold mb-2 text-cyan-400">✈️ Telegram</label>
-                      <input
-                        type="text"
-                        value={editForm.supportTelegram || ""}
-                        onChange={(e) => setEditForm({ ...editForm, supportTelegram: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border-2 border-cyan-700 focus:border-cyan-500 text-white transition-all"
-                        placeholder="https://t.me/yoursupport"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold mb-2 text-cyan-400">💭 Discord</label>
-                      <input
-                        type="text"
-                        value={editForm.supportDiscord || ""}
-                        onChange={(e) => setEditForm({ ...editForm, supportDiscord: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border-2 border-cyan-700 focus:border-cyan-500 text-white transition-all"
-                        placeholder="https://discord.gg/yourserver"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Free Lesson Toggle */}

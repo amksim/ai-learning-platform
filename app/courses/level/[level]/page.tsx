@@ -165,10 +165,7 @@ export default function LessonPage() {
             translations: course.translations || {},
             displayOrder: course.display_order || course.id,
             images: course.images || [],
-            videos: course.videos || [],
-            supportEmail: course.support_email || "",
-            supportTelegram: course.support_telegram || "",
-            supportDiscord: course.support_discord || ""
+            videos: course.videos || []
           }));
           
           // СОРТИРОВКА: Бесплатные наверху, потом платные
@@ -482,61 +479,36 @@ export default function LessonPage() {
           </Card>
         )}
 
-        {/* Support Section - показываем только если есть хотя бы один контакт */}
-        {(currentLevel.supportEmail || currentLevel.supportTelegram || currentLevel.supportDiscord) && (
-          <Card className="mb-8 border-2 border-blue-500/30 bg-gradient-to-br from-blue-900/20 via-cyan-900/10 to-blue-900/20 premium-shadow backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
-                  <span className="text-2xl">💬</span>
+        {/* Support Section - на каждом уроке */}
+        <Card className="mb-8 border-2 border-blue-500/30 bg-gradient-to-br from-blue-900/20 via-cyan-900/10 to-blue-900/20 premium-shadow backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
+                  <span className="text-3xl">💬</span>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                    Нужна помощь?
+                <div>
+                  <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-1">
+                    Остались вопросы?
                   </h3>
-                  <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-                    Если что-то непонятно или возникли вопросы по этому уроку — мы всегда готовы помочь! Свяжитесь с нами удобным способом:
+                  <p className="text-gray-300 text-sm">
+                    Если что-то непонятно — обратитесь в поддержку, мы поможем!
                   </p>
-                  <div className="flex flex-wrap gap-3">
-                    {currentLevel.supportEmail && (
-                      <a
-                        href={`mailto:${currentLevel.supportEmail}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 hover:border-blue-400/50 text-blue-300 hover:text-blue-200 transition-all font-medium"
-                      >
-                        <span>📧</span>
-                        Email
-                      </a>
-                    )}
-                    {currentLevel.supportTelegram && (
-                      <a
-                        href={currentLevel.supportTelegram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 hover:border-blue-400/50 text-blue-300 hover:text-blue-200 transition-all font-medium"
-                      >
-                        <span>✈️</span>
-                        Telegram
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                    {currentLevel.supportDiscord && (
-                      <a
-                        href={currentLevel.supportDiscord}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 hover:border-blue-400/50 text-blue-300 hover:text-blue-200 transition-all font-medium"
-                      >
-                        <span>💭</span>
-                        Discord
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <a
+                href="https://t.me/yoursupport"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+              >
+                <span className="text-xl">💬</span>
+                Написать в поддержку
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Navigation */}
         <div className="flex items-center justify-between">
