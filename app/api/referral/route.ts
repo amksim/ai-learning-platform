@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
+  // Получаем токен из cookies
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get('sb-access-token')?.value || 
+                      cookieStore.get('supabase-auth-token')?.value;
+  
+  // Создаём клиент с токеном пользователя
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: accessToken ? {
+          Authorization: `Bearer ${accessToken}`
+        } : {}
+      }
+    }
   );
 
   try {
@@ -12,7 +26,7 @@ export async function GET(request: NextRequest) {
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(accessToken);
 
     if (authError || !user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
