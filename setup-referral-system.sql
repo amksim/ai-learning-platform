@@ -159,3 +159,8 @@ COMMENT ON TABLE referrals IS 'История рефералов и начисл
 COMMENT ON COLUMN users.referral_code IS 'Уникальный реферальный код пользователя';
 COMMENT ON COLUMN users.referred_by IS 'Кто пригласил этого пользователя';
 COMMENT ON COLUMN users.balance IS 'Баланс заработанных на рефералах денег';
+
+-- ⚠️ ВАЖНО: Генерируем реферальные коды для существующих пользователей
+UPDATE users
+SET referral_code = generate_referral_code()
+WHERE referral_code IS NULL;

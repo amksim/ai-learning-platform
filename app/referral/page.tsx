@@ -29,7 +29,7 @@ interface ReferralData {
 }
 
 export default function ReferralPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,22 +43,32 @@ export default function ReferralPage() {
   });
 
   useEffect(() => {
+    // Не редиректим пока идёт загрузка
+    if (authLoading) {
+      return;
+    }
+    
     if (!user) {
       router.push("/login");
       return;
     }
+    
     loadReferralData();
-  }, [user]);
+  }, [user, authLoading, router]);
 
   const loadReferralData = async () => {
     try {
       const response = await fetch("/api/referral");
       const result = await response.json();
+      console.log("📊 Referral API Response:", result);
       if (result.success) {
+        console.log("✅ Referral Code:", result.data.referralCode);
         setData(result.data);
+      } else {
+        console.error("❌ API Error:", result.error);
       }
     } catch (error) {
-      console.error("Error loading referral data:", error);
+      console.error("❌ Error loading referral data:", error);
     } finally {
       setLoading(false);
     }
@@ -231,18 +241,28 @@ export default function ReferralPage() {
             <CardDescription>Поделитесь этой ссылкой и зарабатывайте $50 за каждого друга, который оплатит курс</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={referralLink}
-                readOnly
-                className="flex-1 px-4 py-3 bg-gray-800/50 border border-green-500/30 rounded-lg text-white"
-              />
-              <Button onClick={copyReferralLink} className="bg-green-500 hover:bg-green-600">
-                <Copy className="h-4 w-4 mr-2" />
-                Скопировать
-              </Button>
-            </div>
+            {!data?.referralCode ? (
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-sm mb-2">⚠️ Реферальный код не найден</p>
+                <p className="text-gray-400 text-xs">
+                  Пожалуйста, запустите SQL скрипт <code className="bg-gray-800 px-2 py-1 rounded">setup-referral-system.sql</code> в Supabase SQL Editor
+                </p>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={referralLink}
+                  readOnly
+                  placeholder="Генерация ссылки..."
+                  className="flex-1 px-4 py-3 bg-gray-800/50 border border-green-500/30 rounded-lg text-white"
+                />
+                <Button onClick={copyReferralLink} className="bg-green-500 hover:bg-green-600">
+                  <Copy className="h-4 w-4 mr-2" />
+                  Скопировать
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
