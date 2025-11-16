@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Trash2, Edit, Save, X, ArrowUp, ArrowDown, Sparkles, Code, Lock, TrendingUp, Settings, Terminal, Database, Zap, Trophy, Rocket, CheckCircle, Users, User } from "lucide-react";
+import { Plus, Trash2, Edit, Save, X, ArrowUp, ArrowDown, Sparkles, Code, Lock, TrendingUp, Settings, Terminal, Database, Zap, Trophy, Rocket, CheckCircle, Users, User, DollarSign } from "lucide-react";
 import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
 import { useAuth } from "@/contexts/AuthContext";
 import { autoTranslateCourseContent } from "@/lib/translateContent";
 import ImageUploader from "@/components/admin/ImageUploader";
 import VideoUploader from "@/components/admin/VideoUploader";
+import { Button } from "@/components/ui/Button";
 
 // Available icons
 const iconOptions = [
@@ -434,11 +436,20 @@ export default function AdminPage() {
     <div className="min-h-screen py-20 px-4">
       <div className="container mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Админ-панель курса
-            </span>
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-4xl font-bold">
+              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                Админ-панель курса
+              </span>
+            </h1>
+            
+            <Link href="/admin/withdrawals">
+              <Button size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+                <DollarSign className="h-5 w-5 mr-2" />
+                Выводы средств
+              </Button>
+            </Link>
+          </div>
 
           {/* Управление статистикой */}
           <Card className="mb-6 glass border-2 border-purple-500/30">
