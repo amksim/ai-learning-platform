@@ -75,13 +75,25 @@ export default function ReferralPage() {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
+      
+      console.log("📡 API Response status:", response.status);
+      console.log("📡 API Response ok:", response.ok);
+      
       const result = await response.json();
       console.log("📊 Referral API Response:", result);
+      console.log("📊 Response success:", result.success);
+      console.log("📊 Response data:", result.data);
+      
       if (result.success) {
-        console.log("✅ Referral Code:", result.data.referralCode);
+        console.log("✅ Referral Code:", result.data?.referralCode);
+        console.log("✅ Referral Code type:", typeof result.data?.referralCode);
+        console.log("✅ Is null?", result.data?.referralCode === null);
+        console.log("✅ Is undefined?", result.data?.referralCode === undefined);
+        console.log("✅ Full data object:", JSON.stringify(result.data, null, 2));
         setData(result.data);
       } else {
         console.error("❌ API Error:", result.error);
+        console.error("❌ Full error:", result);
       }
     } catch (error) {
       console.error("❌ Error loading referral data:", error);

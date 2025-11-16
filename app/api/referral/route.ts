@@ -37,30 +37,62 @@ export async function GET(request: NextRequest) {
     }
 
     // Получаем данные пользователя с реферальной информацией
-    // Пробуем сначала profiles, потом users
+    // Пробуем сначала users, потом profiles
     let userData, userError;
+    let tableName = "";
     
-    const profilesResponse = await supabase
-      .from("profiles")
+    console.log("👤 User ID:", user.id);
+    
+    // СНАЧАЛА ПРОБУЕМ USERS
+    const usersResponse = await supabase
+      .from("users")
       .select("referral_code, balance, total_referrals, paid_referrals")
       .eq("id", user.id)
       .single();
     
-    if (profilesResponse.data) {
-      userData = profilesResponse.data;
-      userError = profilesResponse.error;
+    console.log("📊 Users table response:", usersResponse);
+    
+    if (usersResponse.data && !usersResponse.error) {
+      userData = usersResponse.data;
+      userError = usersResponse.error;
+      tableName = "users";
+      console.log("✅ Found user in 'users' table");
     } else {
-      const usersResponse = await supabase
-        .from("users")
+      console.log("❌ User not found in 'users' table, trying 'profiles'...");
+      
+      // ЕСЛИ НЕ НАШЛИ, ПРОБУЕМ PROFILES
+      const profilesResponse = await supabase
+        .from("profiles")
         .select("referral_code, balance, total_referrals, paid_referrals")
         .eq("id", user.id)
         .single();
-      userData = usersResponse.data;
-      userError = usersResponse.error;
+      
+      console.log("📊 Profiles table response:", profilesResponse);
+      
+      userData = profilesResponse.data;
+      userError = profilesResponse.error;
+      tableName = "profiles";
+      
+      if (profilesResponse.data) {
+        console.log("✅ Found user in 'profiles' table");
+      }
     }
 
+    console.log("📌 Final userData:", userData);
+    console.log("📌 Table used:", tableName);
+    console.log("📌 Referral code:", userData?.referral_code);
+
     if (userError || !userData) {
-      return NextResponse.json({ success: false, error: userError?.message || "User not found" }, { status: 500 });
+      console.error("❌ Error or no data:", userError);
+      return NextResponse.json({ 
+        success: false, 
+        error: userError?.message || "User not found",
+        debug: {
+          userId: user.id,
+          tableName,
+          error: userError
+        }
+      }, { status: 500 });
     }
 
     // Получаем список рефералов
@@ -114,16 +146,22 @@ export async function GET(request: NextRequest) {
       console.error("Error fetching withdrawals:", withdrawalsError);
     }
 
+    const responseData = {
+      referralCode: userData.referral_code,
+      balance: parseFloat(userData.balance) || 0,
+      totalReferrals: userData.total_referrals || 0,
+      paidReferrals: userData.paid_referrals || 0,
+      referrals: referralsWithEmails,
+      withdrawals: withdrawals || [],
+    };
+    
+    console.log("📤 Sending response:", responseData);
+    console.log("📤 referralCode value:", responseData.referralCode);
+    console.log("📤 referralCode type:", typeof responseData.referralCode);
+    
     return NextResponse.json({
       success: true,
-      data: {
-        referralCode: userData.referral_code,
-        balance: parseFloat(userData.balance) || 0,
-        totalReferrals: userData.total_referrals || 0,
-        paidReferrals: userData.paid_referrals || 0,
-        referrals: referralsWithEmails,
-        withdrawals: withdrawals || [],
-      },
+      data: responseData,
     });
   } catch (error) {
     console.error("Error in referral API:", error);
