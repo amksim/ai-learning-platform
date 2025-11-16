@@ -144,6 +144,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Функция для возврата средств при отклонении заявки
+CREATE OR REPLACE FUNCTION refund_withdrawal(p_user_id UUID, p_amount DECIMAL)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE users
+  SET balance = balance + p_amount
+  WHERE id = p_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
 COMMENT ON TABLE withdrawal_requests IS 'Заявки на вывод средств из реферальной программы';
 COMMENT ON TABLE referrals IS 'История рефералов и начислений';
 COMMENT ON COLUMN users.referral_code IS 'Уникальный реферальный код пользователя';
