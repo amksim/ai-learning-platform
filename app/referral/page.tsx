@@ -124,6 +124,15 @@ export default function ReferralPage() {
     }
   };
 
+  // Генерируем реферальную ссылку на клиенте
+  const [referralLink, setReferralLink] = useState("");
+
+  useEffect(() => {
+    if (data?.referralCode && typeof window !== 'undefined') {
+      setReferralLink(`${window.location.origin}?ref=${data.referralCode}`);
+    }
+  }, [data?.referralCode]);
+
   if (!user) {
     return null;
   }
@@ -135,8 +144,6 @@ export default function ReferralPage() {
       </div>
     );
   }
-
-  const referralLink = data ? `${window.location.origin}?ref=${data.referralCode}` : "";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 py-20 px-4">

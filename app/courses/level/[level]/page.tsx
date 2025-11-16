@@ -135,7 +135,7 @@ export default function LessonPage() {
   const router = useRouter();
   const params = useParams();
   const { t, language } = useLanguage();
-  const { user, updateProgress } = useAuth();
+  const { user, updateProgress, loading: authLoading } = useAuth();
   const [currentLevel, setCurrentLevel] = useState<any>(null);
   const [allLevels, setAllLevels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,11 +195,21 @@ export default function LessonPage() {
           });
           
           // ВАЖНО: Теперь ВСЕ уроки требуют логин (для сохранения прогресса)
-          if (!user) {
+          // НО не редиректим пока идёт загрузка пользователя
+          if (!authLoading && !user) {
             console.log('❌ User not logged in - redirecting to /login');
             router.push("/login");
             return;
           }
+          
+          // Если ещё идёт загрузка авторизации, не проверяем доступ
+          if (authLoading) {
+            console.log('⏳ Auth loading, waiting...');
+            return;
+          }
+          
+          // На этом этапе user точно существует (прошли проверку выше)
+          if (!user) return;
           
           // Free lessons доступны залогиненным, но по порядку!
           if (level?.isFree) {
@@ -263,7 +273,7 @@ export default function LessonPage() {
     };
     
     loadCourses();
-  }, [user, router, levelId, updateProgress]);
+  }, [user, router, levelId, updateProgress, authLoading]);
 
   // Calculate lesson navigation based on display_order, not ID
   const currentIndex = allLevels.findIndex((l: any) => l.id === levelId);
