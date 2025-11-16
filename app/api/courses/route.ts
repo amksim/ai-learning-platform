@@ -3,13 +3,16 @@ import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 // GET - получить все курсы
 export async function GET() {
+  const supabase = getSupabaseClient();
   try {
     const { data, error } = await supabase
       .from('courses')
@@ -30,6 +33,7 @@ export async function GET() {
 
 // POST - создать новый курс
 export async function POST(request: NextRequest) {
+  const supabase = getSupabaseClient();
   try {
     const body = await request.json();
     
@@ -59,6 +63,7 @@ export async function POST(request: NextRequest) {
 
 // PUT - обновить курс
 export async function PUT(request: NextRequest) {
+  const supabase = getSupabaseClient();
   try {
     const body = await request.json();
     const { id, ...updates } = body;
@@ -94,6 +99,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - удалить курс
 export async function DELETE(request: NextRequest) {
+  const supabase = getSupabaseClient();
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

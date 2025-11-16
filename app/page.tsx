@@ -1,30 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User, Trophy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import ReferralCodeHandler from "@/components/ReferralCodeHandler";
 
 export default function HomePage() {
   const { t } = useLanguage();
   const { reviews } = useReviews();
-  const searchParams = useSearchParams();
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [stats, setStats] = useState({ totalUsers: 0, activeStudents: 0 });
   const [baseActiveStudents, setBaseActiveStudents] = useState(0);
-
-  // Сохраняем реферальный код из URL
-  useEffect(() => {
-    const ref = searchParams.get('ref');
-    if (ref) {
-      localStorage.setItem('referral_code', ref);
-      console.log('✅ Реферальный код сохранён:', ref);
-    }
-  }, [searchParams]);
 
   // Загрузка статистики
   useEffect(() => {
@@ -610,6 +600,11 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
+
+      {/* Обработчик реферального кода */}
+      <Suspense fallback={null}>
+        <ReferralCodeHandler />
+      </Suspense>
     </div>
   );
 }
