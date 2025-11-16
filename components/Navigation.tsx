@@ -63,7 +63,7 @@ export function Navigation() {
               <span className="font-bold text-base sm:text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI Learning</span>
             </Link>
             
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1">
               {navItemsWithReferral.map((item) => {
                 const ItemIcon = 'icon' in item ? item.icon : null;
                 const isReferral = item.href === "/referral";
@@ -134,11 +134,11 @@ export function Navigation() {
               </div>
             ) : user ? (
               <>
-                {/* Profile button */}
+                {/* Profile button - только на больших экранах */}
                 <Link
                   href="/profile"
                   className={cn(
-                    "hidden md:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                    "hidden lg:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors",
                     pathname === "/profile" && "bg-accent"
                   )}
                   title={t.nav.profile}

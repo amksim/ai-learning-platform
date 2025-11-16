@@ -54,7 +54,7 @@ export default function MobileBottomNav() {
       {/* Маленькая плавающая кнопка поддержки */}
       <button
         onClick={() => window.open("https://t.me/AlLearning_Help", "_blank", "noopener,noreferrer")}
-        className="fixed bottom-20 right-4 z-50 md:hidden w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
+        className="fixed bottom-20 right-4 z-50 lg:hidden w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
       >
         <MessageCircle className="h-6 w-6 text-white" strokeWidth={2.5} />
         {/* Индикатор онлайн */}
@@ -63,7 +63,7 @@ export default function MobileBottomNav() {
         </div>
       </button>
       
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-t from-gray-900 via-gray-900/98 to-gray-900/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl shadow-purple-500/10">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-gradient-to-t from-gray-900 via-gray-900/98 to-gray-900/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl shadow-purple-500/10">
         <div className="flex items-center justify-around px-1 py-2 safe-area-bottom">
         {navItems.map((item) => {
           const Icon = item.icon;
