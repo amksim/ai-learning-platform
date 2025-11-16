@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { DollarSign, Copy, Users, TrendingUp, CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { DollarSign, Copy, Users, TrendingUp, CreditCard, CheckCircle2, Clock, AlertCircle, UserCheck, UserX } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface ReferralData {
@@ -351,22 +351,54 @@ export default function ReferralPage() {
               {data && data.referrals && data.referrals.length > 0 ? (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
                   {data.referrals.map((ref, index) => (
-                    <div key={index} className="p-3 bg-gray-800/30 rounded-lg border border-gray-700">
+                    <div 
+                      key={index} 
+                      className={`p-4 rounded-lg border transition-all ${
+                        ref.status === "paid" 
+                          ? "bg-green-900/20 border-green-500/30 hover:border-green-500/50" 
+                          : "bg-yellow-900/20 border-yellow-500/30 hover:border-yellow-500/50"
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-white font-medium">{ref.email}</p>
-                          <p className="text-xs text-gray-400">
-                            Регистрация: {new Date(ref.createdAt).toLocaleDateString()}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          {ref.status === "paid" ? (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
+                              <UserCheck className="h-5 w-5 text-green-400" />
+                            </div>
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20">
+                              <Clock className="h-5 w-5 text-yellow-400" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-white font-medium">{ref.email}</p>
+                            <p className="text-xs text-gray-400">
+                              Регистрация: {new Date(ref.createdAt).toLocaleDateString()}
+                            </p>
+                            {ref.status === "paid" && ref.paidAt && (
+                              <p className="text-xs text-green-400">
+                                Оплата: {new Date(ref.paidAt).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div className="text-right">
                           {ref.status === "paid" ? (
-                            <div className="flex items-center gap-1 text-green-400">
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span className="text-sm font-bold">+$50</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1 text-green-400">
+                                <CheckCircle2 className="h-5 w-5" />
+                                <span className="text-lg font-bold">+$50</span>
+                              </div>
+                              <span className="text-xs text-green-300">Засчитан</span>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-500">Не оплатил</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1 text-yellow-400">
+                                <Clock className="h-5 w-5" />
+                                <span className="text-sm font-medium">$0</span>
+                              </div>
+                              <span className="text-xs text-yellow-300">Ждём оплаты</span>
+                            </div>
                           )}
                         </div>
                       </div>
