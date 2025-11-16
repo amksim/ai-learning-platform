@@ -134,7 +134,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 3. Ждём 500ms
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // 4. Создаём профиль
+      // 4. Получаем реферальный код из localStorage
+      const referralCode = typeof window !== 'undefined' ? localStorage.getItem('referral_code') : null;
+      console.log('🔗 Реферальный код:', referralCode);
+
+      // 5. Создаём профиль
       console.log('📝 Создаём профиль...');
       const { error: profileError } = await supabase
         .from('profiles')
@@ -161,7 +165,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Profile created');
       }
 
-      // 5. Ждём ещё 500ms
+      // 6. Создаём запись в users для реферальной системы
+      console.log('📝 Создаём user для реферальной системы...');
+      const { error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: email,
+          full_name: name,
+          referred_by: referralCode || null,
+        });
+
+      if (userError) {
+        console.error('❌ User error:', userError);
+        // Игнорируем если уже существует
+        if (!userError.message.includes('duplicate') && !userError.code?.includes('23505')) {
+          console.error('User creation failed but continuing:', userError);
+        }
+      } else {
+        console.log('✅ User created');
+        
+        // Если есть реферальный код, создаём запись в referrals
+        if (referralCode) {
+          console.log('📝 Создаём запись реферала...');
+          const { error: refError } = await supabase.rpc('create_referral_record', {
+            p_referral_code: referralCode,
+            p_referred_id: authData.user.id
+          });
+          
+          if (refError) {
+            console.error('❌ Referral record error:', refError);
+          } else {
+            console.log('✅ Referral record created');
+            // Очищаем код из localStorage
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('referral_code');
+            }
+          }
+        }
+      }
+
+      // 7. Ждём ещё 500ms
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // 6. Логинимся
@@ -334,6 +378,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('✅ Подписка обновлена в базе!');
+
+    // Начисляем реферальный бонус если пользователь был приглашён
+    try {
+      console.log('💰 Проверяем реферальный бонус...');
+      const { error: bonusError } = await supabase.rpc('credit_referral_bonus', {
+        referred_user_id: user.id
+      });
+      
+      if (bonusError) {
+        console.error('❌ Ошибка начисления бонуса:', bonusError);
+      } else {
+        console.log('✅ Реферальный бонус начислен!');
+      }
+    } catch (err) {
+      console.error('❌ Ошибка при начислении реферального бонуса:', err);
+    }
 
     // КРИТИЧНО: Перезагружаем данные из базы для синхронизации
     await checkUser();

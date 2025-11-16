@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, BookOpen, FolderOpen, User, MessageCircle } from "lucide-react";
+import { Home, BookOpen, FolderOpen, User, MessageCircle, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -26,18 +26,19 @@ export default function MobileBottomNav() {
       type: "link" as const,
     },
     {
+      href: "/referral",
+      icon: DollarSign,
+      label: "Реферал",
+      isActive: pathname === "/referral",
+      type: "link" as const,
+      special: true, // Центральная кнопка
+    },
+    {
       href: "/projects",
       icon: FolderOpen,
       label: t.nav.projects || "Проекты",
       isActive: pathname === "/projects",
       type: "link" as const,
-    },
-    {
-      href: "https://t.me/AlLearning_Help",
-      icon: MessageCircle,
-      label: t.support?.button || "Поддержка",
-      isActive: false,
-      type: "support" as const,
     },
     {
       href: "/profile",
@@ -49,18 +50,31 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-t from-gray-900 via-gray-900/98 to-gray-900/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl shadow-purple-500/10">
-      <div className="flex items-center justify-around px-1 py-2 safe-area-bottom">
+    <>
+      {/* Маленькая плавающая кнопка поддержки */}
+      <button
+        onClick={() => window.open("https://t.me/AlLearning_Help", "_blank", "noopener,noreferrer")}
+        className="fixed bottom-20 right-4 z-50 md:hidden w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
+      >
+        <MessageCircle className="h-6 w-6 text-white" strokeWidth={2.5} />
+        {/* Индикатор онлайн */}
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900">
+          <div className="absolute inset-0 bg-green-400 rounded-full animate-ping" />
+        </div>
+      </button>
+      
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-t from-gray-900 via-gray-900/98 to-gray-900/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl shadow-purple-500/10">
+        <div className="flex items-center justify-around px-1 py-2 safe-area-bottom">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isSupport = item.type === "support";
+          const isSpecial = 'special' in item && item.special; // Центральная кнопка реферала
           
           const className = cn(
             "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-300 min-w-[70px]",
             item.isActive
               ? "bg-gradient-to-br from-purple-500/30 to-pink-500/30 text-white scale-105"
-              : isSupport
-                ? "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 active:scale-95"
+              : isSpecial
+                ? "text-green-400 hover:text-green-300 hover:bg-green-500/10 active:scale-95 scale-110"
                 : "text-gray-400 hover:text-white hover:bg-gray-800/50 active:scale-95"
           );
           
@@ -71,9 +85,9 @@ export default function MobileBottomNav() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl blur-md -z-10 animate-pulse" />
               )}
               
-              {/* Свечение для поддержки */}
-              {isSupport && (
-                <div className="absolute inset-0 bg-cyan-500/10 rounded-xl blur-sm -z-10" />
+              {/* Свечение для реферала */}
+              {isSpecial && (
+                <div className="absolute inset-0 bg-green-500/20 rounded-xl blur-sm -z-10 animate-pulse" />
               )}
               
               {/* Иконка с анимацией */}
@@ -82,16 +96,16 @@ export default function MobileBottomNav() {
                   className={cn(
                     "h-6 w-6 transition-all duration-300",
                     item.isActive && "scale-110 drop-shadow-lg",
-                    isSupport && "animate-pulse"
+                    isSpecial && "h-7 w-7 drop-shadow-glow"
                   )}
-                  strokeWidth={item.isActive ? 2.5 : 2}
+                  strokeWidth={item.isActive || isSpecial ? 2.5 : 2}
                 />
                 {/* Индикатор активности */}
                 {item.isActive && (
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full animate-ping" />
                 )}
-                {/* Индикатор онлайн для поддержки */}
-                {isSupport && (
+                {/* Индикатор для реферала */}
+                {isSpecial && !item.isActive && (
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full">
                     <div className="absolute inset-0 bg-green-400 rounded-full animate-ping" />
                   </div>
@@ -115,16 +129,8 @@ export default function MobileBottomNav() {
             </>
           );
           
-          // Для поддержки используем button, для остальных Link
-          return isSupport ? (
-            <button
-              key={item.href}
-              onClick={() => window.open(item.href, "_blank", "noopener,noreferrer")}
-              className={className}
-            >
-              {content}
-            </button>
-          ) : (
+          // Все элементы теперь Link
+          return (
             <Link
               key={item.href}
               href={item.href}
@@ -136,5 +142,6 @@ export default function MobileBottomNav() {
         })}
       </div>
     </nav>
+    </>
   );
 }
