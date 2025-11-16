@@ -19,14 +19,30 @@ export async function GET(request: NextRequest) {
     }
 
     // Получаем данные пользователя с реферальной информацией
-    const { data: userData, error: userError } = await supabase
-      .from("users")
+    // Пробуем сначала profiles, потом users
+    let userData, userError;
+    
+    const profilesResponse = await supabase
+      .from("profiles")
       .select("referral_code, balance, total_referrals, paid_referrals")
       .eq("id", user.id)
       .single();
+    
+    if (profilesResponse.data) {
+      userData = profilesResponse.data;
+      userError = profilesResponse.error;
+    } else {
+      const usersResponse = await supabase
+        .from("users")
+        .select("referral_code, balance, total_referrals, paid_referrals")
+        .eq("id", user.id)
+        .single();
+      userData = usersResponse.data;
+      userError = usersResponse.error;
+    }
 
-    if (userError) {
-      return NextResponse.json({ success: false, error: userError.message }, { status: 500 });
+    if (userError || !userData) {
+      return NextResponse.json({ success: false, error: userError?.message || "User not found" }, { status: 500 });
     }
 
     // Получаем список рефералов
@@ -47,14 +63,20 @@ export async function GET(request: NextRequest) {
       console.error("Error fetching referrals:", referralsError);
     }
 
-    // Получаем email рефералов
+    // Получаем email рефералов (проверяем profiles и users)
     const referralsWithEmails = referrals
       ? await Promise.all(
           referrals.map(async (ref) => {
-            const { data: refUser } = await supabase.from("users").select("email").eq("id", ref.referred_id).single();
+            // Пробуем profiles
+            let refUser = await supabase.from("profiles").select("email").eq("id", ref.referred_id).single();
+            
+            // Если нет в profiles, пробуем users
+            if (!refUser.data) {
+              refUser = await supabase.from("users").select("email").eq("id", ref.referred_id).single();
+            }
 
             return {
-              email: refUser?.email || "Unknown",
+              email: refUser.data?.email || "Unknown",
               status: ref.status,
               createdAt: ref.created_at,
               paidAt: ref.paid_at,
