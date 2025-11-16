@@ -12,21 +12,14 @@ export async function GET(request: NextRequest) {
   
   console.log("🔑 Received token:", accessToken.substring(0, 20) + "...");
   
-  // Создаём клиент с токеном пользователя
+  // Создаём клиент с токеном пользователя - БЕЗ ДОПОЛНИТЕЛЬНЫХ HEADERS!
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   try {
-    // Получаем текущего пользователя
+    // Получаем текущего пользователя - ПЕРЕДАЁМ ТОКЕН ПРЯМО!
     const {
       data: { user },
       error: authError,
