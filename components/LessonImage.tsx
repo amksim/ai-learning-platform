@@ -44,11 +44,14 @@ export default function LessonImage({ image }: LessonImageProps) {
           }}
           onClick={() => setShowModal(true)}
         >
-          {/* Image */}
+          {/* Image - сохраняем оригинальное качество и пропорции */}
           <img
             src={image.url}
             alt={image.alt}
-            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105 rounded-2xl"
+            className="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl"
+            style={{
+              imageRendering: 'auto',
+            }}
           />
 
           {/* Overlay on hover */}

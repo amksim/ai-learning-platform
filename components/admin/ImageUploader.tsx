@@ -21,15 +21,43 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert to base64
+    // Создаём Image для загрузки оригинала
+    const img = new Image();
     const reader = new FileReader();
+    
     reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setNewImage({
-        ...newImage,
-        url: base64,
-      });
+      img.onload = () => {
+        // Создаём canvas с оригинальными размерами
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          console.error('Failed to get canvas context');
+          return;
+        }
+        
+        // Отключаем сглаживание для сохранения резкости
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // Рисуем изображение
+        ctx.drawImage(img, 0, 0);
+        
+        // Конвертируем в base64 с МАКСИМАЛЬНЫМ качеством
+        // quality: 1.0 = 100% качества (без сжатия)
+        const base64 = canvas.toDataURL('image/png', 1.0);
+        
+        setNewImage({
+          ...newImage,
+          url: base64,
+        });
+      };
+      
+      img.src = event.target?.result as string;
     };
+    
     reader.readAsDataURL(file);
   };
 
