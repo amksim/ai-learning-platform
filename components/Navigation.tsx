@@ -134,6 +134,19 @@ export function Navigation() {
               </div>
             ) : user ? (
               <>
+                {/* Profile button */}
+                <Link
+                  href="/profile"
+                  className={cn(
+                    "hidden md:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                    pathname === "/profile" && "bg-accent"
+                  )}
+                  title={t.nav.profile}
+                >
+                  <User className="h-4 w-4" />
+                  <span className="text-sm">{t.nav.profile}</span>
+                </Link>
+                
                 {/* Admin panel - only for specific email */}
                 {user.email?.toLowerCase() === "kmak4551@gmail.com" && (
                   <Link
