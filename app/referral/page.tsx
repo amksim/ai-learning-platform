@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DollarSign, Copy, Users, TrendingUp, CreditCard, CheckCircle2, Clock, AlertCircle, UserCheck, UserX } from "lucide-react";
@@ -58,7 +59,22 @@ export default function ReferralPage() {
 
   const loadReferralData = async () => {
     try {
-      const response = await fetch("/api/referral");
+      // Получаем текущую сессию
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        console.error("❌ No access token found");
+        setLoading(false);
+        return;
+      }
+      
+      console.log("🔑 Access token found:", session.access_token.substring(0, 20) + "...");
+      
+      const response = await fetch("/api/referral", {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       const result = await response.json();
       console.log("📊 Referral API Response:", result);
       if (result.success) {

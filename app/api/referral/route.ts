@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
-  // Получаем токен из cookies
-  const cookieStore = cookies();
-  const accessToken = cookieStore.get('sb-access-token')?.value || 
-                      cookieStore.get('supabase-auth-token')?.value;
+  // Получаем токен из Authorization header
+  const authHeader = request.headers.get('authorization');
+  const accessToken = authHeader?.replace('Bearer ', '');
+  
+  if (!accessToken) {
+    return NextResponse.json({ success: false, error: "No authorization token" }, { status: 401 });
+  }
+  
+  console.log("🔑 Received token:", accessToken.substring(0, 20) + "...");
   
   // Создаём клиент с токеном пользователя
   const supabase = createClient(
@@ -14,9 +18,9 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       global: {
-        headers: accessToken ? {
+        headers: {
           Authorization: `Bearer ${accessToken}`
-        } : {}
+        }
       }
     }
   );

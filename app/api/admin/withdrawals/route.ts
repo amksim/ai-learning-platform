@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
 
-function createAuthenticatedClient() {
-  const cookieStore = cookies();
-  const accessToken = cookieStore.get('sb-access-token')?.value || 
-                      cookieStore.get('supabase-auth-token')?.value;
+function createAuthenticatedClient(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  const accessToken = authHeader?.replace('Bearer ', '');
+  
+  if (!accessToken) {
+    return null;
+  }
   
   return {
     client: createClient(
@@ -13,9 +15,9 @@ function createAuthenticatedClient() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: {
-          headers: accessToken ? {
+          headers: {
             Authorization: `Bearer ${accessToken}`
-          } : {}
+          }
         }
       }
     ),
@@ -25,7 +27,11 @@ function createAuthenticatedClient() {
 
 // Получить все заявки на вывод
 export async function GET(request: NextRequest) {
-  const { client: supabase, accessToken } = createAuthenticatedClient();
+  const auth = createAuthenticatedClient(request);
+  if (!auth) {
+    return NextResponse.json({ success: false, error: "No authorization token" }, { status: 401 });
+  }
+  const { client: supabase, accessToken } = auth;
 
   try {
     const {
@@ -97,7 +103,11 @@ export async function GET(request: NextRequest) {
 
 // Одобрить или отклонить заявку
 export async function PATCH(request: NextRequest) {
-  const { client: supabase, accessToken } = createAuthenticatedClient();
+  const auth = createAuthenticatedClient(request);
+  if (!auth) {
+    return NextResponse.json({ success: false, error: "No authorization token" }, { status: 401 });
+  }
+  const { client: supabase, accessToken } = auth;
 
   try {
     const { id, status, adminNotes } = await request.json();
