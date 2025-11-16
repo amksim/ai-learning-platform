@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { Globe, ChevronDown, LogIn, LogOut, User, Settings } from "lucide-react";
+import { Globe, ChevronDown, LogIn, LogOut, User, Settings, DollarSign } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,12 @@ export function Navigation() {
     { href: "/projects", label: t.nav.projects },
   ];
 
+  // Добавляем реферал для залогиненных пользователей
+  const navItemsWithReferral = user ? [
+    ...navItems,
+    { href: "/referral", label: "Реферал", icon: DollarSign },
+  ] : navItems;
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-800/50 bg-gray-900/95 backdrop-blur-md">
       <div className="container mx-auto px-4">
@@ -58,18 +64,24 @@ export function Navigation() {
             </Link>
             
             <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                    pathname === item.href && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navItemsWithReferral.map((item) => {
+                const ItemIcon = 'icon' in item ? item.icon : null;
+                const isReferral = item.href === "/referral";
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground flex items-center gap-2",
+                      pathname === item.href && "bg-accent text-accent-foreground",
+                      isReferral && "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 hover:border-green-500/50 text-green-400"
+                    )}
+                  >
+                    {ItemIcon && <ItemIcon className="h-4 w-4" />}
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -122,19 +134,6 @@ export function Navigation() {
               </div>
             ) : user ? (
               <>
-                {/* Profile button */}
-                <Link
-                  href="/profile"
-                  className={cn(
-                    "flex items-center gap-2 px-2 md:px-3 py-2 rounded-md hover:bg-accent transition-colors",
-                    pathname === "/profile" && "bg-accent"
-                  )}
-                  title={t.nav.profile}
-                >
-                  <User className="h-5 w-5 md:h-4 md:w-4" />
-                  <span className="hidden md:inline text-sm">{t.nav.profile}</span>
-                </Link>
-                
                 {/* Admin panel - only for specific email */}
                 {user.email?.toLowerCase() === "kmak4551@gmail.com" && (
                   <Link

@@ -145,9 +145,25 @@ export default function ReferralPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
             💰 Реферальная программа
           </h1>
-          <p className="text-gray-300 text-lg">
+          <p className="text-gray-300 text-lg mb-4">
             Зарабатывай <strong className="text-green-400">$50</strong> за каждого приглашённого друга!
           </p>
+          
+          {/* Информационный блок */}
+          <div className="max-w-3xl mx-auto mt-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+            <div className="flex items-start gap-3 text-left">
+              <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-gray-300">
+                <p className="font-semibold text-blue-300 mb-2">Как это работает?</p>
+                <ul className="space-y-1.5 text-gray-400">
+                  <li>• Поделитесь своей реферальной ссылкой с друзьями</li>
+                  <li>• Друг регистрируется по вашей ссылке → появляется в списке</li>
+                  <li>• <strong className="text-green-400">Когда друг оплачивает курс → вам начисляется $50</strong></li>
+                  <li>• Накопили от $50 → можете заказать выплату</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Статистика */}
