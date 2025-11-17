@@ -31,29 +31,15 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Фильтруем курсы - только полные с обязательными полями
+    // Фильтруем курсы - только с обязательными полями
     const filteredCourses = (data || []).filter(course => {
-      // Проверяем обязательные поля
-      if (!course.title || !course.description || !course.difficulty) {
-        console.log('🚫 Фильтрую курс без обязательных полей:', course.id, course.title);
+      // Проверяем только title (самое важное поле)
+      if (!course.title || course.title.trim().length === 0) {
+        console.log('🚫 Фильтрую курс без title:', course.id);
         return false;
       }
       
-      // Проверяем что есть хотя бы изображения или видео
-      const hasImages = Array.isArray(course.images) && course.images.length > 0;
-      const hasVideos = Array.isArray(course.videos) && course.videos.length > 0;
-      
-      if (!hasImages && !hasVideos) {
-        console.log('🚫 Фильтрую курс без контента:', course.id, course.title);
-        return false;
-      }
-      
-      // Проверяем что title не пустая строка и не просто пробелы
-      if (course.title.trim().length === 0) {
-        console.log('🚫 Фильтрую курс с пустым title:', course.id);
-        return false;
-      }
-      
+      // Не фильтруем по description, difficulty, images, videos - это может удалить рабочие курсы
       return true;
     });
 
