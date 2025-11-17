@@ -37,6 +37,7 @@ export default function LessonImage({ image, allImages, currentIndex = 0 }: Less
   // Если передан массив - используем его, иначе показываем одну картинку
   const imagesToShow = allImages || [image];
   const indexToShow = allImages ? currentIndex : 0;
+  const totalImages = imagesToShow.length;
 
   return (
     <>
@@ -50,6 +51,13 @@ export default function LessonImage({ image, allImages, currentIndex = 0 }: Less
           }}
           onClick={() => setShowModal(true)}
         >
+          {/* Image number badge - always visible */}
+          {totalImages > 1 && (
+            <div className="absolute top-3 left-3 z-10 bg-purple-600/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-white font-bold text-sm shadow-lg">
+              {currentIndex + 1} / {totalImages}
+            </div>
+          )}
+
           {/* Image - сохраняем оригинальное качество и пропорции */}
           <img
             src={image.url}

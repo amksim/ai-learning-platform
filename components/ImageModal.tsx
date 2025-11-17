@@ -15,11 +15,14 @@ export default function ImageModal({ images, initialIndex, onClose }: ImageModal
 
   // Scroll to clicked image on mount
   useEffect(() => {
-    if (scrollRef.current && initialIndex > 0) {
-      const imageElements = scrollRef.current.querySelectorAll('.gallery-image');
-      if (imageElements[initialIndex]) {
-        imageElements[initialIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    if (scrollRef.current) {
+      // Небольшая задержка для надёжности рендеринга
+      setTimeout(() => {
+        const imageElements = scrollRef.current?.querySelectorAll('.gallery-image');
+        if (imageElements && imageElements[initialIndex]) {
+          imageElements[initialIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
   }, [initialIndex]);
 
