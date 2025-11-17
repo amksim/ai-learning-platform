@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('courses')
       .insert([body])
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('❌ Error creating course:', error);
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Course created successfully');
-    return NextResponse.json({ course: data });
+    return NextResponse.json({ course: data?.[0] || data });
   } catch (error: any) {
     console.error('❌ Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -81,8 +80,7 @@ export async function PUT(request: NextRequest) {
       .from('courses')
       .update(updates)
       .eq('id', id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('❌ Error updating course:', error);
@@ -90,7 +88,7 @@ export async function PUT(request: NextRequest) {
     }
 
     console.log('✅ Course updated successfully');
-    return NextResponse.json({ course: data });
+    return NextResponse.json({ course: data?.[0] || data });
   } catch (error: any) {
     console.error('❌ Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
