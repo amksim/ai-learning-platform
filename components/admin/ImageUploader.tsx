@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Upload, X, Image as ImageIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { LessonImageData } from "@/components/LessonImage";
+import { supabase } from "@/lib/supabase";
 
 interface ImageUploaderProps {
   images: LessonImageData[];
@@ -12,53 +13,54 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ images, onChange }: ImageUploaderProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newImage, setNewImage] = useState<Partial<LessonImageData>>({
     size: "medium",
     position: "center",
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Создаём Image для загрузки оригинала
-    const img = new Image();
-    const reader = new FileReader();
-    
-    reader.onload = (event) => {
-      img.onload = () => {
-        // Создаём canvas с оригинальными размерами
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          console.error('Failed to get canvas context');
-          return;
-        }
-        
-        // Отключаем сглаживание для сохранения резкости
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        
-        // Рисуем изображение
-        ctx.drawImage(img, 0, 0);
-        
-        // Конвертируем в base64 с МАКСИМАЛЬНЫМ качеством
-        // quality: 1.0 = 100% качества (без сжатия)
-        const base64 = canvas.toDataURL('image/png', 1.0);
-        
-        setNewImage({
-          ...newImage,
-          url: base64,
+    try {
+      setUploading(true);
+
+      // Генерируем уникальное имя файла
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+
+      // Загружаем файл в Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('course-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
         });
-      };
-      
-      img.src = event.target?.result as string;
-    };
-    
-    reader.readAsDataURL(file);
+
+      if (error) {
+        console.error('Upload error:', error);
+        alert('Ошибка загрузки: ' + error.message);
+        return;
+      }
+
+      // Получаем публичный URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-images')
+        .getPublicUrl(fileName);
+
+      console.log('✅ Image uploaded:', publicUrl);
+
+      setNewImage({
+        ...newImage,
+        url: publicUrl,
+      });
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Не удалось загрузить изображение');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleAddImage = () => {
@@ -157,17 +159,22 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
               Загрузить картинку
             </label>
             <div className="flex items-center gap-3">
-              <label className="flex-1 flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
+              <label className={`flex-1 flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg transition-colors ${
+                uploading 
+                  ? 'border-purple-500 bg-purple-500/10 cursor-wait' 
+                  : 'border-gray-600 cursor-pointer hover:border-purple-500'
+              }`}>
                 <Upload className="h-5 w-5" />
-                <span>Выбрать файл</span>
+                <span>{uploading ? 'Загрузка...' : 'Выбрать файл'}</span>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={uploading}
                 />
               </label>
-              {newImage.url && (
+              {newImage.url && !uploading && (
                 <img
                   src={newImage.url}
                   alt="Preview"
