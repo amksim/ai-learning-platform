@@ -413,7 +413,12 @@ export default function LessonPage() {
                   <div className="mt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {currentLevel.images.map((image: any, imgIndex: number) => (
-                        <LessonImage key={`img-${imgIndex}`} image={image} />
+                        <LessonImage 
+                          key={`img-${imgIndex}`} 
+                          image={image}
+                          allImages={currentLevel.images}
+                          currentIndex={imgIndex}
+                        />
                       ))}
                     </div>
                   </div>

@@ -14,6 +14,8 @@ export interface LessonImageData {
 
 interface LessonImageProps {
   image: LessonImageData;
+  allImages?: LessonImageData[];
+  currentIndex?: number;
 }
 
 const sizeClasses = {
@@ -29,8 +31,12 @@ const positionClasses = {
   right: "ml-auto",
 };
 
-export default function LessonImage({ image }: LessonImageProps) {
+export default function LessonImage({ image, allImages, currentIndex = 0 }: LessonImageProps) {
   const [showModal, setShowModal] = useState(false);
+  
+  // Если передан массив - используем его, иначе показываем одну картинку
+  const imagesToShow = allImages || [image];
+  const indexToShow = allImages ? currentIndex : 0;
 
   return (
     <>
@@ -78,8 +84,8 @@ export default function LessonImage({ image }: LessonImageProps) {
       {/* Modal */}
       {showModal && (
         <ImageModal
-          imageUrl={image.url}
-          alt={image.alt}
+          images={imagesToShow}
+          initialIndex={indexToShow}
           onClose={() => setShowModal(false)}
         />
       )}
