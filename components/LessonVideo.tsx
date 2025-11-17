@@ -81,6 +81,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
   const [isMuted, setIsMuted] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
   const watchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   
   // Загружаем статус просмотра из localStorage
   useEffect(() => {
@@ -128,6 +129,21 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
     if (!isWatched && video.currentTime >= 3) {
       console.log('✅ Пользователь посмотрел 3+ секунд');
       markAsWatched();
+    }
+  };
+
+  // Функция для fullscreen
+  const handleFullscreen = () => {
+    if (videoRef.current) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      } else if ((videoRef.current as any).webkitRequestFullscreen) {
+        (videoRef.current as any).webkitRequestFullscreen();
+      } else if ((videoRef.current as any).mozRequestFullScreen) {
+        (videoRef.current as any).mozRequestFullScreen();
+      } else if ((videoRef.current as any).msRequestFullscreen) {
+        (videoRef.current as any).msRequestFullscreen();
+      }
     }
   };
   
@@ -217,6 +233,7 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
             ) : (
               // Direct video file - отслеживаем время просмотра
               <video
+                ref={videoRef}
                 key={embedUrl}
                 className="w-full h-full object-cover rounded-2xl"
                 poster={video.poster}
@@ -233,20 +250,23 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
               </video>
             )}
 
-            {/* Fullscreen button for external videos */}
-            {isExternal && (
-              <div className="absolute top-2 right-2 z-10">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+            {/* Fullscreen button for ALL videos */}
+            <div className="absolute top-2 right-2 z-10">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isExternal) {
                     setShowModal(true);
-                  }}
-                  className="p-2 bg-black/70 hover:bg-black/90 rounded-full transition-colors backdrop-blur-sm"
-                >
-                  <Maximize2 className="h-5 w-5 text-white" />
-                </button>
-              </div>
-            )}
+                  } else {
+                    handleFullscreen();
+                  }
+                }}
+                className="p-2 bg-black/70 hover:bg-black/90 rounded-full transition-colors backdrop-blur-sm"
+                title="Полный экран"
+              >
+                <Maximize2 className="h-5 w-5 text-white" />
+              </button>
+            </div>
 
             {/* Video Title Overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
