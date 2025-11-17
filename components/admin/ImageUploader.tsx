@@ -70,16 +70,20 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
       return;
     }
 
-    onChange([
-      ...images,
-      {
-        url: newImage.url,
-        alt: newImage.alt,
-        size: newImage.size || "medium",
-        position: newImage.position || "center",
-        caption: newImage.caption,
-      } as LessonImageData,
-    ]);
+    const newImageData = {
+      url: newImage.url,
+      alt: newImage.alt,
+      size: newImage.size || "medium",
+      position: newImage.position || "center",
+      caption: newImage.caption,
+    } as LessonImageData;
+
+    const updatedImages = [...images, newImageData];
+    
+    console.log('✅ Adding image to form:', newImageData);
+    console.log('📸 Total images now:', updatedImages.length);
+    
+    onChange(updatedImages);
 
     // Reset
     setNewImage({
