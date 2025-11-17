@@ -74,23 +74,26 @@ export default function AdminPage() {
       
       if (data.courses) {
         console.log('✅ Loaded', data.courses.length, 'courses');
-        const formattedCourses = data.courses.map((course: any) => ({
-          id: course.id,
-          title: course.title,
-          description: course.description,
-          difficulty: course.difficulty,
-          topics: course.topics || [],
-          category: course.category,
-          icon: course.icon,
-          blockName: course.block_name,
-          practice: course.practice || false,
-          practiceDescription: course.practice_description,
-          isFree: course.is_free || false,
-          translations: course.translations || {},
-          images: course.images || [],
-          videos: course.videos || [],
-          displayOrder: course.display_order || course.id
-        }));
+        const formattedCourses = data.courses.map((course: any) => {
+          console.log(`📸 Course "${course.title}" images:`, course.images);
+          return {
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            difficulty: course.difficulty,
+            topics: course.topics || [],
+            category: course.category,
+            icon: course.icon,
+            blockName: course.block_name,
+            practice: course.practice || false,
+            practiceDescription: course.practice_description,
+            isFree: course.is_free || false,
+            translations: course.translations || {},
+            images: course.images || [],
+            videos: course.videos || [],
+            displayOrder: course.display_order || course.id
+          };
+        });
         
         // СОРТИРОВКА: По display_order (порядок который ты выбрал)
         // Бесплатные и платные могут быть в ЛЮБОМ порядке
@@ -213,6 +216,9 @@ export default function AdminPage() {
           editForm.translations // Передаем существующие translations чтобы сохранить videoUrl
         )
       };
+      
+      console.log('💾 Saving course with images:', updateData.images);
+      console.log('💾 Images count:', updateData.images.length);
       
       const response = await fetch('/api/courses', {
         method: 'PUT',

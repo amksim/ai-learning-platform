@@ -71,6 +71,7 @@ export async function PUT(request: NextRequest) {
     console.log('📦 Updates keys:', Object.keys(updates));
     console.log('🎬 Videos count:', updates.videos?.length || 0);
     console.log('📸 Images count:', updates.images?.length || 0);
+    console.log('📸 Images data:', JSON.stringify(updates.images));
 
     if (!id) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
@@ -84,10 +85,12 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error updating course:', error);
+      console.error('❌ Error details:', JSON.stringify(error));
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     console.log('✅ Course updated successfully');
+    console.log('✅ Updated data images:', data?.[0]?.images);
     return NextResponse.json({ course: data?.[0] || data });
   } catch (error: any) {
     console.error('❌ Unexpected error:', error);

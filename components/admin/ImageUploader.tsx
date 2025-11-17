@@ -51,27 +51,11 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
 
       console.log('✅ Image uploaded:', publicUrl);
 
-      // Автоматически добавляем изображение в список после загрузки
-      const autoAlt = `Изображение ${images.length + 1}`;
-      onChange([
-        ...images,
-        {
-          url: publicUrl,
-          alt: newImage.alt || autoAlt,
-          size: newImage.size || "medium",
-          position: newImage.position || "center",
-          caption: newImage.caption,
-        } as LessonImageData,
-      ]);
-
-      // Сбрасываем форму
+      // Сохраняем URL в форму
       setNewImage({
-        size: "medium",
-        position: "center",
+        ...newImage,
+        url: publicUrl,
       });
-      setIsAdding(false);
-      
-      alert('✅ Изображение добавлено!');
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Не удалось загрузить изображение');
