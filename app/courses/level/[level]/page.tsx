@@ -418,6 +418,7 @@ export default function LessonPage() {
                           image={image}
                           allImages={currentLevel.images}
                           currentIndex={imgIndex}
+                          language={language}
                         />
                       ))}
                     </div>

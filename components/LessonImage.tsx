@@ -10,12 +10,14 @@ export interface LessonImageData {
   size: "small" | "medium" | "large" | "full";
   position: "left" | "center" | "right";
   caption?: string;
+  translations?: Record<string, string>; // Переводы ЭТОГО изображения: { en: "url", uk: "url", ... }
 }
 
 interface LessonImageProps {
   image: LessonImageData;
   allImages?: LessonImageData[];
   currentIndex?: number;
+  language?: string; // Текущий язык пользователя
 }
 
 const sizeClasses = {
@@ -31,8 +33,17 @@ const positionClasses = {
   right: "ml-auto",
 };
 
-export default function LessonImage({ image, allImages, currentIndex = 0 }: LessonImageProps) {
+export default function LessonImage({ image, allImages, currentIndex = 0, language = 'ru' }: LessonImageProps) {
   const [showModal, setShowModal] = useState(false);
+  
+  // Функция для получения URL изображения с учетом языка
+  const getImageUrl = (img: LessonImageData) => {
+    const translatedUrl = img.translations?.[language];
+    const imageUrl = language === 'ru' 
+      ? img.url 
+      : (translatedUrl || img.url); // Если нет перевода, используем русский URL
+    return imageUrl;
+  };
   
   // Если передан массив - используем его, иначе показываем одну картинку
   const imagesToShow = allImages || [image];
@@ -60,7 +71,7 @@ export default function LessonImage({ image, allImages, currentIndex = 0 }: Less
 
           {/* Image - сохраняем оригинальное качество и пропорции */}
           <img
-            src={image.url}
+            src={getImageUrl(image)}
             alt={image.alt}
             className="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl"
             style={{
@@ -95,6 +106,7 @@ export default function LessonImage({ image, allImages, currentIndex = 0 }: Less
           images={imagesToShow}
           initialIndex={indexToShow}
           onClose={() => setShowModal(false)}
+          language={language}
         />
       )}
     </>

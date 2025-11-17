@@ -8,10 +8,20 @@ interface ImageModalProps {
   images: LessonImageData[];
   initialIndex: number;
   onClose: () => void;
+  language?: string; // Текущий язык пользователя
 }
 
-export default function ImageModal({ images, initialIndex, onClose }: ImageModalProps) {
+export default function ImageModal({ images, initialIndex, onClose, language = 'ru' }: ImageModalProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Функция для получения URL изображения с учетом языка
+  const getImageUrl = (img: LessonImageData) => {
+    const translatedUrl = img.translations?.[language];
+    const imageUrl = language === 'ru' 
+      ? img.url 
+      : (translatedUrl || img.url); // Если нет перевода, используем русский URL
+    return imageUrl;
+  };
 
   // Scroll to clicked image on mount
   useEffect(() => {
@@ -59,7 +69,7 @@ export default function ImageModal({ images, initialIndex, onClose }: ImageModal
           <div key={index} className="gallery-image">
             {/* Image */}
             <img
-              src={image.url}
+              src={getImageUrl(image)}
               alt={image.alt}
               className="w-full h-auto object-contain rounded-2xl shadow-2xl"
             />
