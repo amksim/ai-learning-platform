@@ -250,23 +250,21 @@ export default function LessonVideo({ video, language = 'ru', videoIndex = 0, le
               </video>
             )}
 
-            {/* Fullscreen button for ALL videos */}
-            <div className="absolute top-2 right-2 z-10">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isExternal) {
-                    setShowModal(true);
-                  } else {
+            {/* Fullscreen button only for direct videos */}
+            {!isExternal && (
+              <div className="absolute top-2 right-2 z-10">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleFullscreen();
-                  }
-                }}
-                className="p-2 bg-black/70 hover:bg-black/90 rounded-full transition-colors backdrop-blur-sm"
-                title="Полный экран"
-              >
-                <Maximize2 className="h-5 w-5 text-white" />
-              </button>
-            </div>
+                  }}
+                  className="p-2 bg-black/70 hover:bg-black/90 rounded-full transition-colors backdrop-blur-sm"
+                  title="Полный экран"
+                >
+                  <Maximize2 className="h-5 w-5 text-white" />
+                </button>
+              </div>
+            )}
 
             {/* Video Title Overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">

@@ -31,7 +31,35 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ courses: data || [] });
+    // Фильтруем курсы - только полные с обязательными полями
+    const filteredCourses = (data || []).filter(course => {
+      // Проверяем обязательные поля
+      if (!course.title || !course.description || !course.difficulty) {
+        console.log('🚫 Фильтрую курс без обязательных полей:', course.id, course.title);
+        return false;
+      }
+      
+      // Проверяем что есть хотя бы изображения или видео
+      const hasImages = Array.isArray(course.images) && course.images.length > 0;
+      const hasVideos = Array.isArray(course.videos) && course.videos.length > 0;
+      
+      if (!hasImages && !hasVideos) {
+        console.log('🚫 Фильтрую курс без контента:', course.id, course.title);
+        return false;
+      }
+      
+      // Проверяем что title не пустая строка и не просто пробелы
+      if (course.title.trim().length === 0) {
+        console.log('🚫 Фильтрую курс с пустым title:', course.id);
+        return false;
+      }
+      
+      return true;
+    });
+
+    console.log(`✅ Отфильтровано курсов: ${filteredCourses.length} из ${data?.length || 0}`);
+    
+    return NextResponse.json({ courses: filteredCourses });
   } catch (error: any) {
     console.error('Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
