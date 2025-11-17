@@ -1,7 +1,7 @@
 "use client";
 
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { LessonImageData } from "./LessonImage";
 
 interface ImageModalProps {
@@ -11,105 +11,80 @@ interface ImageModalProps {
 }
 
 export default function ImageModal({ images, initialIndex, onClose }: ImageModalProps) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const currentImage = images[currentIndex];
-  const hasMultipleImages = images.length > 1;
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  // Keyboard navigation
+  // Scroll to clicked image on mount
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "ArrowLeft") {
-        setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-      } else if (e.key === "ArrowRight") {
-        setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    if (scrollRef.current && initialIndex > 0) {
+      const imageElements = scrollRef.current.querySelectorAll('.gallery-image');
+      if (imageElements[initialIndex]) {
+        imageElements[initialIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+    }
+  }, [initialIndex]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
     
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [onClose, images.length]);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm animate-in fade-in overflow-y-auto"
       onClick={onClose}
     >
-      {/* Close button */}
+      {/* Close button - fixed */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
+        className="fixed top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
       >
         <X className="h-6 w-6 text-white" />
       </button>
 
-      {/* Previous button */}
-      {hasMultipleImages && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            goToPrevious();
-          }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-        >
-          <ChevronLeft className="h-8 w-8 text-white" />
-        </button>
-      )}
-
-      {/* Next button */}
-      {hasMultipleImages && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            goToNext();
-          }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-        >
-          <ChevronRight className="h-8 w-8 text-white" />
-        </button>
-      )}
-
-      {/* Image */}
+      {/* Images container - scrollable */}
       <div
-        className="max-w-7xl max-h-[90vh] p-4"
+        ref={scrollRef}
+        className="max-w-4xl mx-auto py-20 px-4 space-y-12"
         onClick={(e) => e.stopPropagation()}
       >
-        <img
-          src={currentImage.url}
-          alt={currentImage.alt}
-          className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-2xl shadow-2xl"
-        />
-        
-        {/* Caption */}
-        {currentImage.caption && (
-          <p className="mt-4 text-center text-white/90 text-lg">
-            {currentImage.caption}
-          </p>
-        )}
+        {images.map((image, index) => (
+          <div key={index} className="gallery-image">
+            {/* Image */}
+            <img
+              src={image.url}
+              alt={image.alt}
+              className="w-full h-auto object-contain rounded-2xl shadow-2xl"
+            />
+            
+            {/* Caption */}
+            {image.caption && (
+              <p className="mt-4 text-center text-white/90 text-lg">
+                {image.caption}
+              </p>
+            )}
+
+            {/* Image number (if multiple images) */}
+            {images.length > 1 && (
+              <p className="mt-2 text-center text-white/50 text-sm">
+                Изображение {index + 1} из {images.length}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Image counter & hint */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center">
-        {hasMultipleImages && (
-          <div className="text-white font-medium mb-2">
-            {currentIndex + 1} / {images.length}
-          </div>
+      {/* Hint text - fixed at bottom */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 text-white/70 text-sm text-center">
+        {images.length > 1 ? (
+          <>Скролл вниз для просмотра всех изображений • ESC для закрытия</>
+        ) : (
+          <>ESC или клик вне картинки чтобы закрыть</>
         )}
-        <div className="text-white/70 text-sm">
-          {hasMultipleImages 
-            ? "← → стрелки для навигации • ESC для закрытия"
-            : "ESC или клик вне картинки чтобы закрыть"
-          }
-        </div>
       </div>
     </div>
   );
