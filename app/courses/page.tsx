@@ -209,17 +209,19 @@ export default function CoursesPage() {
       const nextLessonId = findNextIncompleteLesson();
       
       if (nextLessonId) {
-        // Небольшая задержка чтобы DOM успел отрендериться
+        // Увеличиваем задержку для красивой анимации
         setTimeout(() => {
           const element = document.getElementById(`lesson-${nextLessonId}`);
           if (element) {
-            console.log(`🎯 Автоскролл к уроку ${nextLessonId}`);
+            console.log(`🎯 Плавный автоскролл к уроку ${nextLessonId}`);
+            // Плавная прокрутка с настройками для красоты
             element.scrollIntoView({ 
               behavior: 'smooth', 
-              block: 'center' 
+              block: 'center',
+              inline: 'nearest'
             });
           }
-        }, 500);
+        }, 1500); // Увеличил с 500ms до 1500ms для более красивого эффекта
       }
     }
   }, [allLevels, user]);
