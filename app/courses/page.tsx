@@ -145,58 +145,60 @@ export default function CoursesPage() {
     }
   };
 
-  const isLevelUnlocked = (levelId: number, isFree?: boolean) => {
-    // НОВАЯ ЛОГИКА:
+  const isLevelUnlocked = (levelId: number, isFree?: boolean, index?: number) => {
+    // НОВАЯ ЛОГИКА - проверяем по порядку в массиве, не по ID!
     
-    // 1. Для НЕ залогиненных: только урок 1 открыт
+    // 1. Для НЕ залогиненных: только первый урок открыт
     if (!user) {
-      console.log(`🔓 Урок ${levelId}: НЕ залогинен -> ${levelId === 1 ? 'OPEN' : 'LOCKED'}`);
-      return levelId === 1;
+      console.log(`🔓 Урок ${levelId} (индекс ${index}): НЕ залогинен -> ${index === 0 ? 'OPEN' : 'LOCKED'}`);
+      return index === 0;
     }
     
     // 2. Для залогиненных БЕЗ подписки:
-    //    - Уроки 1-2 (бесплатные) открыты, но проходить по порядку
-    //    - Урок 3+ закрыты (требуют оплату)
+    //    - Первые 2 урока (бесплатные) открыты, но проходить по порядку
+    //    - Остальные закрыты (требуют оплату)
     if (!user.hasPaid) {
-      // Урок 1 всегда открыт
-      if (levelId === 1) {
-        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, урок 1 -> OPEN`);
+      // Первый урок всегда открыт
+      if (index === 0) {
+        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, первый -> OPEN`);
         return true;
       }
       
-      // Урок 2 открыт только если урок 1 пройден
-      if (isFree && levelId === 2) {
-        const result = user.completedLessons.includes(1);
-        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, урок 2 -> ${result ? 'OPEN' : 'LOCKED'} (урок 1 пройден: ${user.completedLessons.includes(1)})`);
+      // Второй урок открыт только если первый пройден
+      if (index === 1 && isFree) {
+        const firstLesson = allLevels[0];
+        const result = firstLesson ? user.completedLessons.includes(firstLesson.id) : false;
+        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, второй -> ${result ? 'OPEN' : 'LOCKED'} (первый урок ${firstLesson?.id} пройден: ${result})`);
         return result;
       }
       
-      // Остальные бесплатные уроки (если есть) - по порядку
-      if (isFree && levelId > 2) {
-        const result = user.completedLessons.includes(levelId - 1);
-        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий ${levelId-1} пройден: ${result})`);
+      // Остальные бесплатные уроки - по порядку
+      if (isFree && index > 1) {
+        const previousLesson = allLevels[index - 1];
+        const result = previousLesson ? user.completedLessons.includes(previousLesson.id) : false;
+        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${result})`);
         return result;
       }
       
       // Платные уроки заблокированы
-      console.log(`🔓 Урок ${levelId}: БЕЗ подписки, платный -> LOCKED`);
+      console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, платный -> LOCKED`);
       return false;
     }
     
     // 3. Для залогиненных С подпиской:
-    //    - Все уроки открыты визуально
-    //    - Но проходить можно только по порядку
-    if (levelId === 1) {
-      console.log(`🔓 Урок ${levelId}: С подпиской, урок 1 -> OPEN`);
+    //    - Урок открыт если предыдущий по порядку пройден ИЛИ если это текущий непройденный
+    if (index === 0) {
+      console.log(`🔓 Урок ${levelId} (индекс ${index}): С подпиской, первый -> OPEN`);
       return true;
     }
     
-    // Урок открыт если предыдущий пройден ИЛИ если это сам текущий непройденный урок
-    const isPreviousCompleted = user.completedLessons.includes(levelId - 1);
+    // Проверяем предыдущий урок по порядку в массиве, не по ID!
+    const previousLesson = allLevels[index - 1];
+    const isPreviousCompleted = previousLesson ? user.completedLessons.includes(previousLesson.id) : false;
     const isCurrentCompleted = user.completedLessons.includes(levelId);
     const result = isPreviousCompleted || isCurrentCompleted;
     
-    console.log(`🔓 Урок ${levelId}: С подпиской -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий ${levelId-1} пройден: ${isPreviousCompleted}, текущий пройден: ${isCurrentCompleted})`);
+    console.log(`🔓 Урок ${levelId} (индекс ${index}): С подпиской -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${isPreviousCompleted}, текущий пройден: ${isCurrentCompleted})`);
     console.log(`   👤 Пройденные уроки: [${user.completedLessons.join(', ')}]`);
     
     return result;
@@ -311,7 +313,7 @@ export default function CoursesPage() {
             const hasMorePaidLessons = allLevels.some((l, i) => i > index && !l.isFree);
             // Show CTA only after last free lesson if user hasn't paid
             const showCTAAfter = isLastFreeLesson && hasMorePaidLessons && !user?.hasPaid;
-            const unlocked = isLevelUnlocked(level.id, level.isFree);
+            const unlocked = isLevelUnlocked(level.id, level.isFree, index);
             const completed = isLevelCompleted(level.id);
             // Handle icon from localStorage or original source
             const IconComponent = typeof level.icon === 'function' 
@@ -393,8 +395,12 @@ export default function CoursesPage() {
                           }
                           
                           // Если просто не пройден предыдущий урок
-                          const previousLessonId = level.id - 1;
-                          alert(`⚠️ Сначала пройдите урок ${previousLessonId}!`);
+                          const previousLesson = allLevels[index - 1];
+                          if (previousLesson) {
+                            alert(`⚠️ Сначала пройдите урок "${previousLesson.title}"!`);
+                          } else {
+                            alert(`⚠️ Сначала пройдите предыдущий урок!`);
+                          }
                           return;
                         }
                         
