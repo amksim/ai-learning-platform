@@ -179,8 +179,11 @@ export default function CoursesPage() {
     //    - Но проходить можно только по порядку
     if (levelId === 1) return true;
     
-    // Следующий урок открыт только если предыдущий пройден
-    return user.completedLessons.includes(levelId - 1);
+    // Урок открыт если предыдущий пройден ИЛИ если это сам текущий непройденный урок
+    const isPreviousCompleted = user.completedLessons.includes(levelId - 1);
+    const isCurrentCompleted = user.completedLessons.includes(levelId);
+    
+    return isPreviousCompleted || isCurrentCompleted;
   };
 
   const isLevelCompleted = (levelId: number) => {
