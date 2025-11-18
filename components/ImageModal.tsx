@@ -90,15 +90,6 @@ export default function ImageModal({ images, initialIndex, onClose, language = '
           </div>
         ))}
       </div>
-
-      {/* Hint text - fixed at bottom */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 text-white/70 text-sm text-center">
-        {images.length > 1 ? (
-          <>Скролл вниз для просмотра всех изображений • ESC для закрытия</>
-        ) : (
-          <>ESC или клик вне картинки чтобы закрыть</>
-        )}
-      </div>
     </div>
   );
 }

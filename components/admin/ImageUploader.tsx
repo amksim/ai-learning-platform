@@ -140,6 +140,17 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
               {image.caption && (
                 <p className="text-xs text-gray-500 italic">{image.caption}</p>
               )}
+              {/* Show translations */}
+              {image.translations && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {image.translations.en && (
+                    <p>🇬🇧 EN: {image.translations.en.substring(0, 30)}...</p>
+                  )}
+                  {image.translations.uk && (
+                    <p>🇺🇦 UA: {image.translations.uk.substring(0, 30)}...</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Remove button */}
@@ -217,6 +228,57 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
               placeholder="Рисунок 1. Главная страница"
               className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-purple-500 focus:outline-none"
             />
+          </div>
+
+          {/* Multilingual URLs */}
+          <div className="space-y-3">
+            <label className="block text-sm font-medium">
+              Изображения на других языках (необязательно)
+            </label>
+            
+            {/* English URL */}
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-400">
+                English URL
+              </label>
+              <input
+                type="url"
+                value={newImage.translations?.en || ""}
+                onChange={(e) =>
+                  setNewImage({ 
+                    ...newImage, 
+                    translations: { 
+                      ...newImage.translations, 
+                      en: e.target.value 
+                    }
+                  })
+                }
+                placeholder="https://example.com/image-en.jpg"
+                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-purple-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Ukrainian URL */}
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-400">
+                Українська URL
+              </label>
+              <input
+                type="url"
+                value={newImage.translations?.uk || ""}
+                onChange={(e) =>
+                  setNewImage({ 
+                    ...newImage, 
+                    translations: { 
+                      ...newImage.translations, 
+                      uk: e.target.value 
+                    }
+                  })
+                }
+                placeholder="https://example.com/image-uk.jpg"
+                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-purple-500 focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Size */}
