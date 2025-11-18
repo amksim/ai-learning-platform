@@ -188,6 +188,42 @@ export default function CoursesPage() {
     return user.completedLessons.includes(levelId);
   };
 
+  // Найти следующий непройденный урок
+  const findNextIncompleteLesson = () => {
+    if (!user || allLevels.length === 0) return null;
+    
+    // Ищем первый урок который не пройден
+    for (const level of allLevels) {
+      if (!user.completedLessons.includes(level.id)) {
+        return level.id;
+      }
+    }
+    
+    // Если все уроки пройдены, возвращаем null
+    return null;
+  };
+
+  // Автоскролл к следующему уроку после загрузки
+  useEffect(() => {
+    if (allLevels.length > 0 && user) {
+      const nextLessonId = findNextIncompleteLesson();
+      
+      if (nextLessonId) {
+        // Небольшая задержка чтобы DOM успел отрендериться
+        setTimeout(() => {
+          const element = document.getElementById(`lesson-${nextLessonId}`);
+          if (element) {
+            console.log(`🎯 Автоскролл к уроку ${nextLessonId}`);
+            element.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 500);
+      }
+    }
+  }, [allLevels, user]);
+
   return (
     <div className="min-h-screen py-12 sm:py-16 md:py-20">
       <div className="container mx-auto px-3 sm:px-4">
@@ -263,7 +299,7 @@ export default function CoursesPage() {
             const showBlockHeader = level.blockName && isFirstInBlock;
 
             return (
-              <div key={level.id} className="relative mb-20">
+              <div key={level.id} id={`lesson-${level.id}`} className="relative mb-20">
                 {/* Заголовок блока - показываем ОДИН РАЗ в начале блока */}
                 {showBlockHeader && (
                   <div className="mb-12 mt-16 text-center">
