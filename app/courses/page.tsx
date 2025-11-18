@@ -150,6 +150,7 @@ export default function CoursesPage() {
     
     // 1. Для НЕ залогиненных: только урок 1 открыт
     if (!user) {
+      console.log(`🔓 Урок ${levelId}: НЕ залогинен -> ${levelId === 1 ? 'OPEN' : 'LOCKED'}`);
       return levelId === 1;
     }
     
@@ -158,32 +159,47 @@ export default function CoursesPage() {
     //    - Урок 3+ закрыты (требуют оплату)
     if (!user.hasPaid) {
       // Урок 1 всегда открыт
-      if (levelId === 1) return true;
+      if (levelId === 1) {
+        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, урок 1 -> OPEN`);
+        return true;
+      }
       
       // Урок 2 открыт только если урок 1 пройден
       if (isFree && levelId === 2) {
-        return user.completedLessons.includes(1);
+        const result = user.completedLessons.includes(1);
+        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, урок 2 -> ${result ? 'OPEN' : 'LOCKED'} (урок 1 пройден: ${user.completedLessons.includes(1)})`);
+        return result;
       }
       
       // Остальные бесплатные уроки (если есть) - по порядку
       if (isFree && levelId > 2) {
-        return user.completedLessons.includes(levelId - 1);
+        const result = user.completedLessons.includes(levelId - 1);
+        console.log(`🔓 Урок ${levelId}: БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий ${levelId-1} пройден: ${result})`);
+        return result;
       }
       
       // Платные уроки заблокированы
+      console.log(`🔓 Урок ${levelId}: БЕЗ подписки, платный -> LOCKED`);
       return false;
     }
     
     // 3. Для залогиненных С подпиской:
     //    - Все уроки открыты визуально
     //    - Но проходить можно только по порядку
-    if (levelId === 1) return true;
+    if (levelId === 1) {
+      console.log(`🔓 Урок ${levelId}: С подпиской, урок 1 -> OPEN`);
+      return true;
+    }
     
     // Урок открыт если предыдущий пройден ИЛИ если это сам текущий непройденный урок
     const isPreviousCompleted = user.completedLessons.includes(levelId - 1);
     const isCurrentCompleted = user.completedLessons.includes(levelId);
+    const result = isPreviousCompleted || isCurrentCompleted;
     
-    return isPreviousCompleted || isCurrentCompleted;
+    console.log(`🔓 Урок ${levelId}: С подпиской -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий ${levelId-1} пройден: ${isPreviousCompleted}, текущий пройден: ${isCurrentCompleted})`);
+    console.log(`   👤 Пройденные уроки: [${user.completedLessons.join(', ')}]`);
+    
+    return result;
   };
 
   const isLevelCompleted = (levelId: number) => {
@@ -377,7 +393,8 @@ export default function CoursesPage() {
                           }
                           
                           // Если просто не пройден предыдущий урок
-                          alert(`⚠️ Сначала пройдите урок ${level.id - 1}!`);
+                          const previousLessonId = level.id - 1;
+                          alert(`⚠️ Сначала пройдите урок ${previousLessonId}!`);
                           return;
                         }
                         
