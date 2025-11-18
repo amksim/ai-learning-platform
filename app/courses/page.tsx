@@ -148,10 +148,13 @@ export default function CoursesPage() {
   const isLevelUnlocked = (levelId: number, isFree?: boolean, index?: number) => {
     // НОВАЯ ЛОГИКА - проверяем по порядку в массиве, не по ID!
     
+    // Защита от undefined index
+    const lessonIndex = index ?? 0;
+    
     // 1. Для НЕ залогиненных: только первый урок открыт
     if (!user) {
-      console.log(`🔓 Урок ${levelId} (индекс ${index}): НЕ залогинен -> ${index === 0 ? 'OPEN' : 'LOCKED'}`);
-      return index === 0;
+      console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): НЕ залогинен -> ${lessonIndex === 0 ? 'OPEN' : 'LOCKED'}`);
+      return lessonIndex === 0;
     }
     
     // 2. Для залогиненных БЕЗ подписки:
@@ -159,46 +162,46 @@ export default function CoursesPage() {
     //    - Остальные закрыты (требуют оплату)
     if (!user.hasPaid) {
       // Первый урок всегда открыт
-      if (index === 0) {
-        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, первый -> OPEN`);
+      if (lessonIndex === 0) {
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, первый -> OPEN`);
         return true;
       }
       
       // Второй урок открыт только если первый пройден
-      if (index === 1 && isFree) {
+      if (lessonIndex === 1 && isFree) {
         const firstLesson = allLevels[0];
         const result = firstLesson ? user.completedLessons.includes(firstLesson.id) : false;
-        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, второй -> ${result ? 'OPEN' : 'LOCKED'} (первый урок ${firstLesson?.id} пройден: ${result})`);
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, второй -> ${result ? 'OPEN' : 'LOCKED'} (первый урок ${firstLesson?.id} пройден: ${result})`);
         return result;
       }
       
       // Остальные бесплатные уроки - по порядку
-      if (isFree && index > 1) {
-        const previousLesson = allLevels[index - 1];
+      if (isFree && lessonIndex > 1) {
+        const previousLesson = allLevels[lessonIndex - 1];
         const result = previousLesson ? user.completedLessons.includes(previousLesson.id) : false;
-        console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${result})`);
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${result})`);
         return result;
       }
       
       // Платные уроки заблокированы
-      console.log(`🔓 Урок ${levelId} (индекс ${index}): БЕЗ подписки, платный -> LOCKED`);
+      console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, платный -> LOCKED`);
       return false;
     }
     
     // 3. Для залогиненных С подпиской:
     //    - Урок открыт если предыдущий по порядку пройден ИЛИ если это текущий непройденный
-    if (index === 0) {
-      console.log(`🔓 Урок ${levelId} (индекс ${index}): С подпиской, первый -> OPEN`);
+    if (lessonIndex === 0) {
+      console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): С подпиской, первый -> OPEN`);
       return true;
     }
     
     // Проверяем предыдущий урок по порядку в массиве, не по ID!
-    const previousLesson = allLevels[index - 1];
+    const previousLesson = allLevels[lessonIndex - 1];
     const isPreviousCompleted = previousLesson ? user.completedLessons.includes(previousLesson.id) : false;
     const isCurrentCompleted = user.completedLessons.includes(levelId);
     const result = isPreviousCompleted || isCurrentCompleted;
     
-    console.log(`🔓 Урок ${levelId} (индекс ${index}): С подпиской -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${isPreviousCompleted}, текущий пройден: ${isCurrentCompleted})`);
+    console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): С подпиской -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${isPreviousCompleted}, текущий пройден: ${isCurrentCompleted})`);
     console.log(`   👤 Пройденные уроки: [${user.completedLessons.join(', ')}]`);
     
     return result;
