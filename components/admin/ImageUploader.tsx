@@ -141,14 +141,20 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
                 <p className="text-xs text-gray-500 italic">{image.caption}</p>
               )}
               {/* Show translations */}
-              {image.translations && (
-                <div className="text-xs text-gray-500 mt-1">
-                  {image.translations.en && (
-                    <p>🇬🇧 EN: {image.translations.en.substring(0, 30)}...</p>
-                  )}
-                  {image.translations.uk && (
-                    <p>🇺🇦 UA: {image.translations.uk.substring(0, 30)}...</p>
-                  )}
+              {image.translations && Object.keys(image.translations).length > 0 && (
+                <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                  {Object.entries(image.translations).map(([lang, url]) => {
+                    if (!url) return null;
+                    const flags: Record<string, string> = {
+                      ru: '🇷🇺', en: '🇬🇧', uk: '🇺🇦', de: '🇩🇪',
+                      pl: '🇵🇱', nl: '🇳🇱', ro: '🇷🇴', hu: '🇭🇺'
+                    };
+                    return (
+                      <p key={lang}>
+                        {flags[lang] || '🌍'} {lang.toUpperCase()}: {url.substring(0, 30)}...
+                      </p>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -236,48 +242,42 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
               Изображения на других языках (необязательно)
             </label>
             
-            {/* English URL */}
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-400">
-                English URL
-              </label>
-              <input
-                type="url"
-                value={newImage.translations?.en || ""}
-                onChange={(e) =>
-                  setNewImage({ 
-                    ...newImage, 
-                    translations: { 
-                      ...newImage.translations, 
-                      en: e.target.value 
-                    }
-                  })
-                }
-                placeholder="https://example.com/image-en.jpg"
-                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-purple-500 focus:outline-none"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { code: 'ru', name: '🇷🇺 Русский' },
+                { code: 'en', name: '🇬🇧 Английский' },
+                { code: 'uk', name: '🇺🇦 Украинский' },
+                { code: 'de', name: '🇩🇪 Германский' },
+                { code: 'pl', name: '🇵🇱 Польский' },
+                { code: 'nl', name: '🇳🇱 Нидерланды' },
+                { code: 'ro', name: '🇷🇴 Румыния/Молдова' },
+                { code: 'hu', name: '🇭🇺 Венгрия' },
+              ].map((lang) => (
+                <div key={lang.code} className="space-y-1">
+                  <label className="block text-xs font-medium text-gray-300">
+                    {lang.name}
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={newImage.translations?.[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTranslations = {
+                        ...newImage.translations,
+                        [lang.code]: e.target.value
+                      };
+                      setNewImage({ ...newImage, translations: newTranslations });
+                    }}
+                    className="w-full px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-purple-500 focus:outline-none text-xs"
+                  />
+                </div>
+              ))}
             </div>
-
-            {/* Ukrainian URL */}
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-400">
-                Українська URL
-              </label>
-              <input
-                type="url"
-                value={newImage.translations?.uk || ""}
-                onChange={(e) =>
-                  setNewImage({ 
-                    ...newImage, 
-                    translations: { 
-                      ...newImage.translations, 
-                      uk: e.target.value 
-                    }
-                  })
-                }
-                placeholder="https://example.com/image-uk.jpg"
-                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-purple-500 focus:outline-none"
-              />
+            
+            <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-xs text-blue-300">
+                💡 <strong>Совет:</strong> Создайте версии изображения с текстом на разных языках и загрузите их. Пользователи увидят изображение на своем языке!
+              </p>
             </div>
           </div>
 
