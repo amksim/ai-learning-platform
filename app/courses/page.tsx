@@ -203,28 +203,22 @@ export default function CoursesPage() {
     return null;
   };
 
-  // Автоскролл к следующему уроку после загрузки
-  useEffect(() => {
-    if (allLevels.length > 0 && user) {
-      const nextLessonId = findNextIncompleteLesson();
-      
-      if (nextLessonId) {
-        // Увеличиваем задержку для красивой анимации
-        setTimeout(() => {
-          const element = document.getElementById(`lesson-${nextLessonId}`);
-          if (element) {
-            console.log(`🎯 Плавный автоскролл к уроку ${nextLessonId}`);
-            // Плавная прокрутка с настройками для красоты
-            element.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center',
-              inline: 'nearest'
-            });
-          }
-        }, 1500); // Увеличил с 500ms до 1500ms для более красивого эффекта
+  // Переход к следующему уроку по клику на кнопку
+  const scrollToNextLesson = () => {
+    const nextLessonId = findNextIncompleteLesson();
+    
+    if (nextLessonId) {
+      const element = document.getElementById(`lesson-${nextLessonId}`);
+      if (element) {
+        console.log(`🎯 Переход к уроку ${nextLessonId} по кнопке`);
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
       }
     }
-  }, [allLevels, user]);
+  };
 
   return (
     <div className="min-h-screen py-12 sm:py-16 md:py-20">
@@ -242,6 +236,19 @@ export default function CoursesPage() {
             {t.courses.create_with} <span className="text-orange-400">{t.courses.websites}</span>, <span className="text-green-400">{t.courses.games}</span>, <span className="text-cyan-400">{t.courses.apps}</span> {t.courses.without_code}
           </p>
         </div>
+
+        {/* Кнопка перехода к следующему уроку */}
+        {!isLoading && user && findNextIncompleteLesson() && (
+          <div className="mb-8 text-center">
+            <button
+              onClick={scrollToNextLesson}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+            >
+              <span className="text-lg">🎯</span>
+              Перейти к следующему уроку
+            </button>
+          </div>
+        )}
 
         {/* Skeleton Loader */}
         {isLoading && (
