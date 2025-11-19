@@ -59,44 +59,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Проверка текущего пользователя
   async function checkUser() {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
       
-      if (authUser) {
-        // Загружаем профиль
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authUser.id)
-          .single();
-
-        if (profile) {
-          // Загружаем прогресс из базы
-          const { data: progressData } = await supabase
-            .from('user_progress')
-            .select('*')
-            .eq('user_id', authUser.id)
-            .eq('completed', true);
-
-          const completedCount = progressData?.length || 0;
-          const completedLessonIds = progressData?.map(p => p.lesson_index) || [];
-
-          setUser({
-            id: authUser.id,
-            email: authUser.email!,
-            full_name: profile.full_name || 'User',
-            telegram_username: profile.telegram_username || null,
-            progress: completedCount,
-            completedLessons: completedLessonIds,
-            joinedDate: profile.created_at || new Date().toISOString(),
-            hasPaid: profile.subscription_status === 'premium',
-            subscription_status: profile.subscription_status || 'free',
-            subscription_end_date: profile.subscription_end_date || null,
-            stripe_customer_id: profile.stripe_customer_id || null,
-          });
-        }
+      if (authError) {
+        console.error('❌ Auth error:', authError);
+        setUser(null);
+        return;
       }
+      
+      if (!authUser) {
+        console.log('👤 Пользователь не авторизован');
+        setUser(null);
+        return;
+      }
+
+      console.log('👤 Загружаем профиль для:', authUser.email);
+      
+      // Загружаем профиль
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profileError) {
+        console.error('❌ Ошибка загрузки профиля:', profileError);
+        // Если профиля нет - это проблема, пользователь не может использовать сайт
+        setUser(null);
+        return;
+      }
+
+      if (!profile) {
+        console.error('❌ Профиль не найден для пользователя:', authUser.id);
+        setUser(null);
+        return;
+      }
+
+      console.log('✅ Профиль загружен:', profile.full_name);
+
+      // Загружаем прогресс из базы
+      const { data: progressData } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .eq('completed', true);
+
+      const completedCount = progressData?.length || 0;
+      const completedLessonIds = progressData?.map(p => p.lesson_index) || [];
+
+      console.log('📊 Прогресс:', completedCount, 'уроков пройдено');
+
+      setUser({
+        id: authUser.id,
+        email: authUser.email!,
+        full_name: profile.full_name || 'User',
+        telegram_username: profile.telegram_username || null,
+        progress: completedCount,
+        completedLessons: completedLessonIds,
+        joinedDate: profile.created_at || new Date().toISOString(),
+        hasPaid: profile.subscription_status === 'premium',
+        subscription_status: profile.subscription_status || 'free',
+        subscription_end_date: profile.subscription_end_date || null,
+        stripe_customer_id: profile.stripe_customer_id || null,
+      });
     } catch (error) {
-      console.error('Check user error:', error);
+      console.error('❌ Критическая ошибка checkUser:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }

@@ -127,10 +127,11 @@ export function Navigation() {
               )}
             </div>
 
-            {loading && user ? (
-              // Показываем загрузку ТОЛЬКО если пользователь уже есть
+            {loading ? (
+              // Показываем загрузку пока проверяем авторизацию
               <div className="flex items-center gap-2 px-4 py-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                <span className="hidden md:inline text-sm text-muted-foreground">Загрузка...</span>
               </div>
             ) : user ? (
               <>

@@ -43,6 +43,7 @@ export type Profile = {
   id: string
   email: string
   full_name: string | null
+  telegram_username: string | null
   avatar_url: string | null
   subscription_status: 'free' | 'premium'
   subscription_end_date: string | null

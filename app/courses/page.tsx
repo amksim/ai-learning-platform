@@ -34,7 +34,7 @@ const iconMap: Record<string, any> = {
 export default function CoursesPage() {
   const router = useRouter();
   const { t, language } = useLanguage();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { translate } = useTranslate();
   const [allLevels, setAllLevels] = useState<Level[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,6 +151,12 @@ export default function CoursesPage() {
     // Защита от undefined index
     const lessonIndex = index ?? 0;
     
+    // КРИТИЧНО: Если идет загрузка авторизации, разблокируем первый урок
+    // чтобы избежать мерцания интерфейса
+    if (authLoading) {
+      return lessonIndex === 0;
+    }
+    
     // 1. Для НЕ залогиненных: только первый урок открыт
     if (!user) {
       console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): НЕ залогинен -> ${lessonIndex === 0 ? 'OPEN' : 'LOCKED'}`);
@@ -262,7 +268,7 @@ export default function CoursesPage() {
         </div>
 
         {/* Кнопка перехода к следующему уроку */}
-        {!isLoading && user && findNextIncompleteLesson() && (
+        {!isLoading && !authLoading && user && findNextIncompleteLesson() && (
           <div className="mb-8 text-center">
             <button
               onClick={scrollToNextLesson}
@@ -275,7 +281,7 @@ export default function CoursesPage() {
         )}
 
         {/* Skeleton Loader */}
-        {isLoading && (
+        {(isLoading || authLoading) && (
           <div className="relative px-4 md:px-8 space-y-8">
             {[1, 2, 3, 4, 5, 6].map((num) => (
               <div 
@@ -307,7 +313,7 @@ export default function CoursesPage() {
         )}
 
         {/* Уровни волной - слева направо */}
-        {!isLoading && (
+        {!isLoading && !authLoading && (
         <div className="relative px-4 md:px-8">
           {allLevels.map((level, index) => {
             // Show CTA only ONCE after the LAST free lesson
