@@ -9,8 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const router = useRouter();
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
@@ -523,5 +524,13 @@ export default function ProfilePage() {
 
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <ProtectedRoute>
+      <ProfilePageContent />
+    </ProtectedRoute>
   );
 }
