@@ -17,29 +17,18 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
   const [newImage, setNewImage] = useState<Partial<LessonImageData>>({
     size: "medium",
     position: "center",
+    translations: {}
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      setUploading(true);
-
-      // Генерируем уникальное имя файла
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-
-      // Загружаем файл в Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('course-images')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        console.error('Upload error:', error);
+    // Проверяем размер файла (максимум 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert("⚠️ Файл слишком большой! Максимум 10MB");
+      return;
         alert('Ошибка загрузки: ' + error.message);
         return;
       }
@@ -56,6 +45,51 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
         ...newImage,
         url: publicUrl,
       });
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Не удалось загрузить изображение');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleLanguageImageUpload = async (langCode: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    try {
+      // Создаем уникальное имя файла с языком
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${langCode}.${fileExt}`;
+
+      // Загружаем в Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('course-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        alert('Ошибка загрузки: ' + error.message);
+        return;
+      }
+
+      // Получаем публичный URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-images')
+        .getPublicUrl(fileName);
+
+      console.log(`✅ Image uploaded for ${langCode}:`, publicUrl);
+
+      // Сохраняем URL в переводы
+      const newTranslations = {
+        ...newImage.translations,
+        [langCode]: publicUrl
+      };
+      setNewImage({ ...newImage, translations: newTranslations });
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Не удалось загрузить изображение');

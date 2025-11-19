@@ -25,29 +25,6 @@ export default function LoginPage() {
 
     try {
       if (isSignup) {
-        if (!name.trim()) {
-          toast.error(
-            (t) => (
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Введите имя</p>
-                  <p className="text-sm opacity-90">Поле имени обязательно для заполнения</p>
-                </div>
-              </div>
-            ),
-            {
-              duration: 4000,
-              style: {
-                background: '#ef4444',
-                color: '#fff',
-                padding: '16px',
-              },
-            }
-          );
-          setLoading(false);
-          return;
-        }
         if (password !== confirmPassword) {
           toast.error(
             (t) => (
@@ -307,7 +284,7 @@ export default function LoginPage() {
                   <>
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium">
-                        Имя
+                        Имя (необязательно)
                       </label>
                       <input
                         id="name"
@@ -315,9 +292,11 @@ export default function LoginPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Ваше имя"
-                        required={isSignup}
                         className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Если не указано, будет использован email
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="telegram" className="text-sm font-medium">

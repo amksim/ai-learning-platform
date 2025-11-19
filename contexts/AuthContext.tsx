@@ -39,6 +39,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Загрузка пользователя при старте
   useEffect(() => {
     checkUser();
+    
+    // Подписываемся на изменения auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.id);
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        await checkUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Проверка текущего пользователя
@@ -90,6 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Регистрация
   async function signup(email: string, password: string, name: string, telegramUsername?: string) {
     console.log('📝 Регистрация:', email);
+    
+    // Если имя не введено, используем первую часть email
+    const userName = name.trim() || email.split('@')[0];
 
     try {
       // 1. Проверяем - может пользователь уже есть?
@@ -145,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .insert({
           id: authData.user.id,
           email: email,
-          full_name: name,
+          full_name: userName,
           telegram_username: telegramUsername || null,
           subscription_status: 'free',
           created_at: new Date().toISOString(),
@@ -172,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .insert({
           id: authData.user.id,
           email: email,
-          full_name: name,
+          full_name: userName,
           referred_by: referralCode || null,
         });
 
@@ -225,7 +243,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 7. Загружаем пользователя
       console.log('📝 Загружаем профиль...');
       await checkUser();
-      console.log('✅ Всё готово!');
+      
+      // Проверяем что пользователь действительно загрузился
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: { user: finalUser } } = await supabase.auth.getUser();
+      if (!finalUser) {
+        throw new Error('Failed to load user after signup');
+      }
+      
+      console.log('✅ Всё готово! Пользователь:', finalUser.id);
       
     } catch (err: any) {
       console.error('❌ Signup error:', err);
@@ -237,16 +263,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(email: string, password: string) {
     console.log('🔐 Вход:', email);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
 
-    console.log('✅ Logged in');
+    console.log('✅ Logged in:', data.user?.id);
 
+    // Загружаем пользователя
     await checkUser();
+    
+    // Проверяем что пользователь действительно загрузился
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const { data: { user: finalUser } } = await supabase.auth.getUser();
+    if (!finalUser) {
+      throw new Error('Failed to load user after login');
+    }
+    
+    console.log('✅ User loaded:', finalUser.id);
   }
 
   // Выход

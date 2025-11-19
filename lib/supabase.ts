@@ -18,7 +18,15 @@ export function getSupabase() {
       throw new Error('Supabase URL and Anon Key are required')
     }
     
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey)
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: 'supabase.auth.token',
+      }
+    })
   }
   return supabaseInstance
 }
