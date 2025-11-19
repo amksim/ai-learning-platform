@@ -35,6 +35,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isCheckingUser = React.useRef(false);
 
   // Загрузка пользователя при старте
   useEffect(() => {
@@ -45,9 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔄 Auth state changed:', event, session?.user?.id);
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-        await checkUser();
+        // Не вызываем checkUser если уже идет проверка
+        if (!isCheckingUser.current) {
+          await checkUser();
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setLoading(false);
       }
     });
     
@@ -58,6 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Проверка текущего пользователя
   async function checkUser() {
+    // Защита от параллельных вызовов
+    if (isCheckingUser.current) {
+      console.log('⚠️ checkUser уже выполняется, пропускаем');
+      return;
+    }
+    
+    isCheckingUser.current = true;
+    console.log('🔍 Начинаем checkUser...');
+    
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
       
@@ -127,6 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     } finally {
       setLoading(false);
+      isCheckingUser.current = false;
     }
   }
 
@@ -272,14 +287,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('📝 Загружаем профиль...');
       await checkUser();
       
-      // Проверяем что пользователь действительно загрузился
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const { data: { user: finalUser } } = await supabase.auth.getUser();
-      if (!finalUser) {
-        throw new Error('Failed to load user after signup');
-      }
-      
-      console.log('✅ Всё готово! Пользователь:', finalUser.id);
+      console.log('✅ Регистрация завершена!');
       
     } catch (err: any) {
       console.error('❌ Signup error:', err);
@@ -300,17 +308,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log('✅ Logged in:', data.user?.id);
 
-    // Загружаем пользователя
+    // Загружаем пользователя - onAuthStateChange тоже вызовет checkUser,
+    // но защита от параллельных вызовов предотвратит дублирование
     await checkUser();
     
-    // Проверяем что пользователь действительно загрузился
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const { data: { user: finalUser } } = await supabase.auth.getUser();
-    if (!finalUser) {
-      throw new Error('Failed to load user after login');
-    }
-    
-    console.log('✅ User loaded:', finalUser.id);
+    console.log('✅ Login завершен');
   }
 
   // Выход

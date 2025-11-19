@@ -114,13 +114,16 @@ export default function LoginPage() {
         );
       }
 
+      // Небольшая задержка чтобы дать время checkUser завершиться
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Перенаправление - проверяем есть ли сохраненный URL
       const redirectUrl = localStorage.getItem('redirectAfterLogin');
       if (redirectUrl) {
         localStorage.removeItem('redirectAfterLogin');
-        window.location.href = redirectUrl;
+        router.push(redirectUrl);
       } else {
-        window.location.href = '/courses';
+        router.push('/courses');
       }
     } catch (error: any) {
       console.error('Auth error:', error);
