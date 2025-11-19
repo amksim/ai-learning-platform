@@ -20,7 +20,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
     translations: {}
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -29,6 +29,30 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
     if (file.size > maxSize) {
       alert("⚠️ Файл слишком большой! Максимум 10MB");
       return;
+    }
+
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      alert("Пожалуйста, выберите файл изображения");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Создаем уникальное имя файла
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+
+      // Загружаем в Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('course-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
         alert('Ошибка загрузки: ' + error.message);
         return;
       }
