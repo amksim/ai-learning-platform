@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User, Trophy } from "lucide-react";
+import { Star, ArrowRight, Code, Smartphone, Gamepad2, Target, Zap, Users, TrendingUp, Gift, User, Trophy, CreditCard } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -57,19 +57,25 @@ export default function HomePage() {
       icon: Code,
       title: t.home.track_websites,
       description: t.home.track_websites_desc,
-      gradient: "from-blue-500 to-cyan-500",
+      gradient: "from-blue-500 via-blue-400 to-cyan-500",
     },
     {
       icon: Smartphone,
       title: t.home.track_apps,
       description: t.home.track_apps_desc,
-      gradient: "from-purple-500 to-pink-500",
+      gradient: "from-purple-500 via-purple-400 to-pink-500",
     },
     {
       icon: Gamepad2,
       title: t.home.track_games,
       description: t.home.track_games_desc,
-      gradient: "from-orange-500 to-red-500",
+      gradient: "from-orange-500 via-orange-400 to-red-500",
+    },
+    {
+      icon: CreditCard,
+      title: t.home.track_payments,
+      description: t.home.track_payments_desc,
+      gradient: "from-green-500 via-emerald-400 to-teal-500",
     },
   ];
 
@@ -336,20 +342,20 @@ export default function HomePage() {
             {t.home.hero_subtitle}
           </p>
           
-          <div className="grid grid-cols-2 gap-4 md:gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 md:gap-8">
             {tracks.map((track) => {
               const Icon = track.icon;
               return (
-                <Card key={track.title} className="group h-full glass premium-shadow hover:scale-105 transition-all duration-300 border-2 hover:border-purple-300">
-                  <CardHeader className="p-3 sm:p-4 md:p-6">
-                    <div className={`mb-3 inline-flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br ${track.gradient} shadow-2xl neon-glow group-hover:scale-110 transition-transform`}>
-                      <Icon className="h-7 w-7 sm:h-10 sm:w-10 text-white" />
+                <Card key={track.title} className="group h-full glass premium-shadow hover:scale-105 transition-all duration-300 border-2 border-white/20 hover:border-white/40 backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/10 hover:from-white/10 hover:to-white/15">
+                  <CardHeader className="p-4 sm:p-5 md:p-6">
+                    <div className={`mb-4 inline-flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br ${track.gradient} shadow-2xl shadow-current/50 group-hover:shadow-current/80 neon-glow group-hover:scale-110 transition-all duration-300`}>
+                      <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
                     </div>
-                    <CardTitle className="text-base sm:text-xl md:text-2xl group-hover:text-purple-600 transition-colors">{track.title}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm md:text-base">{track.description}</CardDescription>
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold mb-2 bg-gradient-to-br from-white to-gray-200 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all duration-300">{track.title}</CardTitle>
+                    <CardDescription className="text-sm sm:text-base text-gray-300 leading-relaxed">{track.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-4 md:p-6">
-                    <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-purple-600">
+                  <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
+                    <div className="flex items-center gap-2 text-sm font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       ✓ Включено в курс
                     </div>
                   </CardContent>
