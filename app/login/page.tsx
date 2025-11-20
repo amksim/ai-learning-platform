@@ -71,7 +71,31 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        await signup(email, password, name, telegramUsername || undefined);
+        // Проверяем Telegram username
+        if (!telegramUsername || telegramUsername.trim().length === 0) {
+          toast.error(
+            (t) => (
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Telegram обязателен</p>
+                  <p className="text-sm opacity-90">Укажите ваш Telegram username</p>
+                </div>
+              </div>
+            ),
+            {
+              duration: 4000,
+              style: {
+                background: '#ef4444',
+                color: '#fff',
+                padding: '16px',
+              },
+            }
+          );
+          setLoading(false);
+          return;
+        }
+        await signup(email, password, name, telegramUsername.trim());
         toast.success(
           (t) => (
             <div className="flex items-start gap-3">
@@ -303,7 +327,7 @@ export default function LoginPage() {
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="telegram" className="text-sm font-medium">
-                        Telegram (необязательно)
+                        Telegram <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="telegram"
@@ -311,10 +335,11 @@ export default function LoginPage() {
                         value={telegramUsername}
                         onChange={(e) => setTelegramUsername(e.target.value.replace('@', ''))}
                         placeholder="username (без @)"
+                        required
                         className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Для связи и поддержки
+                        Обязательно для связи и поддержки
                       </p>
                     </div>
                   </>

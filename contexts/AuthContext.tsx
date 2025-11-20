@@ -21,9 +21,10 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string, name: string, telegramUsername?: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, telegramUsername: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (updates: { full_name?: string; telegram_username?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Регистрация
-  async function signup(email: string, password: string, name: string, telegramUsername?: string) {
+  async function signup(email: string, password: string, name: string, telegramUsername: string) {
     console.log('📝 Регистрация:', email);
 
     try {
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: authData.user.id,
           email: email,
           full_name: name || email.split('@')[0],
-          telegram_username: telegramUsername || null,
+          telegram_username: telegramUsername,
           subscription_status: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -205,8 +206,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
+  // Обновление профиля
+  async function updateProfile(updates: { full_name?: string; telegram_username?: string }) {
+    console.log('📝 Обновление профиля:', updates);
+
+    if (!user) {
+      throw new Error('Пользователь не авторизован');
+    }
+
+    try {
+      // Обновляем профиль в БД
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('❌ Ошибка обновления профиля:', error);
+        throw error;
+      }
+
+      console.log('✅ Профиль обновлен');
+
+      // Перезагружаем данные пользователя
+      await loadUser();
+    } catch (error) {
+      console.error('❌ Ошибка updateProfile:', error);
+      throw error;
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, signup, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
