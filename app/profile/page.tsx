@@ -10,7 +10,6 @@ import { useReviews } from "@/contexts/ReviewsContext";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import CourseStatsWidget from "@/components/profile/CourseStatsWidget";
 
 function ProfilePageContent() {
   const router = useRouter();
@@ -307,11 +306,6 @@ function ProfilePageContent() {
             )}
           </CardContent>
         </Card>
-
-        {/* Статистика по курсам */}
-        <div className="mb-8">
-          <CourseStatsWidget completedLessonIds={user.completedLessons || []} />
-        </div>
 
         {/* Achievements / Badges - Horizontal Scroll */}
         <Card className="mb-8 glass border-2 border-purple-500/20 premium-shadow">
