@@ -112,7 +112,8 @@ export default function HomePage() {
       description: "Стильный магазин с фильтрами и оплатой онлайн",
       image: "👕",
       url: "https://elegant-clothing-shop.vercel.app",
-      category: "website"
+      category: "website",
+      gradient: "from-blue-500 via-cyan-500 to-teal-500"
     },
     {
       title: "Трекер привычек",
@@ -120,7 +121,8 @@ export default function HomePage() {
       description: "Приложение для отслеживания ежедневных привычек с напоминаниями",
       image: "✓",
       url: "https://habit-tracker-app-demo.vercel.app",
-      category: "app"
+      category: "app",
+      gradient: "from-purple-500 via-pink-500 to-rose-500"
     },
     {
       title: "Тетрис",
@@ -128,7 +130,8 @@ export default function HomePage() {
       description: "Классическая игра с уровнями сложности",
       image: "🎮",
       url: "https://js-tetris-game.netlify.app",
-      category: "game"
+      category: "game",
+      gradient: "from-orange-500 via-red-500 to-pink-500"
     },
     {
       title: "Калькулятор калорий",
@@ -136,7 +139,8 @@ export default function HomePage() {
       description: "Удобный счётчик калорий для здорового питания",
       image: "🥗",
       url: "https://calorie-calculator-modern.vercel.app",
-      category: "app"
+      category: "app",
+      gradient: "from-green-500 via-emerald-500 to-teal-500"
     },
     {
       title: "Змейка 2.0",
@@ -144,7 +148,8 @@ export default function HomePage() {
       description: "Обновлённая версия классической игры с бонусами",
       image: "🐍",
       url: "https://snake-game-js-modern.netlify.app",
-      category: "game"
+      category: "game",
+      gradient: "from-lime-500 via-green-500 to-emerald-500"
     },
     {
       title: "Портфолио дизайнера",
@@ -152,7 +157,8 @@ export default function HomePage() {
       description: "Минималистичное портфолио с анимациями",
       image: "🎨",
       url: "https://designer-portfolio-minimal.vercel.app",
-      category: "website"
+      category: "website",
+      gradient: "from-pink-500 via-rose-500 to-red-500"
     },
     {
       title: "Таймер Помодоро",
@@ -160,7 +166,8 @@ export default function HomePage() {
       description: "Продуктивность по методу помодоро с статистикой",
       image: "⏱",
       url: "https://pomodoro-timer-app.netlify.app",
-      category: "app"
+      category: "app",
+      gradient: "from-amber-500 via-orange-500 to-red-500"
     },
     {
       title: "Сайт ресторана",
@@ -168,7 +175,8 @@ export default function HomePage() {
       description: "Красивый сайт с меню и бронированием столиков",
       image: "🍽",
       url: "https://restaurant-website-template.vercel.app",
-      category: "website"
+      category: "website",
+      gradient: "from-yellow-500 via-amber-500 to-orange-500"
     },
     {
       title: "Крестики-нолики",
@@ -176,7 +184,8 @@ export default function HomePage() {
       description: "Игра с AI противником и онлайн режимом",
       image: "❌",
       url: "https://tic-tac-toe-ai-game.netlify.app",
-      category: "game"
+      category: "game",
+      gradient: "from-indigo-500 via-purple-500 to-pink-500"
     },
   ];
 
@@ -504,41 +513,44 @@ export default function HomePage() {
           </div>
           
           {/* Премиум карточки проектов */}
-          <div className="grid grid-cols-2 gap-4 md:gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {studentProjects.map((project, index) => (
               <a 
                 key={project.title}
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block"
+                className="block group"
               >
                 <Card 
-                  className="group h-full glass premium-shadow border-2 border-purple-100 hover:border-purple-300 transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer"
+                  className="h-full glass premium-shadow border-2 border-purple-400/20 hover:border-purple-400/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20 overflow-hidden cursor-pointer"
                 >
-                {/* Большой эмодзи с градиентным фоном */}
-                <div className="relative h-32 sm:h-40 md:h-48 flex items-center justify-center bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 group-hover:from-purple-200 group-hover:via-pink-200 group-hover:to-blue-200 transition-all">
-                  <div className="text-5xl sm:text-6xl md:text-8xl transform group-hover:scale-110 transition-transform duration-300">
+                {/* Большой эмодзи с ярким градиентным фоном */}
+                <div className={`relative h-40 sm:h-48 flex items-center justify-center bg-gradient-to-br ${project.gradient} transition-all duration-300 group-hover:scale-105`}>
+                  <div className="text-6xl sm:text-7xl md:text-8xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 drop-shadow-2xl">
                     {project.image}
                   </div>
                   {/* Бейдж категории */}
-                  <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm text-xs font-semibold text-purple-600 shadow-lg">
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-xs font-bold shadow-lg border border-white/50">
                     {project.category === 'website' ? '🌐 Сайты' : project.category === 'app' ? '📱 Приложения' : '🎮 Игры'}
                   </div>
+                  
+                  {/* Hover оверлей */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                 </div>
                 
-                <CardHeader className="p-3 sm:p-4 md:p-6">
-                  <CardTitle className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <CardHeader className="p-4 sm:p-5 md:p-6">
+                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all">
                     {project.title}
                   </CardTitle>
-                  <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">{project.author}</p>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{project.description}</p>
+                  <p className="text-sm text-gray-400 mb-2 font-medium">от {project.author}</p>
+                  <p className="text-sm text-gray-300 leading-relaxed line-clamp-2">{project.description}</p>
                 </CardHeader>
                 
-                <CardContent className="p-3 sm:p-4 md:p-6">
+                <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
                   <Button 
                     variant="outline" 
-                    className="w-full group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 hover:from-purple-700 hover:to-pink-700 hover:scale-105 transition-all shadow-lg font-bold"
                   >
                     {t.home.view_project}
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
