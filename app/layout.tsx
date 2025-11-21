@@ -8,6 +8,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ReviewsProvider } from "@/contexts/ReviewsContext";
 import { Toaster } from "react-hot-toast";
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "AI Learning Platform - Научись создавать сайты, игры и приложения с AI",
   description: "🌍 Первая в мире платформа для обучения созданию сайтов, игр и приложений с помощью AI. Без знания кода! Полный курс за $399. Более 100 уроков.",
@@ -90,7 +97,7 @@ export default function RootLayout({
           <LanguageProvider>
             <ReviewsProvider>
               <Navigation />
-              <main className="min-h-screen pb-20 md:pb-0">
+              <main className="min-h-screen pb-16 md:pb-0">
                 {children}
               </main>
               <SupportButton />

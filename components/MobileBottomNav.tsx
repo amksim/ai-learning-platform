@@ -54,9 +54,9 @@ export default function MobileBottomNav() {
       {/* Маленькая плавающая кнопка поддержки */}
       <button
         onClick={() => window.open("https://t.me/AlLearning_Help", "_blank", "noopener,noreferrer")}
-        className="fixed bottom-20 right-4 z-50 lg:hidden w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
+        className="fixed bottom-16 right-3 z-50 lg:hidden w-11 h-11 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
       >
-        <MessageCircle className="h-6 w-6 text-white" strokeWidth={2.5} />
+        <MessageCircle className="h-5 w-5 text-white" strokeWidth={2.5} />
         {/* Индикатор онлайн */}
         <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900">
           <div className="absolute inset-0 bg-green-400 rounded-full animate-ping" />
@@ -64,13 +64,13 @@ export default function MobileBottomNav() {
       </button>
       
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-gradient-to-t from-gray-900 via-gray-900/98 to-gray-900/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl shadow-purple-500/10">
-        <div className="flex items-center justify-around px-1 py-2 safe-area-bottom">
+        <div className="flex items-center justify-around px-1 py-1.5 pb-safe">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isSpecial = 'special' in item && item.special; // Центральная кнопка реферала
           
           const className = cn(
-            "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-300 min-w-[70px]",
+            "relative flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-lg transition-all duration-300 min-w-[60px]",
             item.isActive
               ? "bg-gradient-to-br from-purple-500/30 to-pink-500/30 text-white scale-105"
               : isSpecial
@@ -94,9 +94,9 @@ export default function MobileBottomNav() {
               <div className="relative">
                 <Icon
                   className={cn(
-                    "h-6 w-6 transition-all duration-300",
+                    "h-5 w-5 transition-all duration-300",
                     item.isActive && "scale-110 drop-shadow-lg",
-                    isSpecial && "h-7 w-7 drop-shadow-glow"
+                    isSpecial && "h-6 w-6 drop-shadow-glow"
                   )}
                   strokeWidth={item.isActive || isSpecial ? 2.5 : 2}
                 />
@@ -115,7 +115,7 @@ export default function MobileBottomNav() {
               {/* Текст */}
               <span 
                 className={cn(
-                  "text-xs font-medium transition-all duration-300",
+                  "text-[10px] font-medium transition-all duration-300 leading-tight",
                   item.isActive ? "font-bold" : "font-normal"
                 )}
               >
