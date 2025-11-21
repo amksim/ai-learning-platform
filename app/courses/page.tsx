@@ -11,6 +11,18 @@ import { allCourseLevels, Level, freeLessonsCount } from "@/lib/courseLevels";
 import { useTranslate } from "@/hooks/useTranslate";
 import { getTotalLessonsCount } from "@/lib/getLessonsCount";
 import { getTranslatedContent } from "@/lib/translateContent";
+import CourseSwitcher from "@/components/CourseSwitcher";
+
+interface CourseCategory {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  total_lessons: number;
+  display_order: number;
+}
 
 // Icon mapping for localStorage compatibility
 const iconMap: Record<string, any> = {
@@ -38,6 +50,7 @@ export default function CoursesPage() {
   const { translate } = useTranslate();
   const [allLevels, setAllLevels] = useState<Level[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<CourseCategory | null>(null);
 
   // Helper function to get translated content
   const getTranslated = (level: Level) => {
@@ -267,6 +280,12 @@ export default function CoursesPage() {
           </p>
         </div>
 
+        {/* Переключатель курсов */}
+        <CourseSwitcher 
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+        />
+
         {/* Кнопка перехода к следующему уроку */}
         {!isLoading && !authLoading && user && findNextIncompleteLesson() && (
           <div className="mb-8 text-center">
@@ -315,7 +334,13 @@ export default function CoursesPage() {
         {/* Уровни волной - слева направо */}
         {!isLoading && !authLoading && (
         <div className="relative px-4 md:px-8">
-          {allLevels.map((level, index) => {
+          {allLevels
+            .filter(level => {
+              // Фильтруем по выбранной категории курса
+              if (!activeCategory) return true;
+              return level.courseCategoryId === activeCategory.id;
+            })
+            .map((level, index) => {
             // Show CTA only ONCE after the LAST free lesson
             const isLastFreeLesson = level.isFree && 
               (index === allLevels.length - 1 || !allLevels[index + 1]?.isFree);

@@ -48,6 +48,7 @@ export default function AdminPage() {
   const [newTopic, setNewTopic] = useState("");
   const [stats, setStats] = useState({ totalUsers: 147, activeStudents: 89 });
   const [isEditingStats, setIsEditingStats] = useState(false);
+  const [courseCategories, setCourseCategories] = useState<any[]>([]);
 
   // Admin access protection
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function AdminPage() {
             practice: course.practice || false,
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
+            courseCategoryId: course.course_category_id,
             translations: course.translations || {},
             images: course.images || [],
             videos: course.videos || [],
@@ -119,8 +121,22 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadCourses();
+    loadCourseCategories();
     loadStats();
   }, []);
+
+  // Load course categories
+  const loadCourseCategories = async () => {
+    try {
+      const response = await fetch('/api/course-categories');
+      const data = await response.json();
+      if (data.categories) {
+        setCourseCategories(data.categories);
+      }
+    } catch (error) {
+      console.error('Error loading course categories:', error);
+    }
+  };
 
   // Загрузка статистики
   const loadStats = async () => {
@@ -208,6 +224,7 @@ export default function AdminPage() {
         practice: editForm.practice || false,
         practice_description: editForm.practiceDescription,
         is_free: editForm.isFree || false,
+        course_category_id: editForm.courseCategoryId || null,
         images: editForm.images || [],
         videos: editForm.videos || [],
         translations: autoTranslateCourseContent(
@@ -314,6 +331,7 @@ export default function AdminPage() {
         practice: editForm.practice || false,
         practice_description: editForm.practiceDescription || "",
         is_free: editForm.isFree || false,
+        course_category_id: editForm.courseCategoryId || null,
         images: editForm.images || [],
         videos: editForm.videos || [],
         display_order: displayOrder,
@@ -634,6 +652,27 @@ export default function AdminPage() {
                       <option value="practice">✍️ Practice</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Course Category Selector */}
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-purple-400">Курс *</label>
+                  <select
+                    value={editForm.courseCategoryId || ""}
+                    onChange={(e) => setEditForm({ ...editForm, courseCategoryId: parseInt(e.target.value) })}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border-2 border-gray-700 focus:border-purple-500 text-white transition-all"
+                    required
+                  >
+                    <option value="">Выбери курс</option>
+                    {courseCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.title}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">
+                    В какой курс добавить этот урок
+                  </p>
                 </div>
 
                 {/* Icon Selector */}
