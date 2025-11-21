@@ -43,6 +43,8 @@ export default function CourseStatsEditor() {
       const course = courses.find(c => c.id === courseId);
       if (!course) return;
 
+      console.log('💾 Сохраняю статистику:', { courseId, field, value });
+
       const response = await fetch('/api/course-categories', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -52,13 +54,20 @@ export default function CourseStatsEditor() {
         })
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        console.log('✅ Статистика сохранена:', result);
         setCourses(courses.map(c => 
           c.id === courseId ? { ...c, [field]: value } : c
         ));
+      } else {
+        console.error('❌ Ошибка от API:', result);
+        alert(`❌ Ошибка: ${result.error}\n\nВозможно колонки в БД не созданы. Запусти ADD_COURSE_STATS.sql!`);
       }
     } catch (error) {
-      console.error('Ошибка сохранения:', error);
+      console.error('❌ Ошибка сохранения:', error);
+      alert('❌ Ошибка при сохранении статистики');
     } finally {
       setSaving(null);
     }
