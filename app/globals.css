@@ -32,6 +32,14 @@
   * {
     @apply border-border;
   }
+  
+  /* ЗАПРЕТ МАСШТАБИРОВАНИЯ НА МОБИЛЬНЫХ */
+  html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
   body {
     @apply bg-background text-foreground;
     background: linear-gradient(135deg, 
@@ -42,6 +50,18 @@
       hsl(250, 40%, 12%) 100%
     );
     background-attachment: fixed;
+    
+    /* Запрет масштабирования */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Разрешить выделение текста в input/textarea */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
   }
   
   /* Премиум glassmorphism эффект */
