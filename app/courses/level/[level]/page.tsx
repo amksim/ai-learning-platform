@@ -391,7 +391,7 @@ export default function LessonPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {section.content}
                 </p>
                 

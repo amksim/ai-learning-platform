@@ -530,7 +530,7 @@ export default function CoursesPage() {
                           <Card className="glass premium-shadow border-2 border-purple-400">
                             <CardContent className="p-4">
                               <h3 className="font-bold text-sm mb-2">{getTranslated(level).title}</h3>
-                              <p className="text-xs text-gray-400 mb-2">{getTranslated(level).description}</p>
+                              <p className="text-xs text-gray-400 mb-2 whitespace-pre-wrap">{getTranslated(level).description}</p>
                               <div className="flex flex-wrap gap-1">
                                 <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500">
                                   🎁 Бесплатный
