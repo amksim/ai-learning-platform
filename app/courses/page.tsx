@@ -22,6 +22,9 @@ interface CourseCategory {
   color: string;
   total_lessons: number;
   display_order: number;
+  video_minutes?: number;
+  text_pages?: number;
+  practice_tasks?: number;
 }
 
 // Icon mapping for localStorage compatibility
@@ -365,6 +368,56 @@ export default function CoursesPage() {
 
             return (
               <div key={level.id} id={`lesson-${level.id}`} className="relative mb-20">
+                {/* Статистика курса - показываем ОДИН РАЗ перед первым уроком */}
+                {index === 0 && activeCategory && (
+                  <div className="mb-12 mx-auto max-w-3xl">
+                    <div className="glass border-2 border-purple-500/30 rounded-xl p-6">
+                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-2xl">{activeCategory.icon}</span>
+                        Что входит в курс "{activeCategory.title}"
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Видео */}
+                        {activeCategory.video_minutes !== undefined && activeCategory.video_minutes > 0 && (
+                          <div className="flex items-center gap-3 bg-blue-500/10 rounded-lg p-4 border border-blue-500/30">
+                            <div className="text-3xl">🎥</div>
+                            <div>
+                              <div className="text-2xl font-bold text-blue-400">
+                                {Math.floor(activeCategory.video_minutes / 60)}ч {activeCategory.video_minutes % 60}м
+                              </div>
+                              <div className="text-sm text-gray-400">Видео</div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Текст */}
+                        {activeCategory.text_pages !== undefined && activeCategory.text_pages > 0 && (
+                          <div className="flex items-center gap-3 bg-purple-500/10 rounded-lg p-4 border border-purple-500/30">
+                            <div className="text-3xl">📄</div>
+                            <div>
+                              <div className="text-2xl font-bold text-purple-400">
+                                {activeCategory.text_pages}
+                              </div>
+                              <div className="text-sm text-gray-400">Листов текста</div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Практика */}
+                        {activeCategory.practice_tasks !== undefined && activeCategory.practice_tasks > 0 && (
+                          <div className="flex items-center gap-3 bg-green-500/10 rounded-lg p-4 border border-green-500/30">
+                            <div className="text-3xl">✍️</div>
+                            <div>
+                              <div className="text-2xl font-bold text-green-400">
+                                {activeCategory.practice_tasks}
+                              </div>
+                              <div className="text-sm text-gray-400">Практических задач</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Заголовок блока - показываем ОДИН РАЗ в начале блока */}
                 {showBlockHeader && (
                   <div className="mb-12 mt-16 text-center">

@@ -89,31 +89,64 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-bold mb-3 text-gray-300">
+      <h2 className="text-xl font-bold mb-4 text-white">
         Выбери курс:
       </h2>
       
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {categories.map((category) => {
           const isActive = activeCategory?.id === category.id;
-          const colorClasses = getColorClasses(category.color, isActive);
+          
+          // Новые цвета для каждого курса
+          const colorMap: Record<string, { bg: string; activeBg: string; border: string; text: string }> = {
+            'blue': { 
+              bg: 'bg-slate-800/60', 
+              activeBg: 'bg-blue-600', 
+              border: 'border-slate-700',
+              text: 'text-blue-400'
+            },
+            'purple': { 
+              bg: 'bg-slate-800/60', 
+              activeBg: 'bg-purple-600', 
+              border: 'border-slate-700',
+              text: 'text-purple-400'
+            },
+            'orange': { 
+              bg: 'bg-slate-800/60', 
+              activeBg: 'bg-orange-600', 
+              border: 'border-slate-700',
+              text: 'text-orange-400'
+            },
+            'green': { 
+              bg: 'bg-slate-800/60', 
+              activeBg: 'bg-green-600', 
+              border: 'border-slate-700',
+              text: 'text-green-400'
+            }
+          };
+          
+          const colors = colorMap[category.color as keyof typeof colorMap] || colorMap.blue;
           
           return (
             <button
               key={category.id}
               onClick={() => onCategoryChange(category)}
               className={`
-                px-5 py-2.5 rounded-full border-2 transition-all font-semibold text-sm
-                ${colorClasses.border}
-                ${colorClasses.bg}
-                ${colorClasses.hover}
-                ${isActive ? `scale-105 shadow-lg ${colorClasses.text}` : 'text-gray-400'}
-                flex items-center gap-2
+                px-4 py-3 rounded-lg border transition-all font-bold text-sm
+                ${isActive 
+                  ? `${colors.activeBg} border-transparent text-white shadow-lg scale-[1.02]` 
+                  : `${colors.bg} ${colors.border} text-gray-400 hover:${colors.bg} hover:text-gray-300`
+                }
+                flex items-center gap-2.5
               `}
             >
-              <span className="text-lg">{category.icon}</span>
-              <span>{category.title}</span>
-              <span className="text-xs opacity-70">({category.total_lessons})</span>
+              <span className="text-2xl">{category.icon}</span>
+              <div className="flex flex-col items-start">
+                <span className="text-base">{category.title}</span>
+                <span className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                  {category.total_lessons} {category.total_lessons === 1 ? 'урок' : 'уроков'}
+                </span>
+              </div>
             </button>
           );
         })}

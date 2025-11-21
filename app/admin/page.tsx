@@ -11,6 +11,7 @@ import { autoTranslateCourseContent } from "@/lib/translateContent";
 import ImageUploader from "@/components/admin/ImageUploader";
 import VideoUploader from "@/components/admin/VideoUploader";
 import { Button } from "@/components/ui/Button";
+import CourseStatsEditor from "@/components/admin/CourseStatsEditor";
 
 // Available icons
 const iconOptions = [
@@ -555,6 +556,9 @@ export default function AdminPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Статистика курсов */}
+          <CourseStatsEditor />
           
           <div className="flex flex-wrap gap-4">
             <button

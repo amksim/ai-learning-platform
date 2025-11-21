@@ -42,20 +42,24 @@ export async function PUT(request: Request) {
   const supabase = getSupabaseClient();
   try {
     const body = await request.json();
-    const { id, total_pages, total_video_minutes, total_tasks } = body;
+    const { id, video_minutes, text_pages, practice_tasks } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
     }
 
+    // Создаём объект только с теми полями, которые были переданы
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    if (video_minutes !== undefined) updateData.video_minutes = video_minutes;
+    if (text_pages !== undefined) updateData.text_pages = text_pages;
+    if (practice_tasks !== undefined) updateData.practice_tasks = practice_tasks;
+
     const { error } = await supabase
       .from('course_categories')
-      .update({
-        total_pages,
-        total_video_minutes,
-        total_tasks,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', id);
 
     if (error) {
