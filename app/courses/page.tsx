@@ -85,6 +85,7 @@ export default function CoursesPage() {
             practice: course.practice || false,
             practiceDescription: course.practice_description,
             isFree: course.is_free || false,
+            courseCategoryId: course.course_category_id, // ← КРИТИЧЕСКИЙ ФИКС!
             translations: course.translations || {},
             displayOrder: course.display_order || course.id,
             images: course.images || [],

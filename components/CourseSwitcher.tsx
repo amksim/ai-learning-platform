@@ -89,11 +89,11 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-        Выбери курс 🎓
+      <h2 className="text-lg font-bold mb-3 text-gray-300">
+        Выбери курс:
       </h2>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="flex flex-wrap gap-3">
         {categories.map((category) => {
           const isActive = activeCategory?.id === category.id;
           const colorClasses = getColorClasses(category.color, isActive);
@@ -103,37 +103,17 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
               key={category.id}
               onClick={() => onCategoryChange(category)}
               className={`
-                text-left p-6 rounded-xl border-2 transition-all transform
+                px-5 py-2.5 rounded-full border-2 transition-all font-semibold text-sm
                 ${colorClasses.border}
                 ${colorClasses.bg}
                 ${colorClasses.hover}
-                ${isActive ? 'scale-105 shadow-2xl' : 'hover:scale-102'}
-                glass
+                ${isActive ? `scale-105 shadow-lg ${colorClasses.text}` : 'text-gray-400'}
+                flex items-center gap-2
               `}
             >
-              {/* Иконка */}
-              <div className="text-4xl mb-3">
-                {category.icon}
-              </div>
-              
-              {/* Название */}
-              <h3 className={`text-xl font-bold mb-2 ${colorClasses.text}`}>
-                {category.title}
-              </h3>
-              
-              {/* Описание */}
-              <p className="text-sm text-gray-400 mb-3 line-clamp-2">
-                {category.description}
-              </p>
-              
-              {/* Количество уроков */}
-              <div className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-full border ${colorClasses.border} ${colorClasses.bg}`}>
-                  <span className={`text-sm font-bold ${colorClasses.text}`}>
-                    {category.total_lessons} {category.total_lessons === 1 ? 'урок' : 'уроков'}
-                  </span>
-                </div>
-              </div>
+              <span className="text-lg">{category.icon}</span>
+              <span>{category.title}</span>
+              <span className="text-xs opacity-70">({category.total_lessons})</span>
             </button>
           );
         })}

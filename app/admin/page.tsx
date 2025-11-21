@@ -51,6 +51,13 @@ export default function AdminPage() {
   const [courseCategories, setCourseCategories] = useState<any[]>([]);
   const [selectedCourseFilter, setSelectedCourseFilter] = useState<number | null>(null);
 
+  // Устанавливаем первый курс по умолчанию после загрузки
+  useEffect(() => {
+    if (courseCategories.length > 0 && selectedCourseFilter === null) {
+      setSelectedCourseFilter(courseCategories[0].id);
+    }
+  }, [courseCategories]);
+
   // Admin access protection
   useEffect(() => {
     // Не проверяем пока загружается
@@ -553,20 +560,17 @@ export default function AdminPage() {
             <button
               onClick={() => {
                 setShowAddForm(true);
-                setInsertAfter(null);
-                setEditForm({
-                  title: "",
-                  description: "",
-                  difficulty: "beginner",
-                  topics: [],
-                  category: "foundation",
-                  icon: 'Sparkles',
+                // АВТОВЫБОР курса: устанавливаем текущий выбранный курс
+                setEditForm({ 
+                  courseCategoryId: selectedCourseFilter || undefined,
                   practice: false,
                   practiceDescription: "",
-                  isFree: false, // По умолчанию платный, но можно изменить галочкой
+                  isFree: false,
                   images: [],
                   videos: []
                 });
+                setInsertAfter(null);
+                setEditingId(null);
               }}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all"
             >
@@ -854,16 +858,6 @@ export default function AdminPage() {
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-purple-400">Выбери курс для управления:</h2>
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setSelectedCourseFilter(null)}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                selectedCourseFilter === null
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
-                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-              }`}
-            >
-              📚 Все курсы ({levels.length} уроков)
-            </button>
             {courseCategories.map((cat) => {
               const count = levels.filter(l => l.courseCategoryId === cat.id).length;
               return (
@@ -887,10 +881,7 @@ export default function AdminPage() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold mb-4 flex items-center justify-between">
             <span>
-              {selectedCourseFilter === null 
-                ? `Все уроки (${levels.filter(l => !selectedCourseFilter || l.courseCategoryId === selectedCourseFilter).length})`
-                : `${courseCategories.find(c => c.id === selectedCourseFilter)?.icon} ${courseCategories.find(c => c.id === selectedCourseFilter)?.title} (${levels.filter(l => l.courseCategoryId === selectedCourseFilter).length} уроков)`
-              }
+              {courseCategories.find(c => c.id === selectedCourseFilter)?.icon} {courseCategories.find(c => c.id === selectedCourseFilter)?.title} ({levels.filter(l => l.courseCategoryId === selectedCourseFilter).length} уроков)
             </span>
             <div className="flex gap-4 text-sm">
               <span className="text-purple-400">
@@ -904,8 +895,7 @@ export default function AdminPage() {
           
           {levels
             .filter(level => {
-              // Фильтруем по выбранному курсу
-              if (selectedCourseFilter === null) return true;
+              // Показываем только уроки выбранного курса
               return level.courseCategoryId === selectedCourseFilter;
             })
             .map((level, index) => {
