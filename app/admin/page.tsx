@@ -49,6 +49,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ totalUsers: 147, activeStudents: 89 });
   const [isEditingStats, setIsEditingStats] = useState(false);
   const [courseCategories, setCourseCategories] = useState<any[]>([]);
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState<number | null>(null);
 
   // Admin access protection
   useEffect(() => {
@@ -849,10 +850,48 @@ export default function AdminPage() {
           </Card>
         )}
 
+        {/* Course Filter Tabs */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 text-purple-400">Выбери курс для управления:</h2>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setSelectedCourseFilter(null)}
+              className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                selectedCourseFilter === null
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
+                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+              }`}
+            >
+              📚 Все курсы ({levels.length} уроков)
+            </button>
+            {courseCategories.map((cat) => {
+              const count = levels.filter(l => l.courseCategoryId === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCourseFilter(cat.id)}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                    selectedCourseFilter === cat.id
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg scale-105'
+                      : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                  }`}
+                >
+                  {cat.icon} {cat.title} ({count} уроков)
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Levels List */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold mb-4 flex items-center justify-between">
-            <span>Все уроки ({levels.length})</span>
+            <span>
+              {selectedCourseFilter === null 
+                ? `Все уроки (${levels.filter(l => !selectedCourseFilter || l.courseCategoryId === selectedCourseFilter).length})`
+                : `${courseCategories.find(c => c.id === selectedCourseFilter)?.icon} ${courseCategories.find(c => c.id === selectedCourseFilter)?.title} (${levels.filter(l => l.courseCategoryId === selectedCourseFilter).length} уроков)`
+              }
+            </span>
             <div className="flex gap-4 text-sm">
               <span className="text-purple-400">
                 🎁 Бесплатных: {levels.filter(l => l.isFree).length}
@@ -863,7 +902,13 @@ export default function AdminPage() {
             </div>
           </h2>
           
-          {levels.map((level, index) => {
+          {levels
+            .filter(level => {
+              // Фильтруем по выбранному курсу
+              if (selectedCourseFilter === null) return true;
+              return level.courseCategoryId === selectedCourseFilter;
+            })
+            .map((level, index) => {
             const LevelIcon = iconOptions.find(opt => opt.name === level.icon)?.component || Sparkles;
             
             // Показываем разделитель между бесплатными и платными
