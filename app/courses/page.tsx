@@ -290,52 +290,40 @@ export default function CoursesPage() {
           onCategoryChange={setActiveCategory}
         />
 
-        {/* Статистика ВСЕГО курса - показывается ОДИН РАЗ */}
-        {!isLoading && !authLoading && activeCategory && (
-          <div className="mb-12 mx-auto max-w-3xl">
-            <div className="glass border-2 border-purple-500/30 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span className="text-2xl">{activeCategory.icon}</span>
-                Что входит в курс "{activeCategory.title}"
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Видео */}
-                {activeCategory.video_minutes !== undefined && activeCategory.video_minutes > 0 && (
-                  <div className="flex items-center gap-3 bg-blue-500/10 rounded-lg p-4 border border-blue-500/30">
-                    <div className="text-3xl">🎥</div>
-                    <div>
-                      <div className="text-2xl font-bold text-blue-400">
-                        {Math.floor(activeCategory.video_minutes / 60)}ч {activeCategory.video_minutes % 60}м
-                      </div>
-                      <div className="text-sm text-gray-400">Видео</div>
-                    </div>
-                  </div>
-                )}
-                {/* Текст */}
-                {activeCategory.text_pages !== undefined && activeCategory.text_pages > 0 && (
-                  <div className="flex items-center gap-3 bg-purple-500/10 rounded-lg p-4 border border-purple-500/30">
-                    <div className="text-3xl">📄</div>
-                    <div>
-                      <div className="text-2xl font-bold text-purple-400">
-                        {activeCategory.text_pages}
-                      </div>
-                      <div className="text-sm text-gray-400">Листов текста</div>
-                    </div>
-                  </div>
-                )}
-                {/* Практика */}
-                {activeCategory.practice_tasks !== undefined && activeCategory.practice_tasks > 0 && (
-                  <div className="flex items-center gap-3 bg-green-500/10 rounded-lg p-4 border border-green-500/30">
-                    <div className="text-3xl">✍️</div>
-                    <div>
-                      <div className="text-2xl font-bold text-green-400">
-                        {activeCategory.practice_tasks}
-                      </div>
-                      <div className="text-sm text-gray-400">Практических задач</div>
-                    </div>
-                  </div>
-                )}
-              </div>
+        {/* Статистика ВСЕГО курса - КОМПАКТНАЯ */}
+        {!isLoading && !authLoading && activeCategory && (activeCategory.video_minutes || activeCategory.text_pages || activeCategory.practice_tasks) && (
+          <div className="mb-6">
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              {/* Видео */}
+              {activeCategory.video_minutes !== undefined && activeCategory.video_minutes > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span>🎥</span>
+                  <span className="text-blue-400 font-semibold">
+                    {Math.floor(activeCategory.video_minutes / 60)}ч {activeCategory.video_minutes % 60}м
+                  </span>
+                  <span className="text-gray-500">видео</span>
+                </div>
+              )}
+              {/* Текст */}
+              {activeCategory.text_pages !== undefined && activeCategory.text_pages > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span>📄</span>
+                  <span className="text-purple-400 font-semibold">
+                    {activeCategory.text_pages}
+                  </span>
+                  <span className="text-gray-500">листов текста</span>
+                </div>
+              )}
+              {/* Практика */}
+              {activeCategory.practice_tasks !== undefined && activeCategory.practice_tasks > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span>✍️</span>
+                  <span className="text-green-400 font-semibold">
+                    {activeCategory.practice_tasks}
+                  </span>
+                  <span className="text-gray-500">практических задач</span>
+                </div>
+              )}
             </div>
           </div>
         )}

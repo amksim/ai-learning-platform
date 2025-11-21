@@ -88,12 +88,8 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4 text-white">
-        Выбери курс:
-      </h2>
-      
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="mb-4">
+      <div className="flex flex-wrap gap-2">
         {categories.map((category) => {
           const isActive = activeCategory?.id === category.id;
           
@@ -132,21 +128,19 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
               key={category.id}
               onClick={() => onCategoryChange(category)}
               className={`
-                px-4 py-3 rounded-lg border transition-all font-bold text-sm
+                px-3 py-1.5 rounded-lg border transition-all font-semibold text-sm
                 ${isActive 
-                  ? `${colors.activeBg} border-transparent text-white shadow-lg scale-[1.02]` 
-                  : `${colors.bg} ${colors.border} text-gray-400 hover:${colors.bg} hover:text-gray-300`
+                  ? `${colors.activeBg} border-transparent text-white shadow-md` 
+                  : `${colors.bg} ${colors.border} text-gray-400 hover:text-gray-300`
                 }
-                flex items-center gap-2.5
+                flex items-center gap-1.5
               `}
             >
-              <span className="text-2xl">{category.icon}</span>
-              <div className="flex flex-col items-start">
-                <span className="text-base">{category.title}</span>
-                <span className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
-                  {category.total_lessons} {category.total_lessons === 1 ? 'урок' : 'уроков'}
-                </span>
-              </div>
+              <span className="text-base">{category.icon}</span>
+              <span>{category.title}</span>
+              <span className={`text-xs ${isActive ? 'text-white/70' : 'text-gray-500'}`}>
+                ({category.total_lessons})
+              </span>
             </button>
           );
         })}
