@@ -39,8 +39,13 @@ export default function CourseStatsEditorNew() {
   };
 
   const updateStats = async (courseId: number, field: string, value: number) => {
+    console.log('🔄 Начинаю обновление:', { courseId, field, value });
+    
     try {
-      // Обновляем локально
+      // Сохраняем старое значение на случай отката
+      const oldValue = courses.find(c => c.id === courseId)?.[field];
+      
+      // Обновляем локально (оптимистично)
       setCourses(courses.map(c => 
         c.id === courseId ? { ...c, [field]: value } : c
       ));
@@ -52,14 +57,33 @@ export default function CourseStatsEditorNew() {
         body: JSON.stringify({ id: courseId, [field]: value })
       });
 
+      console.log('📡 API Response status:', response.status);
+      
+      const result = await response.json();
+      console.log('📡 API Response data:', result);
+
       if (!response.ok) {
+        console.error('❌ API Error:', result);
         // При ошибке - откатываем
-        loadCourses();
-        alert('❌ Ошибка сохранения');
+        setCourses(courses.map(c => 
+          c.id === courseId ? { ...c, [field]: oldValue } : c
+        ));
+        alert(`❌ Ошибка: ${result.error || 'Неизвестная ошибка'}`);
+        return;
       }
+
+      console.log('✅ Успешно сохранено:', result);
+      
+      // Через секунду перезагружаем для синхронизации
+      setTimeout(() => {
+        console.log('🔄 Синхронизация с БД...');
+        loadCourses();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('❌ Ошибка сети:', error);
       loadCourses();
+      alert('❌ Ошибка сети при сохранении');
     }
   };
 
