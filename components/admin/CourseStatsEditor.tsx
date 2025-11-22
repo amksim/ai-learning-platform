@@ -25,7 +25,12 @@ export default function CourseStatsEditor() {
 
   const loadCourses = async () => {
     try {
-      const response = await fetch('/api/course-categories');
+      const response = await fetch('/api/course-categories', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
       const data = await response.json();
       if (data.categories) {
         setCourses(data.categories);
@@ -58,9 +63,8 @@ export default function CourseStatsEditor() {
 
       if (response.ok) {
         console.log('✅ Статистика сохранена:', result);
-        setCourses(courses.map(c => 
-          c.id === courseId ? { ...c, [field]: value } : c
-        ));
+        // Перезагружаем данные из БД чтобы получить актуальные значения
+        await loadCourses();
       } else {
         console.error('❌ Ошибка от API:', result);
         alert(`❌ Ошибка: ${result.error}\n\nВозможно колонки в БД не созданы. Запусти ADD_COURSE_STATS.sql!`);
