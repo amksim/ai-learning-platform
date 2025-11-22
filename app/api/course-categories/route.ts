@@ -16,21 +16,39 @@ function getSupabaseClient() {
   );
 }
 
-// GET - получить все категории курсов
+// GET - получить все категории курсов с количеством уроков
 export async function GET() {
   const supabase = getSupabaseClient();
   try {
-    const { data, error } = await supabase
+    // Получаем все категории
+    const { data: categories, error: categoriesError } = await supabase
       .from('course_categories')
       .select('*')
       .order('display_order', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching course categories:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (categoriesError) {
+      console.error('Error fetching course categories:', categoriesError);
+      return NextResponse.json({ error: categoriesError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ categories: data || [] });
+    // Для каждой категории считаем количество уроков
+    const categoriesWithCounts = await Promise.all(
+      (categories || []).map(async (category) => {
+        const { count, error: countError } = await supabase
+          .from('courses')
+          .select('*', { count: 'exact', head: true })
+          .eq('course_category_id', category.id);
+
+        if (countError) {
+          console.error(`Error counting lessons for category ${category.id}:`, countError);
+          return { ...category, total_lessons: 0 };
+        }
+
+        return { ...category, total_lessons: count || 0 };
+      })
+    );
+
+    return NextResponse.json({ categories: categoriesWithCounts });
   } catch (error: any) {
     console.error('Unexpected error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
