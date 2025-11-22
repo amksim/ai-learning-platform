@@ -290,40 +290,43 @@ export default function CoursesPage() {
           onCategoryChange={setActiveCategory}
         />
 
-        {/* Статистика ВСЕГО курса - КОМПАКТНАЯ */}
-        {!isLoading && !authLoading && activeCategory && (activeCategory.video_minutes || activeCategory.text_pages || activeCategory.practice_tasks) && (
+        {/* Статистика ВСЕГО курса - ВРЕМЕННЫЕ ЗНАЧЕНИЯ */}
+        {!isLoading && !authLoading && activeCategory && (
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-4 text-sm">
               {/* Видео */}
-              {activeCategory.video_minutes !== undefined && activeCategory.video_minutes > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <span>🎥</span>
-                  <span className="text-blue-400 font-semibold">
-                    {Math.floor(activeCategory.video_minutes / 60)}ч {activeCategory.video_minutes % 60}м
-                  </span>
-                  <span className="text-gray-500">видео</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5">
+                <span>🎥</span>
+                <span className="text-blue-400 font-semibold">
+                  {activeCategory.slug === 'websites' ? '3ч 0м' :
+                   activeCategory.slug === 'apps' ? '2ч 0м' :
+                   activeCategory.slug === 'games' ? '2ч 30м' :
+                   activeCategory.slug === 'payments' ? '1ч 30м' : '0ч 0м'}
+                </span>
+                <span className="text-gray-500">видео</span>
+              </div>
               {/* Текст */}
-              {activeCategory.text_pages !== undefined && activeCategory.text_pages > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <span>📄</span>
-                  <span className="text-purple-400 font-semibold">
-                    {activeCategory.text_pages}
-                  </span>
-                  <span className="text-gray-500">листов текста</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5">
+                <span>📄</span>
+                <span className="text-purple-400 font-semibold">
+                  {activeCategory.slug === 'websites' ? '25' :
+                   activeCategory.slug === 'apps' ? '18' :
+                   activeCategory.slug === 'games' ? '20' :
+                   activeCategory.slug === 'payments' ? '15' : '0'}
+                </span>
+                <span className="text-gray-500">листов текста</span>
+              </div>
               {/* Практика */}
-              {activeCategory.practice_tasks !== undefined && activeCategory.practice_tasks > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <span>✍️</span>
-                  <span className="text-green-400 font-semibold">
-                    {activeCategory.practice_tasks}
-                  </span>
-                  <span className="text-gray-500">практических задач</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5">
+                <span>✍️</span>
+                <span className="text-green-400 font-semibold">
+                  {activeCategory.slug === 'websites' ? '12' :
+                   activeCategory.slug === 'apps' ? '8' :
+                   activeCategory.slug === 'games' ? '10' :
+                   activeCategory.slug === 'payments' ? '6' : '0'}
+                </span>
+                <span className="text-gray-500">практических задач</span>
+              </div>
             </div>
           </div>
         )}
