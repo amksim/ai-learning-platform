@@ -63,15 +63,27 @@ export default function CourseStatsEditor() {
 
       if (response.ok) {
         console.log('✅ Статистика сохранена:', result);
-        // Перезагружаем данные из БД чтобы получить актуальные значения
-        await loadCourses();
+        
+        // СРАЗУ обновляем локальный стейт чтобы UI обновился
+        setCourses(courses.map(c => 
+          c.id === courseId ? { ...c, [field]: value } : c
+        ));
+        
+        // Через 500мс перезагружаем из БД для синхронизации
+        setTimeout(() => {
+          loadCourses();
+        }, 500);
       } else {
         console.error('❌ Ошибка от API:', result);
         alert(`❌ Ошибка: ${result.error}\n\nВозможно колонки в БД не созданы. Запусти ADD_COURSE_STATS.sql!`);
+        // При ошибке - откатываем на старые значения
+        await loadCourses();
       }
     } catch (error) {
       console.error('❌ Ошибка сохранения:', error);
       alert('❌ Ошибка при сохранении статистики');
+      // При ошибке - откатываем на старые значения
+      await loadCourses();
     } finally {
       setSaving(null);
     }
