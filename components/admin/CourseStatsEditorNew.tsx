@@ -38,12 +38,13 @@ export default function CourseStatsEditorNew() {
     }
   };
 
-  const updateStats = async (courseId: number, field: string, value: number) => {
+  const updateStats = async (courseId: number, field: keyof CourseStats, value: number) => {
     console.log('🔄 Начинаю обновление:', { courseId, field, value });
     
     try {
       // Сохраняем старое значение на случай отката
-      const oldValue = courses.find(c => c.id === courseId)?.[field];
+      const course = courses.find(c => c.id === courseId);
+      const oldValue = course ? course[field] : undefined;
       
       // Обновляем локально (оптимистично)
       setCourses(courses.map(c => 
