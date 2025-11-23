@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import SupportButton from "@/components/SupportButton";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -102,6 +103,7 @@ export default function RootLayout({
               <main className="min-h-screen pb-16 md:pb-0">
                 {children}
               </main>
+              <Footer />
               <SupportButton />
               <MobileBottomNav />
               <Toaster
