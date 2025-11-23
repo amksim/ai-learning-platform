@@ -121,7 +121,7 @@ export default function PaymentPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userEmail: user.email,
-            amount: 399 // Можно конвертировать в рубли: 399 * курс
+            amount: 399
           })
         });
 
@@ -141,6 +141,58 @@ export default function PaymentPage() {
           window.location.href = data.confirmationUrl;
         } else {
           throw new Error('No payment URL received');
+        }
+        return;
+      }
+
+      // LiqPay для Украины
+      if (paymentMethod === 'liqpay') {
+        console.log('🇺🇦 Using LiqPay for Ukraine');
+        
+        const response = await fetch('/api/liqpay/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: user.email,
+            amount: 399
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 LiqPay response:', data);
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        if (data.data && data.signature) {
+          console.log('🇺🇦 Redirecting to LiqPay...');
+          
+          // Создаём форму для отправки на LiqPay
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = data.checkoutUrl || 'https://www.liqpay.ua/api/3/checkout';
+          
+          const dataInput = document.createElement('input');
+          dataInput.type = 'hidden';
+          dataInput.name = 'data';
+          dataInput.value = data.data;
+          form.appendChild(dataInput);
+          
+          const signatureInput = document.createElement('input');
+          signatureInput.type = 'hidden';
+          signatureInput.name = 'signature';
+          signatureInput.value = data.signature;
+          form.appendChild(signatureInput);
+          
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          throw new Error('No payment data received');
         }
         return;
       }
@@ -570,12 +622,19 @@ export default function PaymentPage() {
                     </div>
                   </button>
 
-                  {/* LiqPay - Украина (Заготовка) */}
+                  {/* LiqPay - Украина */}
                   <button
                     onClick={() => {
-                      alert('LiqPay для Украины будет добавлен в ближайшее время!');
+                      setPaymentMethod('liqpay');
+                      setUserCountry('UA');
+                      setShowCountrySelector(false);
+                      setShowModal(true);
                     }}
-                    className="p-6 rounded-xl border-2 border-gray-700 bg-gray-800/50 opacity-50 cursor-not-allowed text-left"
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                      paymentMethod === 'liqpay'
+                        ? 'border-yellow-500 bg-yellow-500/10'
+                        : 'border-gray-700 hover:border-yellow-500/50 bg-gray-800/50'
+                    }`}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
@@ -584,14 +643,21 @@ export default function PaymentPage() {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">🔜 LiqPay (Украина)</h3>
+                        <h3 className="text-xl font-bold text-white mb-1">💳 LiqPay (Украина)</h3>
                         <p className="text-sm text-gray-400 mb-2">
-                          Скоро! Карты Украины - Visa, Mastercard
+                          Для пользователей из Украины - Visa, Mastercard
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Скоро</span>
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Visa</span>
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Mastercard</span>
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Приват24</span>
                         </div>
                       </div>
+                      {paymentMethod === 'liqpay' && (
+                        <div className="flex-shrink-0">
+                          <Check className="h-6 w-6 text-yellow-400" />
+                        </div>
+                      )}
                     </div>
                   </button>
                 </div>
