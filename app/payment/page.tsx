@@ -10,8 +10,10 @@ import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+type PaymentMethod = 'stripe' | 'yookassa' | 'liqpay';
+
 export default function PaymentPage() {
-  const { user, completePurchase, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -19,9 +21,45 @@ export default function PaymentPage() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [useTestPrice, setUseTestPrice] = useState(false); // Переключатель для админа
   const [totalLessons, setTotalLessons] = useState(0); // Динамическое количество уроков
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+  const [userCountry, setUserCountry] = useState<string>(''); // Страна пользователя
+  const [showCountrySelector, setShowCountrySelector] = useState(false); // Показать выбор страны
   
   // Проверяем является ли пользователь админом
   const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+  // Определяем страну пользователя
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        // Пробуем определить по IP через бесплатный API
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        const country = data.country_code || '';
+        setUserCountry(country);
+        
+        console.log('🌍 Detected country:', country);
+        
+        // Автоматически выбираем платёжную систему
+        if (country === 'RU') {
+          setPaymentMethod('yookassa'); // YooKassa для России
+          console.log('🇷🇺 Selected: YooKassa (СБП)');
+        } else if (country === 'UA') {
+          setPaymentMethod('liqpay'); // LiqPay для Украины (добавим позже)
+          console.log('🇺🇦 Selected: LiqPay');
+        } else {
+          setPaymentMethod('stripe'); // Stripe для остальных
+          console.log('🌍 Selected: Stripe');
+        }
+      } catch (error) {
+        console.error('Failed to detect country:', error);
+        // По умолчанию показываем выбор
+        setShowCountrySelector(true);
+      }
+    };
+    
+    detectCountry();
+  }, []);
 
   // Загружаем количество уроков из API
   useEffect(() => {
@@ -66,21 +104,56 @@ export default function PaymentPage() {
     try {
       console.log('💳 Starting payment process...');
       console.log('👤 User email:', user?.email || 'No user');
+      console.log('💎 Payment method:', paymentMethod);
       
       if (!user?.email) {
         alert('Please login first');
         setIsProcessing(false);
         return;
       }
+
+      // YooKassa для России (СБП)
+      if (paymentMethod === 'yookassa') {
+        console.log('🇷🇺 Using YooKassa (СБП) for Russia');
+        
+        const response = await fetch('/api/yookassa/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: user.email,
+            amount: 399 // Можно конвертировать в рубли: 399 * курс
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 YooKassa response:', data);
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        if (data.confirmationUrl) {
+          console.log('🇷🇺 Redirecting to YooKassa...');
+          window.location.href = data.confirmationUrl;
+        } else {
+          throw new Error('No payment URL received');
+        }
+        return;
+      }
+
+      // Stripe для остального мира
+      console.log('🌍 Using Stripe for international payments');
       
-      // Выбираем цену: если админ выбрал тест - используем тестовую, иначе продакшн
       const priceId = useTestPrice 
         ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
         : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y');
       
       console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($399)');
       console.log('💰 Price ID:', priceId);
-      console.log('📡 Calling /api/checkout...');
       
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -389,6 +462,146 @@ export default function PaymentPage() {
                 <p className="text-xs text-center text-gray-400">
                   Click the button to get instant access to all lessons
                 </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Country/Payment Method Selector Modal */}
+      {showCountrySelector && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl">
+            <Card className="glass premium-shadow border-2 border-purple-500/50 bg-gradient-to-br from-purple-900/90 to-pink-900/90">
+              <button
+                onClick={() => setShowCountrySelector(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              
+              <CardContent className="p-6 sm:p-8">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    🌍 Выберите способ оплаты
+                  </h2>
+                  <p className="text-gray-300">
+                    Мы автоматически определили ваш регион, но вы можете выбрать другой способ
+                  </p>
+                </div>
+
+                <div className="grid gap-4 mb-6">
+                  {/* Stripe - Весь мир */}
+                  <button
+                    onClick={() => {
+                      setPaymentMethod('stripe');
+                      setUserCountry('GB');
+                      setShowCountrySelector(false);
+                      setShowModal(true);
+                    }}
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                      paymentMethod === 'stripe'
+                        ? 'border-blue-500 bg-blue-500/10'
+                        : 'border-gray-700 hover:border-blue-500/50 bg-gray-800/50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <CreditCard className="h-6 w-6 text-blue-400" />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-1">💳 Банковская карта (Stripe)</h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                          Для пользователей из Англии, США, Европы и других стран
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">Visa</span>
+                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">Mastercard</span>
+                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">American Express</span>
+                        </div>
+                      </div>
+                      {paymentMethod === 'stripe' && (
+                        <div className="flex-shrink-0">
+                          <Check className="h-6 w-6 text-blue-400" />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* YooKassa - Россия */}
+                  <button
+                    onClick={() => {
+                      setPaymentMethod('yookassa');
+                      setUserCountry('RU');
+                      setShowCountrySelector(false);
+                      setShowModal(true);
+                    }}
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                      paymentMethod === 'yookassa'
+                        ? 'border-purple-500 bg-purple-500/10'
+                        : 'border-gray-700 hover:border-purple-500/50 bg-gray-800/50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                          <span className="text-2xl">🇷🇺</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-1">🚀 СБП + Карты РФ (ЮMoney)</h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                          Для пользователей из России - СБП, Мир, Visa, Mastercard
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">СБП</span>
+                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">Мир</span>
+                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">Visa РФ</span>
+                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">MC РФ</span>
+                        </div>
+                      </div>
+                      {paymentMethod === 'yookassa' && (
+                        <div className="flex-shrink-0">
+                          <Check className="h-6 w-6 text-purple-400" />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* LiqPay - Украина (Заготовка) */}
+                  <button
+                    onClick={() => {
+                      alert('LiqPay для Украины будет добавлен в ближайшее время!');
+                    }}
+                    className="p-6 rounded-xl border-2 border-gray-700 bg-gray-800/50 opacity-50 cursor-not-allowed text-left"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                          <span className="text-2xl">🇺🇦</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-1">🔜 LiqPay (Украина)</h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                          Скоро! Карты Украины - Visa, Mastercard
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Скоро</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
+                  <p className="text-xs text-gray-400 text-center">
+                    🔒 Все платежи защищены и обрабатываются через надёжные процессоры.<br/>
+                    Мы не храним данные вашей карты.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
