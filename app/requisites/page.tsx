@@ -17,12 +17,12 @@ export default function RequisitesPage() {
           <div className="space-y-4 text-gray-800">
             <div className="border-b border-gray-200 pb-3">
               <p className="text-sm text-gray-600 mb-1">ФИО:</p>
-              <p className="text-lg font-semibold">Петрова Зарина Сергеевна</p>
+              <p className="text-lg font-semibold">Аверина Зарина Акимовна</p>
             </div>
             
             <div className="border-b border-gray-200 pb-3">
               <p className="text-sm text-gray-600 mb-1">ИНН:</p>
-              <p className="text-lg font-semibold">123456789012</p>
+              <p className="text-lg font-semibold">025509808226</p>
             </div>
             
             <div className="border-b border-gray-200 pb-3">
@@ -32,12 +32,12 @@ export default function RequisitesPage() {
             
             <div className="border-b border-gray-200 pb-3">
               <p className="text-sm text-gray-600 mb-1">Телефон:</p>
-              <p className="text-lg font-semibold">+7__________</p>
+              <p className="text-lg font-semibold">+7 982 221 93 44</p>
             </div>
             
             <div className="pb-3">
               <p className="text-sm text-gray-600 mb-1">Email:</p>
-              <p className="text-lg font-semibold">______________</p>
+              <p className="text-lg font-semibold">zarina_averina@mail.ru</p>
             </div>
           </div>
 
