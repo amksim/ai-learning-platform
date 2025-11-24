@@ -1,23 +1,22 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Політика конфіденційності | AI Learning Platform',
-  description: 'Політика конфіденційності та захист персональних даних',
-};
+import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PrivacyPage() {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-8 shadow-xl">
           <h1 className="text-3xl font-bold text-white mb-8">
-            🔒 Політика конфіденційності
+            🔒 {t.privacy.title}
           </h1>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              1. Збір персональних даних
+              1. {t.privacy.data_collection_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>Ми збираємо наступну інформацію:</p>
@@ -32,7 +31,7 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              2. Використання даних
+              2. {t.privacy.data_usage_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>Ваші дані використовуються для:</p>
@@ -50,12 +49,11 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              3. Платіжна інформація
+              3. {t.privacy.payment_info_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>
-                🔒 Ми <strong>НЕ зберігаємо</strong> дані ваших карт. Всі платежі обробляються 
-                через надійні платіжні системи:
+                🔒 {t.privacy.no_card_storage}
               </p>
               <ul className="list-disc list-inside ml-4 space-y-2">
                 <li>Stripe (міжнародні платежі)</li>
@@ -67,7 +65,7 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              4. Захист даних
+              4. {t.privacy.data_protection_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>Ми використовуємо:</p>
@@ -82,7 +80,7 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              5. Ваші права
+              5. {t.privacy.your_rights_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>Ви маєте право:</p>
@@ -100,7 +98,7 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              6. Cookies
+              6. {t.privacy.cookies_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p>Ми використовуємо cookies для:</p>
@@ -114,7 +112,7 @@ export default function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              7. Контакти
+              7. {t.privacy.contacts_title}
             </h2>
             <div className="text-gray-300 space-y-2">
               <p>
@@ -138,7 +136,7 @@ export default function PrivacyPage() {
             href="/"
             className="text-purple-400 hover:text-purple-300 underline text-sm"
           >
-            ← Повернутися на головну
+            {t.privacy.back_home}
           </Link>
         </div>
       </div>
