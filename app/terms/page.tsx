@@ -17,45 +17,70 @@ export default function TermsPage() {
           {/* О сервисе */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              1. {t.terms.about_service}
+              1. О нашей услуге
             </h2>
             <div className="text-gray-300 space-y-3">
               <p><strong>AI Learning Platform</strong></p>
-              <p>{t.terms.full_access_price}</p>
-              <p><strong>{t.terms.whats_included}</strong></p>
+              <p>💰 <strong>Стоимость полного доступа: $249.99 USD</strong> (одноразовый платеж)</p>
+              <p><strong>Что включено:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-2">
-                <li>{t.terms.all_courses_access}</li>
-                <li>{t.terms.practice_tasks}</li>
-                <li>{t.terms.lifetime_access}</li>
-                <li>{t.terms.support_24_7}</li>
-                <li>{t.terms.free_updates}</li>
+                <li>Доступ ко всем 4 курсам (100+ уроков)</li>
+                <li>Практические задания и проекты</li>
+                <li>Бессрочный доступ к материалам</li>
+                <li>Техподдержка 24/7</li>
+                <li>Бесплатные обновления курсов</li>
               </ul>
+            </div>
+          </section>
+
+          {/* Скидка за рекламу */}
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-green-400 mb-4">
+              🎬 2. Скидка за рекламу — $179!
+            </h2>
+            <div className="text-gray-300 space-y-3">
+              <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
+                <p className="text-green-400 font-semibold mb-3">
+                  💡 Получи скидку $70 — заплати только $179 вместо $249.99!
+                </p>
+                <p className="mb-3"><strong>Как получить скидку:</strong></p>
+                <ol className="list-decimal list-inside ml-4 space-y-2">
+                  <li>Сними видео-рекламу нашего курса</li>
+                  <li>Опубликуй на YouTube, TikTok или Instagram</li>
+                  <li>Набери <strong>1000+ просмотров</strong></li>
+                  <li>Пришли ссылку на видео нам на email</li>
+                  <li>Получи курс за <strong>$179</strong>!</li>
+                </ol>
+              </div>
+              <p className="text-sm text-gray-400">
+                * Видео должно быть оригинальным и содержать информацию о нашей платформе AI Learning.
+              </p>
             </div>
           </section>
 
           {/* Условия доступа */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              2. {t.terms.access_conditions}
+              3. Условия предоставления доступа
             </h2>
             <div className="text-gray-300 space-y-3">
-              <p>✅ {t.terms.instant_access}</p>
+              <p>✅ Доступ предоставляется мгновенно после успешной оплаты</p>
             </div>
           </section>
 
           {/* Условия получения услуги / Доставка */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              3. {t.terms.delivery_title}
+              4. Условия получения услуги
             </h2>
             <div className="text-gray-300 space-y-3">
               <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-                <p className="text-blue-400 font-semibold mb-2">📦 {t.terms.delivery_online}</p>
+                <p className="text-blue-400 font-semibold mb-2">📦 Это онлайн-курс. Физическая доставка не требуется.</p>
               </div>
               <ul className="list-disc list-inside ml-4 space-y-2">
-                <li>✅ {t.terms.delivery_instant}</li>
-                <li>♾️ {t.terms.delivery_lifetime}</li>
-                <li>🌍 {t.terms.delivery_anywhere}</li>
+                <li>✅ Доступ к материалам открывается мгновенно после оплаты</li>
+                <li>♾️ Доступ предоставляется навсегда (бессрочно)</li>
+                <li>🌍 Доступ с любого устройства в любой точке мира</li>
               </ul>
             </div>
           </section>
@@ -63,21 +88,35 @@ export default function TermsPage() {
           {/* Возврат средств */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              4. {t.terms.refund_policy_title}
+              5. Политика возврата средств
             </h2>
             <div className="text-gray-300 space-y-4">
-              <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
-                <h3 className="text-xl font-semibold text-green-400 mb-2">
-                  ✅ {t.terms.refund_guarantee}
+              <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
+                <h3 className="text-xl font-semibold text-yellow-400 mb-3">
+                  ⚠️ Условия возврата
                 </h3>
+                <p className="mb-3">
+                  Возврат средств возможен <strong>только</strong> в случае, если вы не можете создать проект по нашим урокам, 
+                  несмотря на выполнение всех инструкций.
+                </p>
+                <p className="mb-3"><strong>Для получения возврата необходимо:</strong></p>
+                <ol className="list-decimal list-inside ml-4 space-y-2">
+                  <li>Пройти минимум 10 уроков курса</li>
+                  <li>Связаться с нашей поддержкой</li>
+                  <li>Показать, что вы следовали инструкциям, но результат не получился</li>
+                  <li>Наша команда проверит вашу ситуацию в течение 48 часов</li>
+                </ol>
               </div>
+              <p className="text-sm text-gray-400">
+                * Возврат не предоставляется, если вы просто передумали или не начали обучение.
+              </p>
             </div>
           </section>
 
           {/* Способы оплаты */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              5. {t.terms.payment_methods_title}
+              6. Способы оплаты
             </h2>
             <div className="text-gray-300 space-y-3">
               <p><strong>{t.terms.we_accept}</strong></p>
@@ -92,7 +131,7 @@ export default function TermsPage() {
           {/* Контакты */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              6. {t.terms.contact_info_title}
+              7. Контактная информация
             </h2>
             <div className="text-gray-300 space-y-2">
               <p>

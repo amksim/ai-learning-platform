@@ -4,7 +4,7 @@ import crypto from 'crypto';
 // LiqPay - для Украины
 export async function POST(request: Request) {
   try {
-    const { userEmail, amount = 399 } = await request.json();
+    const { userEmail, amount = 249.99 } = await request.json();
 
     console.log('🇺🇦 Creating LiqPay payment for:', userEmail);
 

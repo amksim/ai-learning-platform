@@ -204,7 +204,7 @@ export default function PaymentPage() {
         ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
         : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y');
       
-      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($399)');
+      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($249.99)');
       console.log('💰 Price ID:', priceId);
       
       const response = await fetch('/api/checkout', {
@@ -306,7 +306,7 @@ export default function PaymentPage() {
                   Экономия $200 🎉
                 </p>  
                   <div className="text-6xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent drop-shadow-2xl">
-                    $399
+                    $249.99
                   </div>
                 </div>
                 <p className="text-xl text-green-400 font-bold">Экономия $200 - Лучшее предложение!</p>
@@ -436,7 +436,7 @@ export default function PaymentPage() {
                   <div className="h-px bg-gradient-to-r from-transparent via-green-500 to-transparent mb-4" />
                   <div className="flex items-center justify-between">
                     <span className="text-white font-bold text-xl">Итого:</span>
-                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$399</span>
+                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$249.99</span>
                   </div>
                 </div>
 
@@ -468,7 +468,7 @@ export default function PaymentPage() {
                             : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
                         }`}
                       >
-                        $399 (LIVE)
+                        $249.99 (LIVE)
                       </button>
                       <button
                         onClick={() => setUseTestPrice(true)}
@@ -506,7 +506,7 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      {useTestPrice ? 'Pay $0.99 (TEST)' : 'Pay $399 - Get Full Access'}
+                      {useTestPrice ? 'Pay $0.99 (TEST)' : 'Pay $249.99 - Get Full Access'}
                     </>
                   )}
                 </button>

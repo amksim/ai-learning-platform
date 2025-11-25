@@ -54,7 +54,7 @@ export const translations = {
       lesson: "Урок",
       free_lesson: "Бесплатный",
       locked_lesson: "Платный урок",
-      locked_desc: "Этот урок доступен после покупки курса за $399",
+      locked_desc: "Этот урок доступен после покупки курса за $249.99",
       complete_free: "Пройди бесплатные уроки, затем купи полный доступ!",
     },
     profile: {
@@ -115,7 +115,7 @@ export const translations = {
       lifetime_access: "Пожизненный доступ ко всем урокам",
       instant_activation: "Мгновенная активация после оплаты",
       secure_payment: "100% безопасная оплата",
-      pay_button: "Оплатить $399",
+      pay_button: "Оплатить $249.99",
       pay_instant: "Нажимая кнопку, ты получишь мгновенный доступ ко всем урокам",
     },
     auth: {
@@ -183,7 +183,7 @@ export const translations = {
       start_learning: "Начать обучение",
       learn_more: "Узнать больше",
       view_all_projects: "Смотреть все проекты",
-      buy_course: "Купить полный курс $399",
+      buy_course: "Купить полный курс $249.99",
       reset_subscription: "Сбросить подписку (админ)",
       resetting: "Сброс...",
       view_project: "Посмотреть проект",
@@ -205,7 +205,7 @@ export const translations = {
     terms: {
       title: "Условия использования и возврат средств",
       about_service: "О нашей услуге",
-      full_access_price: "Стоимость полного доступа: $399 USD (одноразовый платеж)",
+      full_access_price: "Стоимость полного доступа: $249.99 USD (одноразовый платеж)",
       whats_included: "Что включено:",
       all_courses_access: "Доступ ко всем курсам (100+ уроков)",
       practice_tasks: "Практические задания и проекты",
@@ -347,7 +347,7 @@ export const translations = {
       lesson: "Lesson",
       free_lesson: "Free",
       locked_lesson: "Paid Lesson",
-      locked_desc: "This lesson is available after purchasing the course for $399",
+      locked_desc: "This lesson is available after purchasing the course for $249.99",
       complete_free: "Complete free lessons, then buy full access!",
     },
     profile: {
@@ -408,7 +408,7 @@ export const translations = {
       lifetime_access: "Lifetime access to all lessons",
       instant_activation: "Instant activation after payment",
       secure_payment: "100% secure payment",
-      pay_button: "Pay $399",
+      pay_button: "Pay $249.99",
       pay_instant: "By clicking the button, you'll get instant access to all lessons",
     },
     auth: {
@@ -476,7 +476,7 @@ export const translations = {
       start_learning: "Start Learning",
       learn_more: "Learn More",
       view_all_projects: "View all projects",
-      buy_course: "Buy full course $399",
+      buy_course: "Buy full course $249.99",
       reset_subscription: "Reset subscription (admin)",
       resetting: "Resetting...",
       view_project: "View project",
@@ -498,7 +498,7 @@ export const translations = {
     terms: {
       title: "Terms of Use and Refund Policy",
       about_service: "About Our Service",
-      full_access_price: "Full access price: $399 USD (one-time payment)",
+      full_access_price: "Full access price: $249.99 USD (one-time payment)",
       whats_included: "What's included:",
       all_courses_access: "Access to all courses (100+ lessons)",
       practice_tasks: "Practice tasks and projects",
@@ -640,7 +640,7 @@ export const translations = {
       lesson: "Урок",
       free_lesson: "Безкоштовний",
       locked_lesson: "Платний урок",
-      locked_desc: "Цей урок доступний після покупки курсу за $399",
+      locked_desc: "Цей урок доступний після покупки курсу за $249.99",
       complete_free: "Пройди безкоштовні уроки, потім купи повний доступ!",
     },
     profile: {
@@ -701,7 +701,7 @@ export const translations = {
       lifetime_access: "Довічний доступ до всіх уроків",
       instant_activation: "Миттєва активація після оплати",
       secure_payment: "100% безпечна оплата",
-      pay_button: "Оплатити $399",
+      pay_button: "Оплатити $249.99",
       pay_instant: "Натискаючи кнопку, ти отримаєш миттєвий доступ до всіх уроків",
     },
     auth: {
@@ -790,7 +790,7 @@ export const translations = {
     terms: {
       title: "Умови використання та повернення коштів",
       about_service: "Про нашу послугу",
-      full_access_price: "Вартість повного доступу: $399 USD (одноразовий платіж)",
+      full_access_price: "Вартість повного доступу: $249.99 USD (одноразовий платіж)",
       whats_included: "Що включено:",
       all_courses_access: "Доступ до всіх курсів (100+ уроків)",
       practice_tasks: "Практичні завдання та проєкти",

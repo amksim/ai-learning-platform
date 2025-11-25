@@ -557,7 +557,7 @@ export default function CoursesPage() {
                                 <h3 className="font-bold text-sm text-orange-400">🔒 Платный урок</h3>
                               </div>
                               <p className="text-xs text-gray-300 mb-2">
-                                Этот урок доступен после покупки курса за $399
+                                Этот урок доступен после покупки курса за $249.99
                               </p>
                               <p className="text-xs text-orange-400 font-bold">
                                 Пройди бесплатные уроки, затем купи полный доступ!
@@ -625,7 +625,7 @@ export default function CoursesPage() {
                           <div className="flex items-center justify-center gap-4 mb-3">
                             <span className="text-3xl text-gray-500 line-through">$599</span>
                             <span className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                              $399
+                              $249.99
                             </span>
                           </div>
                           <p className="text-lg text-green-400 font-bold mb-4">Экономия $200!</p>
