@@ -605,7 +605,15 @@ export default function CoursesPage() {
                 </div>
                 
                 {/* Premium upgrade card after free lessons - показываем ОДИН РАЗ */}
-                {showCTAAfter && (
+                {showCTAAfter && (() => {
+                  // Определяем цену курса
+                  const isPaymentCourse = activeCategory?.slug?.includes('payment') || 
+                                          activeCategory?.title?.toLowerCase().includes('платёж') || 
+                                          activeCategory?.id === 4;
+                  const price = isPaymentCourse ? 49.99 : 249.99;
+                  const discountPrice = isPaymentCourse ? null : 174.99;
+                  
+                  return (
                   <div className="my-16 flex justify-center">
                     <Card className="glass premium-shadow border-4 border-green-500/50 bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 max-w-lg w-full relative overflow-hidden">
                       <CardContent className="p-8">
@@ -622,10 +630,22 @@ export default function CoursesPage() {
                         {/* Price */}
                         <div className="text-center mb-6">
                           <span className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                            $62.50
+                            ${price}
                           </span>
                           <p className="text-sm text-gray-400 mt-2">Единоразовый платеж • Пожизненный доступ</p>
                         </div>
+
+                        {/* Скидка за рекламу */}
+                        {discountPrice && (
+                          <div className="mb-6 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                            <p className="text-sm text-orange-400 font-bold text-center">
+                              🎬 Скидка за рекламу: <span className="line-through">${price}</span> → <span className="text-green-400">${discountPrice}</span>
+                            </p>
+                            <p className="text-xs text-gray-400 text-center mt-1">
+                              Сними видео-обзор, набери 1000+ просмотров
+                            </p>
+                          </div>
+                        )}
 
                         {/* Features */}
                         <div className="mb-6 space-y-2">
@@ -648,14 +668,15 @@ export default function CoursesPage() {
                           <Link href={`/payment/course/${activeCategory?.id || 1}`}>
                             <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-10 py-5 rounded-xl font-bold transition-all transform hover:scale-105 w-full premium-shadow text-xl flex items-center justify-center gap-3">
                               <Zap className="h-6 w-6" />
-                              Купить курс за $62.50
+                              Купить курс за ${price}
                             </button>
                           </Link>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-                )}
+                  );
+                })()}
               </div>
             );
           })}

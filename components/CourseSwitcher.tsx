@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, ShoppingCart } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import Link from "next/link";
 
 interface CourseCategory {
   id: number;
@@ -140,39 +139,27 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
           const isPaid = isCoursePaid(category.id);
           
           return (
-            <div key={category.id} className="flex items-center gap-1">
-              <button
-                onClick={() => onCategoryChange(category)}
-                className={`
-                  px-3 py-1.5 rounded-lg border transition-all font-semibold text-sm
-                  ${isActive 
-                    ? `${colors.activeBg} border-transparent text-white shadow-md` 
-                    : `${colors.bg} ${colors.border} text-gray-400 hover:text-gray-300`
-                  }
-                  flex items-center gap-1.5
-                `}
-              >
-                <span className="text-base">{category.icon}</span>
-                <span>{category.title}</span>
-                {!isPaid && user && (
-                  <Lock className="h-3 w-3 text-yellow-500" />
-                )}
-                <span className={`text-xs ${isActive ? 'text-white/70' : 'text-gray-500'}`}>
-                  ({category.total_lessons})
-                </span>
-              </button>
-              
-              {/* Кнопка покупки для неоплаченного курса */}
-              {!isPaid && user && isActive && (
-                <Link
-                  href={`/payment/course/${category.id}`}
-                  className="px-2 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold flex items-center gap-1 transition-all"
-                >
-                  <ShoppingCart className="h-3 w-3" />
-                  $62.50
-                </Link>
+            <button
+              key={category.id}
+              onClick={() => onCategoryChange(category)}
+              className={`
+                px-3 py-1.5 rounded-lg border transition-all font-semibold text-sm
+                ${isActive 
+                  ? `${colors.activeBg} border-transparent text-white shadow-md` 
+                  : `${colors.bg} ${colors.border} text-gray-400 hover:text-gray-300`
+                }
+                flex items-center gap-1.5
+              `}
+            >
+              <span className="text-base">{category.icon}</span>
+              <span>{category.title}</span>
+              {!isPaid && user && (
+                <Lock className="h-3 w-3 text-yellow-500" />
               )}
-            </div>
+              <span className={`text-xs ${isActive ? 'text-white/70' : 'text-gray-500'}`}>
+                ({category.total_lessons})
+              </span>
+            </button>
           );
         })}
       </div>

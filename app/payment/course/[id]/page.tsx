@@ -61,6 +61,12 @@ export default function BuyCoursePagePage() {
   // Проверка - курс уже оплачен?
   const isAlreadyPaid = user?.paidCourses?.includes(courseId) || user?.subscription_status === 'premium';
 
+  // Определяем цену курса
+  // Платёжные системы (slug содержит "payment" или id = 4) = $49.99, остальные = $249.99
+  const isPaymentSystemsCourse = course?.slug?.includes('payment') || course?.title?.toLowerCase().includes('платёж') || courseId === 4;
+  const coursePrice = isPaymentSystemsCourse ? 49.99 : 249.99;
+  const discountPrice = isPaymentSystemsCourse ? null : 174.99; // Скидка только для обычных курсов
+
   const handlePayment = async () => {
     if (!user || !course || isProcessing) return;
     
@@ -75,7 +81,7 @@ export default function BuyCoursePagePage() {
           userEmail: user.email,
           courseId: courseId,
           courseName: course.title,
-          amount: 62.50 // Цена одного курса
+          amount: coursePrice
         })
       });
 
@@ -179,9 +185,26 @@ export default function BuyCoursePagePage() {
             {/* Цена */}
             <div className="bg-gray-900/50 rounded-xl p-6 mb-6 text-center">
               <p className="text-gray-400 mb-2">Цена курса:</p>
-              <p className="text-5xl font-bold text-green-400">$62.50</p>
+              <p className="text-5xl font-bold text-green-400">${coursePrice}</p>
               <p className="text-sm text-gray-500 mt-2">Одноразовый платёж • Пожизненный доступ</p>
             </div>
+
+            {/* Скидка за рекламу - только для обычных курсов */}
+            {discountPrice && (
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-2 border-orange-500/30">
+                <p className="text-orange-400 font-bold text-center mb-2">🎬 Скидка за рекламу!</p>
+                <p className="text-gray-300 text-sm text-center mb-2">
+                  Сними видео-обзор курса, набери <strong className="text-green-400">1000+ просмотров</strong> и получи скидку!
+                </p>
+                <p className="text-center">
+                  <span className="text-gray-500 line-through">${coursePrice}</span>
+                  <span className="text-2xl font-bold text-green-400 ml-2">${discountPrice}</span>
+                </p>
+                <p className="text-xs text-gray-400 text-center mt-2">
+                  Видео: расскажи о курсе, покажи что изучаешь, поделись впечатлениями
+                </p>
+              </div>
+            )}
 
             {/* Что включено */}
             <div className="space-y-3 mb-6">
@@ -235,7 +258,7 @@ export default function BuyCoursePagePage() {
               ) : (
                 <>
                   <Zap className="h-6 w-6" />
-                  Купить курс за $62.50
+                  Купить курс за ${coursePrice}
                 </>
               )}
             </button>
