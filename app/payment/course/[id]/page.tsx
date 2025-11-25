@@ -192,17 +192,43 @@ export default function BuyCoursePagePage() {
             {/* Скидка за рекламу - только для обычных курсов */}
             {discountPrice && (
               <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-2 border-orange-500/30">
-                <p className="text-orange-400 font-bold text-center mb-2">🎬 Скидка за рекламу!</p>
-                <p className="text-gray-300 text-sm text-center mb-2">
-                  Сними видео-обзор курса, набери <strong className="text-green-400">1000+ просмотров</strong> и получи скидку!
-                </p>
-                <p className="text-center">
+                <p className="text-orange-400 font-bold text-center mb-3">🎬 Получи скидку за рекламу!</p>
+                
+                <div className="space-y-2 text-sm text-gray-300 mb-3">
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-400">1.</span>
+                    <span>Скачай наше готовое рекламное видео</span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-400">2.</span>
+                    <span>Опубликуй его на своём YouTube/TikTok/Instagram</span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-400">3.</span>
+                    <span>Добавь свой <strong className="text-purple-400">код верификации</strong> в описание видео</span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-400">4.</span>
+                    <span>Набери <strong className="text-green-400">1000+ просмотров</strong></span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-400">5.</span>
+                    <span>Отправь ссылку на видео и получи скидку!</span>
+                  </p>
+                </div>
+
+                <p className="text-center mb-3">
                   <span className="text-gray-500 line-through">${coursePrice}</span>
                   <span className="text-2xl font-bold text-green-400 ml-2">${discountPrice}</span>
+                  <span className="text-sm text-gray-400 ml-2">(экономия $75)</span>
                 </p>
-                <p className="text-xs text-gray-400 text-center mt-2">
-                  Видео: расскажи о курсе, покажи что изучаешь, поделись впечатлениями
-                </p>
+
+                <Link 
+                  href="/payment#promo-discount"
+                  className="block w-full text-center py-2 px-4 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/50 text-orange-400 font-bold transition-all"
+                >
+                  📥 Получить рекламное видео и код
+                </Link>
               </div>
             )}
 

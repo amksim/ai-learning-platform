@@ -805,16 +805,44 @@ export default function PaymentPage() {
                 <X className="h-6 w-6" />
               </button>
               
-              <CardContent className="p-6 sm:p-8">
+              <CardContent className="p-6 sm:p-8" id="promo-discount">
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4">
                     <Video className="h-8 w-8 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold mb-2 text-green-400">
-                    🎬 Скидка $70 за рекламу!
+                    🎬 Скидка $75 за рекламу!
                   </h2>
                   <p className="text-gray-300 text-sm">
-                    Сними видео о нашем курсе и получи скидку
+                    Опубликуй наше рекламное видео и получи скидку
+                  </p>
+                  <p className="text-center mt-2">
+                    <span className="text-gray-500 line-through">$249.99</span>
+                    <span className="text-2xl font-bold text-green-400 ml-2">$174.99</span>
+                  </p>
+                </div>
+
+                {/* Готовые рекламные видео */}
+                <div className="mb-6 p-4 rounded-xl bg-blue-500/20 border-2 border-blue-500/50">
+                  <p className="text-sm text-blue-300 mb-3 font-medium">📥 Скачай готовое рекламное видео:</p>
+                  <div className="space-y-2">
+                    <a 
+                      href="https://ai-learning45.netlify.app/promo/video1.mp4" 
+                      target="_blank"
+                      className="block py-2 px-4 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 text-sm transition-all"
+                    >
+                      🎬 Видео 1 - Короткое (30 сек) для TikTok/Reels
+                    </a>
+                    <a 
+                      href="https://ai-learning45.netlify.app/promo/video2.mp4" 
+                      target="_blank"
+                      className="block py-2 px-4 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 text-sm transition-all"
+                    >
+                      🎬 Видео 2 - Длинное (2 мин) для YouTube
+                    </a>
+                  </div>
+                  <p className="text-xs text-blue-400 mt-2">
+                    Скоро добавим больше видео!
                   </p>
                 </div>
 
@@ -827,7 +855,7 @@ export default function PaymentPage() {
                     </code>
                   </div>
                   <p className="text-xs text-purple-400 mt-2">
-                    ⚠️ Этот код должен быть виден на видео (мелким текстом в углу экрана)
+                    ⚠️ Добавь этот код в <strong>описание видео</strong> или в <strong>комментарий</strong> под видео
                   </p>
                 </div>
 
@@ -835,9 +863,9 @@ export default function PaymentPage() {
                 <div className="mb-6 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
                   <p className="text-sm text-gray-300 mb-3 font-medium">📋 Как получить скидку:</p>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
-                    <li>Сними видео о AI Learning Platform</li>
-                    <li><strong className="text-yellow-400">Добавь код в видео</strong> (мелким текстом в углу)</li>
-                    <li>Опубликуй на YouTube, TikTok или Instagram</li>
+                    <li><strong className="text-blue-400">Скачай</strong> наше готовое рекламное видео выше</li>
+                    <li><strong className="text-blue-400">Опубликуй</strong> на YouTube, TikTok или Instagram</li>
+                    <li><strong className="text-yellow-400">Добавь код</strong> в описание или комментарий</li>
                     <li>Набери минимум <strong className="text-green-400">1000 просмотров</strong></li>
                     <li>Отправь ссылку ниже</li>
                   </ol>

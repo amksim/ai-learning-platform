@@ -188,30 +188,26 @@ export default function CoursesPage() {
     //    - Бесплатные уроки открыты по порядку
     //    - Платные закрыты (требуют оплату)
     if (!isCoursePaid) {
-      // Первый урок всегда открыт
-      if (lessonIndex === 0) {
-        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, первый -> OPEN`);
+      // Платные уроки ВСЕГДА заблокированы без оплаты
+      if (!isFree) {
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ оплаты, платный -> LOCKED`);
+        return false;
+      }
+      
+      // Первый БЕСПЛАТНЫЙ урок открыт
+      if (lessonIndex === 0 && isFree) {
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ оплаты, первый бесплатный -> OPEN`);
         return true;
       }
       
-      // Второй урок открыт только если первый пройден
-      if (lessonIndex === 1 && isFree) {
-        const firstLesson = allLevels[0];
-        const result = firstLesson ? user.completedLessons.includes(firstLesson.id) : false;
-        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, второй -> ${result ? 'OPEN' : 'LOCKED'} (первый урок ${firstLesson?.id} пройден: ${result})`);
-        return result;
-      }
-      
-      // Остальные бесплатные уроки - по порядку
-      if (isFree && lessonIndex > 1) {
+      // Остальные бесплатные уроки - по порядку (предыдущий должен быть пройден)
+      if (isFree && lessonIndex > 0) {
         const previousLesson = allLevels[lessonIndex - 1];
         const result = previousLesson ? user.completedLessons.includes(previousLesson.id) : false;
-        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, бесплатный >2 -> ${result ? 'OPEN' : 'LOCKED'} (предыдущий урок ${previousLesson?.id} пройден: ${result})`);
+        console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ оплаты, бесплатный -> ${result ? 'OPEN' : 'LOCKED'}`);
         return result;
       }
       
-      // Платные уроки заблокированы
-      console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, платный -> LOCKED`);
       return false;
     }
     
@@ -394,12 +390,20 @@ export default function CoursesPage() {
             const isThisCoursePaidCheck = user?.subscription_status === 'premium' || 
                                           user?.paidCourses?.includes(activeCategory?.id || 0);
             
-            // Show CTA only ONCE after the LAST free lesson
+            // Фильтруем уроки этой категории
             const filteredLevels = allLevels.filter(l => l.courseCategoryId === activeCategory?.id);
+            const hasFreeLesson = filteredLevels.some(l => l.isFree);
+            
+            // Показываем карточку оплаты:
+            // 1. Если нет бесплатных уроков - показать ПЕРЕД первым платным
+            // 2. Или после последнего бесплатного урока
+            const isFirstPaidWithoutFree = !hasFreeLesson && index === 0 && !level.isFree;
             const isLastFreeLesson = level.isFree && 
               (index === filteredLevels.length - 1 || !filteredLevels[index + 1]?.isFree);
             const hasMorePaidLessons = filteredLevels.some((l, i) => i > index && !l.isFree);
-            // Show CTA only after last free lesson if user hasn't paid THIS course
+            
+            // Show CTA если курс не оплачен
+            const showCTABefore = isFirstPaidWithoutFree && user && !isThisCoursePaidCheck;
             const showCTAAfter = isLastFreeLesson && hasMorePaidLessons && user && !isThisCoursePaidCheck;
             const unlocked = isLevelUnlocked(level.id, level.isFree, index);
             const completed = isLevelCompleted(level.id);
@@ -416,8 +420,58 @@ export default function CoursesPage() {
             const isFirstInBlock = index === 0 || level.blockName !== allLevels[index - 1].blockName;
             const showBlockHeader = level.blockName && isFirstInBlock;
 
+            // Определяем цену для карточки
+            const isPaymentCourse = activeCategory?.slug?.includes('payment') || 
+                                    activeCategory?.title?.toLowerCase().includes('платёж') || 
+                                    activeCategory?.id === 4;
+            const cardPrice = isPaymentCourse ? 49.99 : 249.99;
+            const cardDiscountPrice = isPaymentCourse ? null : 174.99;
+            
             return (
               <div key={level.id} id={`lesson-${level.id}`} className="relative mb-20">
+                {/* Карточка оплаты ПЕРЕД первым платным уроком (если нет бесплатных) */}
+                {showCTABefore && (
+                  <div className="mb-16 flex justify-center">
+                    <Card className="glass premium-shadow border-4 border-orange-500/50 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-pink-500/10 max-w-lg w-full">
+                      <CardContent className="p-8">
+                        <div className="text-center mb-6">
+                          <div className="text-5xl mb-4">🔒</div>
+                          <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
+                            Курс "{activeCategory?.title}" требует оплаты
+                          </h3>
+                          <p className="text-gray-300 text-base">
+                            Этот курс полностью платный. Оплатите чтобы получить доступ ко всем урокам.
+                          </p>
+                        </div>
+
+                        <div className="text-center mb-6">
+                          <span className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                            ${cardPrice}
+                          </span>
+                          <p className="text-sm text-gray-400 mt-2">Единоразовый платеж • Пожизненный доступ</p>
+                        </div>
+
+                        {cardDiscountPrice && (
+                          <div className="mb-6 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                            <p className="text-sm text-orange-400 font-bold text-center">
+                              🎬 Скидка за рекламу: <span className="line-through">${cardPrice}</span> → <span className="text-green-400">${cardDiscountPrice}</span>
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="text-center">
+                          <Link href={`/payment/course/${activeCategory?.id || 1}`}>
+                            <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-10 py-5 rounded-xl font-bold transition-all transform hover:scale-105 w-full premium-shadow text-xl flex items-center justify-center gap-3">
+                              <Zap className="h-6 w-6" />
+                              Купить курс за ${cardPrice}
+                            </button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
                 {/* Заголовок блока - показываем ОДИН РАЗ в начале блока */}
                 {showBlockHeader && (
                   <div className="mb-12 mt-16 text-center">
@@ -639,11 +693,17 @@ export default function CoursesPage() {
                         {discountPrice && (
                           <div className="mb-6 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
                             <p className="text-sm text-orange-400 font-bold text-center">
-                              🎬 Скидка за рекламу: <span className="line-through">${price}</span> → <span className="text-green-400">${discountPrice}</span>
+                              🎬 Скидка: <span className="line-through">${price}</span> → <span className="text-green-400">${discountPrice}</span>
                             </p>
                             <p className="text-xs text-gray-400 text-center mt-1">
-                              Сними видео-обзор, набери 1000+ просмотров
+                              Опубликуй наше рекламное видео, набери 1000+ просмотров
                             </p>
+                            <Link 
+                              href="/payment#promo-discount"
+                              className="block mt-2 text-center text-xs py-1 px-2 rounded bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-all"
+                            >
+                              Узнать подробнее →
+                            </Link>
                           </div>
                         )}
 
