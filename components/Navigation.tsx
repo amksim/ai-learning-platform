@@ -6,7 +6,7 @@ import { LogIn, LogOut, User, Settings, DollarSign } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import GoogleTranslate from "@/components/GoogleTranslate";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -58,8 +58,8 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Google Translate - автоматический перевод всего сайта */}
-            <GoogleTranslate />
+            {/* Переключатель языков */}
+            <LanguageSwitcher />
 
             {loading ? (
               // Показываем загрузку пока проверяем авторизацию
