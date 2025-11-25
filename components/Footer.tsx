@@ -39,11 +39,15 @@ export function Footer() {
 
         {/* Контакты */}
         <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-2 md:gap-4 text-xs text-gray-500 mb-3">
-          <a href="mailto:support@ai-learning45.com" className="hover:text-white transition-colors">
-            📧 {t.footer.support_email}
+          <a href="mailto:maksimmotok00000@gmail.com" className="hover:text-white transition-colors">
+            📧 maksimmotok00000@gmail.com
           </a>
           <span className="hidden md:inline text-gray-600">•</span>
-          <span>☎️ {t.footer.support_24_7}</span>
+          <a href="tel:+447404180061" className="hover:text-white transition-colors">
+            📞 +44 740 418 0061
+          </a>
+          <span className="hidden md:inline text-gray-600">•</span>
+          <span>🕐 {t.footer.support_24_7}</span>
         </div>
 
         {/* Copyright */}

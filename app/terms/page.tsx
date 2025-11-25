@@ -43,10 +43,27 @@ export default function TermsPage() {
             </div>
           </section>
 
+          {/* Условия получения услуги / Доставка */}
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-purple-400 mb-4">
+              3. {t.terms.delivery_title}
+            </h2>
+            <div className="text-gray-300 space-y-3">
+              <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+                <p className="text-blue-400 font-semibold mb-2">📦 {t.terms.delivery_online}</p>
+              </div>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>✅ {t.terms.delivery_instant}</li>
+                <li>♾️ {t.terms.delivery_lifetime}</li>
+                <li>🌍 {t.terms.delivery_anywhere}</li>
+              </ul>
+            </div>
+          </section>
+
           {/* Возврат средств */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              3. {t.terms.refund_policy_title}
+              4. {t.terms.refund_policy_title}
             </h2>
             <div className="text-gray-300 space-y-4">
               <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
@@ -60,7 +77,7 @@ export default function TermsPage() {
           {/* Способы оплаты */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              4. {t.terms.payment_methods_title}
+              5. {t.terms.payment_methods_title}
             </h2>
             <div className="text-gray-300 space-y-3">
               <p><strong>{t.terms.we_accept}</strong></p>
@@ -75,19 +92,28 @@ export default function TermsPage() {
           {/* Контакты */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-              5. {t.terms.contact_info_title}
+              6. {t.terms.contact_info_title}
             </h2>
             <div className="text-gray-300 space-y-2">
               <p>
                 <strong>Email:</strong>{' '}
                 <a
-                  href="mailto:support@ai-learning45.com"
+                  href="mailto:maksimmotok00000@gmail.com"
                   className="text-purple-400 hover:underline"
                 >
-                  support@ai-learning45.com
+                  maksimmotok00000@gmail.com
                 </a>
               </p>
-              <p><strong>{t.footer.support_24_7}</strong></p>
+              <p>
+                <strong>{t.requisites.phone_label}</strong>{' '}
+                <a
+                  href="tel:+447404180061"
+                  className="text-purple-400 hover:underline"
+                >
+                  +44 740 418 0061
+                </a>
+              </p>
+              <p><strong>🕐 {t.footer.support_24_7}</strong></p>
             </div>
           </section>
         </div>

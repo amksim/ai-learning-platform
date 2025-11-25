@@ -34,12 +34,12 @@ export default function RequisitesPage() {
             <div className="space-y-4 text-gray-800 max-w-2xl mx-auto">
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.fop_full_name}</p>
-                <p className="text-lg font-semibold text-blue-900">[ТВОЄ ІМ'Я ТА ПРІЗВИЩЕ]</p>
+                <p className="text-lg font-semibold text-blue-900">Моток Максим Артурович</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.edrpou_ipn}</p>
-                <p className="text-lg font-semibold text-blue-900">[ТВІЙ ІПН]</p>
+                <p className="text-lg font-semibold text-blue-900">3728309157</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
@@ -49,22 +49,22 @@ export default function RequisitesPage() {
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.registration_address}</p>
-                <p className="text-lg font-semibold text-blue-900">[АДРЕСА РЕЄСТРАЦІЇ ФОП]</p>
+                <p className="text-lg font-semibold text-blue-900 text-red-600">[ДОДАЙ АДРЕСУ З ДІЇ]</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.city_label}</p>
-                <p className="text-lg font-semibold text-blue-900">[МІСТО]</p>
+                <p className="text-lg font-semibold text-blue-900 text-red-600">[ДОДАЙ МІСТО З ДІЇ]</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.phone_label}</p>
-                <p className="text-lg font-semibold text-blue-900">[ТВІЙ ТЕЛЕФОН]</p>
+                <p className="text-lg font-semibold text-blue-900">+44 740 418 0061</p>
               </div>
               
               <div className="pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.email_label}</p>
-                <p className="text-lg font-semibold text-blue-900">[ТВІЙ EMAIL]</p>
+                <p className="text-lg font-semibold text-blue-900">maksimmotok00000@gmail.com</p>
               </div>
             </div>
 
