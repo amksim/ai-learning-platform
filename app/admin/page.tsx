@@ -475,6 +475,11 @@ export default function AdminPage() {
               </span>
             </h1>
             
+            <Link href="/admin/promo">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 mr-2">
+                🎬 Промо-видео
+              </Button>
+            </Link>
             <Link href="/admin/withdrawals">
               <Button size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
                 <DollarSign className="h-5 w-5 mr-2" />
