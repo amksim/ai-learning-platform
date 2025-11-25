@@ -15,11 +15,11 @@ function getSupabase() {
 // POST - отправка промо-видео на проверку
 export async function POST(request: Request) {
   try {
-    const { userEmail, videoUrl } = await request.json();
+    const { userEmail, videoUrl, verificationCode } = await request.json();
 
-    if (!userEmail || !videoUrl) {
+    if (!userEmail || !videoUrl || !verificationCode) {
       return NextResponse.json(
-        { error: 'Email and video URL are required' },
+        { error: 'Email, video URL and verification code are required' },
         { status: 400 }
       );
     }
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       .insert({
         user_email: userEmail,
         video_url: videoUrl,
+        verification_code: verificationCode,
         status: 'pending', // pending, approved, rejected
         created_at: new Date().toISOString()
       })

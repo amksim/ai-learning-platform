@@ -30,9 +30,20 @@ export default function PaymentPage() {
   const [promoVideoUrl, setPromoVideoUrl] = useState(''); // Ссылка на видео
   const [promoSubmitting, setPromoSubmitting] = useState(false); // Отправка промо
   const [hasPromoDiscount, setHasPromoDiscount] = useState(false); // Есть ли скидка
+  const [verificationCode, setVerificationCode] = useState(''); // Код верификации
   
   // Проверяем является ли пользователь админом
   const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+  // Генерируем стабильный код верификации на основе email
+  useEffect(() => {
+    if (user?.email) {
+      // Создаём хеш из email для стабильного кода
+      const emailHash = user.email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const code = 'AIL-' + user.email.slice(0, 2).toUpperCase() + emailHash.toString(36).toUpperCase().slice(0, 4);
+      setVerificationCode(code);
+    }
+  }, [user?.email]);
 
   // Определяем страну пользователя
   useEffect(() => {
@@ -784,39 +795,55 @@ export default function PaymentPage() {
 
       {/* Promo Video Modal */}
       {showPromoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-lg my-8">
             <Card className="glass premium-shadow border-2 border-green-500/50 bg-gradient-to-br from-green-900/90 to-emerald-900/90">
               <button
                 onClick={() => setShowPromoModal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
               >
                 <X className="h-6 w-6" />
               </button>
               
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4">
-                    <Video className="h-10 w-10 text-white" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4">
+                    <Video className="h-8 w-8 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold mb-2 text-green-400">
-                    🎬 Получи скидку $70!
+                    🎬 Скидка $70 за рекламу!
                   </h2>
-                  <p className="text-gray-300">
-                    Отправь ссылку на видео-рекламу и получи курс за $179
+                  <p className="text-gray-300 text-sm">
+                    Сними видео о нашем курсе и получи скидку
                   </p>
                 </div>
 
-                <div className="mb-6 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
-                  <p className="text-sm text-gray-300 mb-3"><strong>Требования к видео:</strong></p>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
-                    <li>Минимум 1000 просмотров</li>
-                    <li>Должно быть про AI Learning Platform</li>
-                    <li>YouTube, TikTok или Instagram</li>
-                    <li>Оригинальный контент</li>
-                  </ul>
+                {/* Уникальный код верификации */}
+                <div className="mb-6 p-4 rounded-xl bg-purple-500/20 border-2 border-purple-500/50">
+                  <p className="text-sm text-purple-300 mb-2 font-medium">🔑 Твой уникальный код верификации:</p>
+                  <div className="bg-gray-900 rounded-lg p-3 text-center">
+                    <code className="text-2xl font-mono font-bold text-yellow-400 tracking-wider select-all">
+                      {verificationCode || 'Загрузка...'}
+                    </code>
+                  </div>
+                  <p className="text-xs text-purple-400 mt-2">
+                    ⚠️ Этот код должен быть виден на видео (мелким текстом в углу экрана)
+                  </p>
                 </div>
 
+                {/* Инструкция */}
+                <div className="mb-6 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
+                  <p className="text-sm text-gray-300 mb-3 font-medium">📋 Как получить скидку:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
+                    <li>Сними видео о AI Learning Platform</li>
+                    <li><strong className="text-yellow-400">Добавь код в видео</strong> (мелким текстом в углу)</li>
+                    <li>Опубликуй на YouTube, TikTok или Instagram</li>
+                    <li>Набери минимум <strong className="text-green-400">1000 просмотров</strong></li>
+                    <li>Отправь ссылку ниже</li>
+                  </ol>
+                </div>
+
+                {/* Форма отправки */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Ссылка на видео:
@@ -825,14 +852,14 @@ export default function PaymentPage() {
                     type="url"
                     value={promoVideoUrl}
                     onChange={(e) => setPromoVideoUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=... или https://tiktok.com/..."
+                    placeholder="https://youtube.com/watch?v=..."
                     className="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
                   />
                 </div>
 
                 <button
                   onClick={async () => {
-                    if (!promoVideoUrl || !user?.email) return;
+                    if (!promoVideoUrl || !user?.email || !verificationCode) return;
                     
                     setPromoSubmitting(true);
                     try {
@@ -841,12 +868,13 @@ export default function PaymentPage() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                           userEmail: user.email,
-                          videoUrl: promoVideoUrl
+                          videoUrl: promoVideoUrl,
+                          verificationCode: verificationCode
                         })
                       });
                       
                       if (response.ok) {
-                        alert('✅ Видео отправлено на проверку! Мы свяжемся с вами в течение 48 часов.');
+                        alert(`✅ Заявка отправлена!\n\n🔑 Ваш код: ${verificationCode}\n\n⚠️ Убедитесь, что код виден на видео!\n\nМы проверим в течение 48 часов.`);
                         setShowPromoModal(false);
                         setPromoVideoUrl('');
                       } else {
@@ -874,7 +902,7 @@ export default function PaymentPage() {
                 </button>
 
                 <p className="text-xs text-center text-gray-400 mt-4">
-                  После одобрения вы получите персональную скидку
+                  После одобрения цена курса для вас станет <strong className="text-green-400">$179</strong>
                 </p>
               </CardContent>
             </Card>

@@ -11,6 +11,7 @@ interface PromoVideo {
   id: string;
   user_email: string;
   video_url: string;
+  verification_code: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   reviewed_at?: string;
@@ -202,14 +203,20 @@ export default function PromoAdminPage() {
                           {video.status === 'rejected' && '❌ Отклонено'}
                         </span>
                       </div>
+
+                      {/* Код верификации */}
+                      <div className="mb-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg inline-block">
+                        <span className="text-xs text-yellow-400 mr-2">🔑 Код для проверки:</span>
+                        <code className="text-lg font-mono font-bold text-yellow-400">{video.verification_code || 'Нет кода'}</code>
+                      </div>
                       
                       <a
                         href={video.video_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-purple-400 hover:text-purple-300 flex items-center gap-2 mb-2"
+                        className="text-purple-400 hover:text-purple-300 flex items-center gap-2 mb-2 break-all"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-4 w-4 flex-shrink-0" />
                         {video.video_url}
                       </a>
                       

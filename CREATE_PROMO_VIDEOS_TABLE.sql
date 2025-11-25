@@ -5,10 +5,14 @@ CREATE TABLE IF NOT EXISTS promo_videos (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_email TEXT NOT NULL,
   video_url TEXT NOT NULL,
+  verification_code TEXT NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   reviewed_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Если таблица уже создана, добавь колонку:
+-- ALTER TABLE promo_videos ADD COLUMN IF NOT EXISTS verification_code TEXT;
 
 -- Индекс для быстрого поиска по статусу
 CREATE INDEX IF NOT EXISTS idx_promo_videos_status ON promo_videos(status);
