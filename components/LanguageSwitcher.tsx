@@ -8,6 +8,13 @@ const languages = [
   { code: 'ru', name: 'Русский', flag: '🇷🇺' },
   { code: 'uk', name: 'Українська', flag: '🇺🇦' },
   { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'ro', name: 'Română', flag: '🇷🇴' },
+  { code: 'hu', name: 'Magyar', flag: '🇭🇺' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
 ];
 
 export default function LanguageSwitcher() {
@@ -27,7 +34,7 @@ export default function LanguageSwitcher() {
   }, []);
 
   const selectLanguage = (langCode: string) => {
-    setLanguage(langCode as 'ru' | 'uk' | 'en');
+    setLanguage(langCode as any);
     setIsOpen(false);
   };
 
@@ -45,7 +52,7 @@ export default function LanguageSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto">
           {languages.map((lang) => (
             <button
               key={lang.code}
