@@ -167,7 +167,7 @@ export default function RequisitesPage() {
           </h3>
           <div className="text-gray-700 space-y-2 text-center">
             <p><strong>{t.requisites.website_label}</strong> https://ai-learning45.netlify.app</p>
-            <p><strong>{t.requisites.support_email_label}</strong> support@ai-learning45.com</p>
+            <p><strong>{t.requisites.support_email_label}</strong> maksimmotok00000@gmail.com</p>
             <p><strong>{t.requisites.activity_type_label}</strong> {t.requisites.activity_description}</p>
           </div>
         </div>

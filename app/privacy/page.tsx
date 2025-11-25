@@ -93,8 +93,8 @@ export default function PrivacyPage() {
               </ul>
               <p className="mt-4">
                 {t.privacy.rights_contact}{' '}
-                <a href="mailto:support@ai-learning45.com" className="text-purple-400 hover:underline">
-                  support@ai-learning45.com
+                <a href="mailto:maksimmotok00000@gmail.com" className="text-purple-400 hover:underline">
+                  maksimmotok00000@gmail.com
                 </a>
               </p>
             </div>
@@ -121,8 +121,8 @@ export default function PrivacyPage() {
             <div className="text-gray-300 space-y-2">
               <p>
                 {t.privacy.contacts_text}{' '}
-                <a href="mailto:support@ai-learning45.com" className="text-purple-400 hover:underline">
-                  support@ai-learning45.com
+                <a href="mailto:maksimmotok00000@gmail.com" className="text-purple-400 hover:underline">
+                  maksimmotok00000@gmail.com
                 </a>
               </p>
             </div>
