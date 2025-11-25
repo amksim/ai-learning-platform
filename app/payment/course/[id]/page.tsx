@@ -248,21 +248,21 @@ export default function BuyCoursePagePage() {
           </CardContent>
         </Card>
 
-        {/* Блок "Выгоднее все 4 курса" */}
+        {/* Блок "Все 4 курса" */}
         <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-2 border-purple-500/50">
           <CardContent className="p-6 text-center">
             <Trophy className="h-10 w-10 text-yellow-400 mx-auto mb-3" />
             <h3 className="text-xl font-bold text-white mb-2">
-              💡 Выгоднее купить все 4 курса!
+              🎓 Хочешь все 4 курса?
             </h3>
             <p className="text-gray-300 mb-4">
-              Вместо $250 за 4 курса по отдельности — получи все за <span className="text-green-400 font-bold">$249.99</span>
+              Полный доступ ко всем курсам: Сайты, Приложения, Игры, Платёжные системы — <span className="text-green-400 font-bold">$370</span>
             </p>
             <Link
               href="/payment"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg text-white font-bold transition-all"
             >
-              Купить все 4 курса
+              Купить все 4 курса за $370
             </Link>
           </CardContent>
         </Card>

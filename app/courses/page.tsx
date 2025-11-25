@@ -180,10 +180,14 @@ export default function CoursesPage() {
       return lessonIndex === 0;
     }
     
-    // 2. Для залогиненных БЕЗ подписки:
-    //    - Первые 2 урока (бесплатные) открыты, но проходить по порядку
-    //    - Остальные закрыты (требуют оплату)
-    if (!user.hasPaid) {
+    // 2. Проверяем оплату ЭТОГО курса (категории)
+    const isCoursePaid = user.subscription_status === 'premium' || 
+                         user.paidCourses?.includes(activeCategory?.id || 0);
+    
+    // Для залогиненных БЕЗ оплаты этого курса:
+    //    - Бесплатные уроки открыты по порядку
+    //    - Платные закрыты (требуют оплату)
+    if (!isCoursePaid) {
       // Первый урок всегда открыт
       if (lessonIndex === 0) {
         console.log(`🔓 Урок ${levelId} (индекс ${lessonIndex}): БЕЗ подписки, первый -> OPEN`);
@@ -386,12 +390,17 @@ export default function CoursesPage() {
               return level.courseCategoryId === activeCategory.id;
             })
             .map((level, index) => {
+            // Проверяем оплату этого курса
+            const isThisCoursePaidCheck = user?.subscription_status === 'premium' || 
+                                          user?.paidCourses?.includes(activeCategory?.id || 0);
+            
             // Show CTA only ONCE after the LAST free lesson
+            const filteredLevels = allLevels.filter(l => l.courseCategoryId === activeCategory?.id);
             const isLastFreeLesson = level.isFree && 
-              (index === allLevels.length - 1 || !allLevels[index + 1]?.isFree);
-            const hasMorePaidLessons = allLevels.some((l, i) => i > index && !l.isFree);
-            // Show CTA only after last free lesson if user hasn't paid
-            const showCTAAfter = isLastFreeLesson && hasMorePaidLessons && !user?.hasPaid;
+              (index === filteredLevels.length - 1 || !filteredLevels[index + 1]?.isFree);
+            const hasMorePaidLessons = filteredLevels.some((l, i) => i > index && !l.isFree);
+            // Show CTA only after last free lesson if user hasn't paid THIS course
+            const showCTAAfter = isLastFreeLesson && hasMorePaidLessons && user && !isThisCoursePaidCheck;
             const unlocked = isLevelUnlocked(level.id, level.isFree, index);
             const completed = isLevelCompleted(level.id);
             // Handle icon from localStorage or original source
@@ -467,9 +476,11 @@ export default function CoursesPage() {
                         if (!unlocked) {
                           e.preventDefault();
                           
-                          // Если платный урок и не оплатил
-                          if (!level.isFree && !user.hasPaid) {
-                            router.push("/payment");
+                          // Если платный урок и не оплатил ЭТОТ курс
+                          const isThisCoursePaid = user.subscription_status === 'premium' || 
+                                                    user.paidCourses?.includes(activeCategory?.id || 0);
+                          if (!level.isFree && !isThisCoursePaid) {
+                            router.push(`/payment/course/${activeCategory?.id || 1}`);
                             return;
                           }
                           
@@ -596,55 +607,48 @@ export default function CoursesPage() {
                 {/* Premium upgrade card after free lessons - показываем ОДИН РАЗ */}
                 {showCTAAfter && (
                   <div className="my-16 flex justify-center">
-                    <Card className="glass premium-shadow border-4 border-purple-500/50 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 max-w-lg w-full relative overflow-hidden">
+                    <Card className="glass premium-shadow border-4 border-green-500/50 bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 max-w-lg w-full relative overflow-hidden">
                       <CardContent className="p-8">
                         <div className="text-center mb-6">
-                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400/30 mb-4">
-                            <Trophy className="h-8 w-8 text-purple-400" />
-                          </div>
-                          <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                            Отличная работа! 🎉
+                          <div className="text-5xl mb-4">{activeCategory?.icon || '🎓'}</div>
+                          <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                            🔓 Разблокировать курс "{activeCategory?.title}"
                           </h3>
                           <p className="text-gray-300 text-base mb-2">
-                            Вы завершили все бесплатные уроки. Готовы продолжить путь к мастерству?
+                            Бесплатные уроки пройдены! Получите доступ к остальным урокам.
                           </p>
-                          <p className="text-orange-400 text-sm font-bold">
-                            🌍 Единственный в мире курс по созданию программ с AI!
-                          </p>
-                        </div>
-
-                        {/* Discount Badge */}
-                        <div className="absolute top-4 right-4">
-                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full font-bold text-xl shadow-2xl shadow-green-500/50">
-                            -33%
-                          </div>
                         </div>
 
                         {/* Price */}
                         <div className="text-center mb-6">
-                          <div className="flex items-center justify-center gap-4 mb-3">
-                            <span className="text-3xl text-gray-500 line-through">$599</span>
-                            <span className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                              $249.99
-                            </span>
-                          </div>
-                          <p className="text-lg text-green-400 font-bold mb-4">Экономия $200!</p>
-                          <p className="text-sm text-gray-400">Единоразовый платеж • Пожизненный доступ</p>
+                          <span className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                            $62.50
+                          </span>
+                          <p className="text-sm text-gray-400 mt-2">Единоразовый платеж • Пожизненный доступ</p>
                         </div>
 
-                        {/* Money-back Guarantee - Compact */}
-                        <div className="mb-6 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                          <p className="text-sm text-green-400 font-bold text-center">
-                            ✓ 100% гарантия возврата денег
-                          </p>
+                        {/* Features */}
+                        <div className="mb-6 space-y-2">
+                          <div className="flex items-center gap-2 text-gray-300">
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                            <span>Все уроки курса "{activeCategory?.title}"</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-300">
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                            <span>Практические задания</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-300">
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                            <span>Доступ навсегда</span>
+                          </div>
                         </div>
 
                         {/* CTA Button */}
                         <div className="text-center">
-                          <Link href="/payment">
-                            <button className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white px-10 py-5 rounded-xl font-bold transition-all transform hover:scale-105 w-full premium-shadow neon-glow text-xl flex items-center justify-center gap-3">
-                              <Trophy className="h-6 w-6" />
-                              Получить полный доступ
+                          <Link href={`/payment/course/${activeCategory?.id || 1}`}>
+                            <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-10 py-5 rounded-xl font-bold transition-all transform hover:scale-105 w-full premium-shadow text-xl flex items-center justify-center gap-3">
+                              <Zap className="h-6 w-6" />
+                              Купить курс за $62.50
                             </button>
                           </Link>
                         </div>

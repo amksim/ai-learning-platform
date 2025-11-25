@@ -221,7 +221,7 @@ export default function PaymentPage() {
         ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST 
         : (process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROD || 'price_1SRGmoIoyNMrDAfMUDpVuB8Y');
       
-      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($249.99)');
+      console.log('💰 Price mode:', useTestPrice ? 'TEST ($0.99)' : 'PRODUCTION ($370)');
       console.log('💰 Price ID:', priceId);
       
       const response = await fetch('/api/checkout', {
@@ -320,13 +320,13 @@ export default function PaymentPage() {
               <div className="mb-8">
                 <div className="flex items-center justify-center gap-6 mb-4">
                   <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400 mb-2">
-                  Экономия $200 🎉
+                  Все 4 курса 🎉
                 </p>  
                   <div className="text-6xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent drop-shadow-2xl">
-                    $249.99
+                    $370
                   </div>
                 </div>
-                <p className="text-xl text-green-400 font-bold">Экономия $200 - Лучшее предложение!</p>
+                <p className="text-xl text-green-400 font-bold">Полный доступ ко всем курсам!</p>
               </div>
 
               {/* Buy Button */}
@@ -486,7 +486,7 @@ export default function PaymentPage() {
                   <div className="h-px bg-gradient-to-r from-transparent via-green-500 to-transparent mb-4" />
                   <div className="flex items-center justify-between">
                     <span className="text-white font-bold text-xl">Итого:</span>
-                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$249.99</span>
+                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$370</span>
                   </div>
                 </div>
 
@@ -518,7 +518,7 @@ export default function PaymentPage() {
                             : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
                         }`}
                       >
-                        $249.99 (LIVE)
+                        $370 (LIVE)
                       </button>
                       <button
                         onClick={() => setUseTestPrice(true)}
@@ -576,7 +576,7 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      {hasPromoDiscount ? 'Оплатить $179 (со скидкой)' : (useTestPrice ? 'Pay $0.99 (TEST)' : 'Оплатить $249.99')}
+                      {hasPromoDiscount ? 'Оплатить $300 (со скидкой)' : (useTestPrice ? 'Pay $0.99 (TEST)' : 'Оплатить $370')}
                     </>
                   )}
                 </button>
