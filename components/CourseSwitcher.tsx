@@ -39,7 +39,10 @@ export default function CourseSwitcher({ activeCategory, onCategoryChange }: Cou
 
   const loadCategories = async () => {
     try {
-      const response = await fetch('/api/course-categories');
+      // Добавляем timestamp чтобы избежать кеширования
+      const response = await fetch(`/api/course-categories?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       const data = await response.json();
       
       if (data.categories) {

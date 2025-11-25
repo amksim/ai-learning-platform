@@ -31,7 +31,7 @@ export async function GET() {
       return NextResponse.json({ error: categoriesError.message }, { status: 500 });
     }
 
-    // Для каждой категории считаем количество уроков
+    // Для каждой категории считаем количество уроков ДИНАМИЧЕСКИ
     const categoriesWithCounts = await Promise.all(
       (categories || []).map(async (category) => {
         const { count, error: countError } = await supabase
@@ -44,9 +44,12 @@ export async function GET() {
           return { ...category, total_lessons: 0 };
         }
 
+        console.log(`📊 Category "${category.title}" (id: ${category.id}): ${count} lessons`);
         return { ...category, total_lessons: count || 0 };
       })
     );
+
+    console.log('📋 All categories with counts:', categoriesWithCounts.map(c => ({ id: c.id, title: c.title, total_lessons: c.total_lessons })));
 
     return NextResponse.json({ categories: categoriesWithCounts });
   } catch (error: any) {
