@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Check, Clock, CreditCard, X, Sparkles, Zap, Trophy, Loader2 } from "lucide-react";
+import { Check, Clock, CreditCard, X, Sparkles, Zap, Trophy, Loader2, Video, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -24,6 +25,11 @@ export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [userCountry, setUserCountry] = useState<string>(''); // Страна пользователя
   const [showCountrySelector, setShowCountrySelector] = useState(false); // Показать выбор страны
+  const [agreedToTerms, setAgreedToTerms] = useState(false); // Согласие с условиями
+  const [showPromoModal, setShowPromoModal] = useState(false); // Модал скидки за рекламу
+  const [promoVideoUrl, setPromoVideoUrl] = useState(''); // Ссылка на видео
+  const [promoSubmitting, setPromoSubmitting] = useState(false); // Отправка промо
+  const [hasPromoDiscount, setHasPromoDiscount] = useState(false); // Есть ли скидка
   
   // Проверяем является ли пользователь админом
   const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -341,6 +347,39 @@ export default function PaymentPage() {
           </Card>
         </div>
 
+        {/* Promo Discount Block */}
+        <Card className="glass premium-shadow border-2 border-green-500/50 bg-gradient-to-br from-green-500/10 to-emerald-500/10 mb-8">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Video className="h-8 w-8 text-green-400" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-green-400">🎬 Скидка за рекламу — $179!</h3>
+                <p className="text-gray-300">Экономия $70 от обычной цены</p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-900/50 rounded-xl p-4 mb-4">
+              <p className="text-gray-300 mb-3"><strong>Как получить скидку:</strong></p>
+              <ol className="list-decimal list-inside space-y-2 text-gray-400 text-sm">
+                <li>Сними видео-рекламу нашего курса (YouTube, TikTok, Instagram)</li>
+                <li>Набери <strong className="text-green-400">1000+ просмотров</strong></li>
+                <li>Отправь ссылку на видео нам</li>
+                <li>После проверки получи курс за <strong className="text-green-400">$179</strong>!</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setShowPromoModal(true)}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3"
+            >
+              <Video className="h-5 w-5" />
+              Отправить видео и получить скидку
+            </button>
+          </CardContent>
+        </Card>
+
         {/* What's Included */}
         <Card className="glass premium-shadow border-2 border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-pink-500/5">
           <CardContent className="p-4 sm:p-6 md:p-8">
@@ -493,9 +532,29 @@ export default function PaymentPage() {
                   </div>
                 )}
 
+                {/* Чекбокс согласия с условиями */}
+                <div className="mb-4 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-1 h-5 w-5 rounded border-gray-600 bg-gray-800 text-purple-500 focus:ring-purple-500"
+                    />
+                    <span className="text-sm text-gray-300">
+                      Я прочитал и согласен с{' '}
+                      <Link href="/terms" target="_blank" className="text-purple-400 hover:underline">
+                        Условиями использования и политикой возврата
+                      </Link>
+                      . Я понимаю, что возврат возможен только если курс не работает как обещано, 
+                      и я обязуюсь пройти минимум 10 уроков перед запросом возврата.
+                    </span>
+                  </label>
+                </div>
+
                 <button
                   onClick={handlePayment}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !agreedToTerms}
                   className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 flex items-center justify-center gap-3 premium-shadow neon-glow text-lg mb-4"
                 >
                   {isProcessing ? (
@@ -506,13 +565,19 @@ export default function PaymentPage() {
                   ) : (
                     <>
                       <Zap className="h-6 w-6" />
-                      {useTestPrice ? 'Pay $0.99 (TEST)' : 'Pay $249.99 - Get Full Access'}
+                      {hasPromoDiscount ? 'Оплатить $179 (со скидкой)' : (useTestPrice ? 'Pay $0.99 (TEST)' : 'Оплатить $249.99')}
                     </>
                   )}
                 </button>
 
+                {!agreedToTerms && (
+                  <p className="text-xs text-center text-yellow-400 mb-2">
+                    ⚠️ Пожалуйста, примите условия для продолжения
+                  </p>
+                )}
+
                 <p className="text-xs text-center text-gray-400">
-                  Click the button to get instant access to all lessons
+                  Нажмите кнопку для мгновенного доступа ко всем урокам
                 </p>
               </CardContent>
             </Card>
@@ -714,6 +779,106 @@ export default function PaymentPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Promo Video Modal */}
+      {showPromoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg">
+            <Card className="glass premium-shadow border-2 border-green-500/50 bg-gradient-to-br from-green-900/90 to-emerald-900/90">
+              <button
+                onClick={() => setShowPromoModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              
+              <CardContent className="p-6 sm:p-8">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4">
+                    <Video className="h-10 w-10 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2 text-green-400">
+                    🎬 Получи скидку $70!
+                  </h2>
+                  <p className="text-gray-300">
+                    Отправь ссылку на видео-рекламу и получи курс за $179
+                  </p>
+                </div>
+
+                <div className="mb-6 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
+                  <p className="text-sm text-gray-300 mb-3"><strong>Требования к видео:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
+                    <li>Минимум 1000 просмотров</li>
+                    <li>Должно быть про AI Learning Platform</li>
+                    <li>YouTube, TikTok или Instagram</li>
+                    <li>Оригинальный контент</li>
+                  </ul>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Ссылка на видео:
+                  </label>
+                  <input
+                    type="url"
+                    value={promoVideoUrl}
+                    onChange={(e) => setPromoVideoUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=... или https://tiktok.com/..."
+                    className="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
+                  />
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (!promoVideoUrl || !user?.email) return;
+                    
+                    setPromoSubmitting(true);
+                    try {
+                      const response = await fetch('/api/promo-video', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          userEmail: user.email,
+                          videoUrl: promoVideoUrl
+                        })
+                      });
+                      
+                      if (response.ok) {
+                        alert('✅ Видео отправлено на проверку! Мы свяжемся с вами в течение 48 часов.');
+                        setShowPromoModal(false);
+                        setPromoVideoUrl('');
+                      } else {
+                        alert('❌ Ошибка при отправке. Попробуйте позже.');
+                      }
+                    } catch (error) {
+                      alert('❌ Ошибка при отправке. Попробуйте позже.');
+                    }
+                    setPromoSubmitting(false);
+                  }}
+                  disabled={promoSubmitting || !promoVideoUrl}
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3"
+                >
+                  {promoSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Отправка...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-5 w-5" />
+                      Отправить на проверку
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-center text-gray-400 mt-4">
+                  После одобрения вы получите персональную скидку
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
     </div>
