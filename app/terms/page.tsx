@@ -65,9 +65,9 @@ export default function TermsPage() {
             <div className="text-gray-300 space-y-3">
               <p><strong>{t.terms.we_accept}</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-2">
-                <li>🇺🇦 LiqPay (Visa, Mastercard, Приват24)</li>
-                <li>🇷🇺 ЮКасса (СБП, МИР, Visa, Mastercard)</li>
-                <li>🌍 Stripe (Visa, Mastercard, Amex)</li>
+                <li>🇺🇦 {t.terms.payment_liqpay}</li>
+                <li>🇷🇺 {t.terms.payment_yookassa}</li>
+                <li>🌍 {t.terms.payment_stripe}</li>
               </ul>
             </div>
           </section>
