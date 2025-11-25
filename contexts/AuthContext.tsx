@@ -12,7 +12,8 @@ export interface User {
   progress: number;
   completedLessons: number[];
   joinedDate: string;
-  hasPaid: boolean;
+  hasPaid: boolean; // Deprecated - для совместимости, true если куплен хотя бы 1 курс
+  paidCourses: number[]; // Массив ID оплаченных категорий курсов
   subscription_status: 'free' | 'premium';
   subscription_end_date: string | null;
   stripe_customer_id: string | null;
@@ -82,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const completedLessonIds = progressData?.map(p => p.lesson_index) || [];
 
       // 4. Устанавливаем пользователя
+      const paidCourses = profile.paid_courses || [];
       setUser({
         id: authUser.id,
         email: authUser.email!,
@@ -90,7 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         progress: completedCount,
         completedLessons: completedLessonIds,
         joinedDate: profile.created_at || new Date().toISOString(),
-        hasPaid: profile.subscription_status === 'premium',
+        hasPaid: profile.subscription_status === 'premium' || paidCourses.length > 0,
+        paidCourses: paidCourses,
         subscription_status: profile.subscription_status || 'free',
         subscription_end_date: profile.subscription_end_date || null,
         stripe_customer_id: profile.stripe_customer_id || null,
