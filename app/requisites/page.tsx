@@ -49,12 +49,12 @@ export default function RequisitesPage() {
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.registration_address}</p>
-                <p className="text-lg font-semibold text-blue-900 text-red-600">[ДОДАЙ АДРЕСУ З ДІЇ]</p>
+                <p className="text-lg font-semibold text-blue-900">Україна, Одеська обл., Болградський р-н, с. Лісне, вул. Манзирська, буд. 15</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
                 <p className="text-sm text-gray-600 mb-1">{t.requisites.city_label}</p>
-                <p className="text-lg font-semibold text-blue-900 text-red-600">[ДОДАЙ МІСТО З ДІЇ]</p>
+                <p className="text-lg font-semibold text-blue-900">с. Лісне, Болградський район, Одеська область</p>
               </div>
               
               <div className="border-b border-gray-300 pb-3">
