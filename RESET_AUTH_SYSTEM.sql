@@ -58,7 +58,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    NEW.email = 'amksim.coder@gmail.com' -- Админ email
+    LOWER(NEW.email) = 'kmak4551@gmail.com' -- Админ email
   );
   RETURN NEW;
 END;

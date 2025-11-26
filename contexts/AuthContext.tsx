@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: authUser.id,
             email: authUser.email,
             full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0],
-            is_admin: authUser.email === "amksim.coder@gmail.com",
+            is_admin: authUser.email?.toLowerCase() === "kmak4551@gmail.com",
           });
           
           if (insertError) {
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: authUser.id,
             email: authUser.email!,
             full_name: authUser.email?.split("@")[0] || "User",
-            is_admin: authUser.email === "amksim.coder@gmail.com",
+            is_admin: authUser.email?.toLowerCase() === "kmak4551@gmail.com",
             subscription_status: "free",
             paid_courses: [],
             created_at: new Date().toISOString(),
