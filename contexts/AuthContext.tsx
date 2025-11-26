@@ -8,7 +8,6 @@ export interface User {
   id: string;
   email: string;
   full_name: string;
-  telegram_username: string | null;
   progress: number;
   completedLessons: number[];
   joinedDate: string;
@@ -22,10 +21,10 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string, name: string, telegramUsername: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (updates: { full_name?: string; telegram_username?: string }) => Promise<void>;
+  updateProfile: (updates: { full_name?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -88,7 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: authUser.id,
         email: authUser.email!,
         full_name: profile.full_name || 'User',
-        telegram_username: profile.telegram_username || null,
         progress: completedCount,
         completedLessons: completedLessonIds,
         joinedDate: profile.created_at || new Date().toISOString(),
@@ -109,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Регистрация
-  async function signup(email: string, password: string, name: string, telegramUsername: string) {
+  async function signup(email: string, password: string, name: string) {
     console.log('📝 Регистрация:', email);
 
     try {
@@ -131,7 +129,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: authData.user.id,
           email: email,
           full_name: name || email.split('@')[0],
-          telegram_username: telegramUsername,
           subscription_status: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Trophy, Target, ArrowRight, Star, Send, Award, Zap, TrendingUp, CheckCircle, Flame, Book, Edit2, Check, X } from "lucide-react";
+import { Calendar, Trophy, Target, ArrowRight, Star, Award, Zap, TrendingUp, CheckCircle, Flame, Book, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReviews } from "@/contexts/ReviewsContext";
@@ -23,10 +23,9 @@ function ProfilePageContent() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditingTelegram, setIsEditingTelegram] = useState(false);
-  const [telegramInput, setTelegramInput] = useState(user?.telegram_username || "");
+  const [existingLessonIds, setExistingLessonIds] = useState<number[]>([]); // Список существующих уроков
 
-  // Загружаем реальное количество уроков из API
+  // Загружаем реальное количество уроков из API и сохраняем их ID
   useEffect(() => {
     const loadTotalLessons = async () => {
       try {
@@ -34,7 +33,10 @@ function ProfilePageContent() {
         const data = await response.json();
         if (data.courses && data.courses.length > 0) {
           setTotalLevels(data.courses.length);
-          console.log(`📚 Загружено ${data.courses.length} уроков из базы`);
+          // Сохраняем ID существующих уроков для корректного подсчёта прогресса
+          const lessonIds = data.courses.map((course: { id: number }) => course.id);
+          setExistingLessonIds(lessonIds);
+          console.log(`📚 Загружено ${data.courses.length} уроков из базы, ID:`, lessonIds);
         }
       } catch (error) {
         console.error('❌ Ошибка загрузки количества уроков:', error);
@@ -54,7 +56,11 @@ function ProfilePageContent() {
     return null;
   }
 
-  const completedLevels = user.completedLessons?.length || user.progress || 0;
+  // Считаем только те пройденные уроки, которые РЕАЛЬНО существуют в базе
+  // Это исправляет проблему когда уроки добавляются/удаляются
+  const completedLevels = existingLessonIds.length > 0
+    ? user.completedLessons?.filter(id => existingLessonIds.includes(id)).length || 0
+    : user.completedLessons?.length || user.progress || 0;
   const remainingLevels = Math.max(0, totalLevels - completedLevels);
   const progressPercent = totalLevels > 0 ? Math.round((completedLevels / totalLevels) * 100) : 0;
   
@@ -131,72 +137,6 @@ function ProfilePageContent() {
             </span>
           </h1>
           <p className="text-gray-400">{user.email}</p>
-          
-          {/* Telegram Username */}
-          <div className="mt-2 flex items-center justify-center gap-2">
-            {!isEditingTelegram ? (
-              <>
-                {user.telegram_username ? (
-                  <p className="text-purple-400 flex items-center gap-2">
-                    <Send className="h-4 w-4" />
-                    @{user.telegram_username}
-                    <button
-                      onClick={() => {
-                        setIsEditingTelegram(true);
-                        setTelegramInput(user.telegram_username || "");
-                      }}
-                      className="text-gray-400 hover:text-purple-400 transition-colors"
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </button>
-                  </p>
-                ) : (
-                  <button
-                    onClick={() => setIsEditingTelegram(true)}
-                    className="text-sm text-gray-400 hover:text-purple-400 transition-colors flex items-center gap-1"
-                  >
-                    <Send className="h-3 w-3" />
-                    Добавить Telegram
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-purple-400">@</span>
-                <input
-                  type="text"
-                  value={telegramInput}
-                  onChange={(e) => setTelegramInput(e.target.value.replace('@', ''))}
-                  placeholder="username"
-                  className="w-32 px-2 py-1 text-sm rounded border border-purple-500/30 bg-gray-900/50 text-white focus:outline-none focus:border-purple-500"
-                  autoFocus
-                />
-                <button
-                  onClick={async () => {
-                    try {
-                      await updateProfile({ telegram_username: telegramInput || undefined });
-                      setIsEditingTelegram(false);
-                    } catch (error) {
-                      console.error('Error updating telegram:', error);
-                      alert('Ошибка обновления Telegram');
-                    }
-                  }}
-                  className="text-green-400 hover:text-green-300 transition-colors"
-                >
-                  <Check className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEditingTelegram(false);
-                    setTelegramInput(user.telegram_username || "");
-                  }}
-                  className="text-red-400 hover:text-red-300 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
           
           {/* Status Badge */}
           <div className="mt-4 inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30">
