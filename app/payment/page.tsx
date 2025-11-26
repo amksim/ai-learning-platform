@@ -11,7 +11,7 @@ import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-type PaymentMethod = 'stripe' | 'yookassa' | 'liqpay';
+type PaymentMethod = 'stripe' | 'yookassa' | 'monobank';
 
 export default function PaymentPage() {
   const { user, loading } = useAuth();
@@ -62,8 +62,8 @@ export default function PaymentPage() {
           setPaymentMethod('yookassa'); // YooKassa для России
           console.log('🇷🇺 Selected: YooKassa (СБП)');
         } else if (country === 'UA') {
-          setPaymentMethod('liqpay'); // LiqPay для Украины (добавим позже)
-          console.log('🇺🇦 Selected: LiqPay');
+          setPaymentMethod('monobank'); // Monobank для Украины
+          console.log('🇺🇦 Selected: Monobank');
         } else {
           setPaymentMethod('stripe'); // Stripe для остальных
           console.log('🌍 Selected: Stripe');
@@ -162,16 +162,17 @@ export default function PaymentPage() {
         return;
       }
 
-      // LiqPay для Украины
-      if (paymentMethod === 'liqpay') {
-        console.log('🇺🇦 Using LiqPay for Ukraine');
+      // Monobank для Украины
+      if (paymentMethod === 'monobank') {
+        console.log('🇺🇦 Using Monobank for Ukraine');
         
-        const response = await fetch('/api/liqpay/create-payment', {
+        const response = await fetch('/api/monobank/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userEmail: user.email,
-            amount: 399
+            amount: 370, // Ціна в доларах
+            currency: 'USD'
           })
         });
 
@@ -180,36 +181,17 @@ export default function PaymentPage() {
         }
 
         const data = await response.json();
-        console.log('📦 LiqPay response:', data);
+        console.log('📦 Monobank response:', data);
         
         if (data.error) {
           throw new Error(data.error);
         }
 
-        if (data.data && data.signature) {
-          console.log('🇺🇦 Redirecting to LiqPay...');
-          
-          // Создаём форму для отправки на LiqPay
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = data.checkoutUrl || 'https://www.liqpay.ua/api/3/checkout';
-          
-          const dataInput = document.createElement('input');
-          dataInput.type = 'hidden';
-          dataInput.name = 'data';
-          dataInput.value = data.data;
-          form.appendChild(dataInput);
-          
-          const signatureInput = document.createElement('input');
-          signatureInput.type = 'hidden';
-          signatureInput.name = 'signature';
-          signatureInput.value = data.signature;
-          form.appendChild(signatureInput);
-          
-          document.body.appendChild(form);
-          form.submit();
+        if (data.url) {
+          console.log('🇺🇦 Redirecting to Monobank...');
+          window.location.href = data.url;
         } else {
-          throw new Error('No payment data received');
+          throw new Error('No payment URL received');
         }
         return;
       }
@@ -698,16 +680,16 @@ export default function PaymentPage() {
                     </div>
                   </button>
 
-                  {/* LiqPay - Украина */}
+                  {/* Monobank - Украина */}
                   <button
                     onClick={() => {
-                      setPaymentMethod('liqpay');
+                      setPaymentMethod('monobank');
                       setUserCountry('UA');
                       setShowCountrySelector(false);
                       setShowModal(true);
                     }}
                     className={`p-6 rounded-xl border-2 transition-all text-left ${
-                      paymentMethod === 'liqpay'
+                      paymentMethod === 'monobank'
                         ? 'border-yellow-500 bg-yellow-500/10'
                         : 'border-gray-700 hover:border-yellow-500/50 bg-gray-800/50'
                     }`}
@@ -719,17 +701,18 @@ export default function PaymentPage() {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">💳 LiqPay (Украина)</h3>
+                        <h3 className="text-xl font-bold text-white mb-1">🏦 Monobank (Україна)</h3>
                         <p className="text-sm text-gray-400 mb-2">
-                          Для пользователей из Украины - Visa, Mastercard
+                          Для користувачів з України - картки будь-якого банку
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Visa</span>
                           <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Mastercard</span>
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Приват24</span>
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Apple Pay</span>
+                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Google Pay</span>
                         </div>
                       </div>
-                      {paymentMethod === 'liqpay' && (
+                      {paymentMethod === 'monobank' && (
                         <div className="flex-shrink-0">
                           <Check className="h-6 w-6 text-yellow-400" />
                         </div>
