@@ -48,18 +48,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearError = useCallback(() => setError(null), []);
 
   // ========================================
-  // ЗАГРУЗКА ПРОФИЛЯ
+  // ЗАГРУЗКА ПРОФИЛЯ (с timeout 10 сек)
   // ========================================
   const loadUserProfile = useCallback(async (authUser: SupabaseUser): Promise<User | null> => {
+    // Timeout чтобы не зависать вечно
+    const timeoutPromise = new Promise<null>((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 10000)
+    );
+
     try {
       console.log('📋 Загрузка профиля для:', authUser.email);
 
-      // 1. Пытаемся получить профиль
-      const { data: profile, error: profileError } = await supabase
+      // 1. Пытаемся получить профиль с timeout
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
-        .maybeSingle(); // Используем maybeSingle вместо single - не выбрасывает ошибку если нет данных
+        .maybeSingle();
+
+      const { data: profile, error: profileError } = await Promise.race([
+        profilePromise,
+        timeoutPromise.then(() => ({ data: null, error: { message: 'Timeout' } }))
+      ]) as any;
+
+      if (profileError && profileError.message !== 'Timeout') {
+        console.error('❌ Ошибка загрузки профиля:', profileError);
+      }
 
       // 2. Если профиля нет - создаём его
       if (!profile) {
@@ -74,18 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updated_at: new Date().toISOString(),
         };
 
+        // Пробуем создать профиль
         const { error: insertError } = await supabase
           .from('profiles')
           .insert(newProfile);
 
         if (insertError) {
           console.error('❌ Ошибка создания профиля:', insertError);
-          // Не критично - продолжаем с базовыми данными
         } else {
           console.log('✅ Профиль создан');
         }
 
-        // Возвращаем базовый профиль
+        // Возвращаем базовый профиль в любом случае
         return {
           id: authUser.id,
           email: authUser.email!,
