@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { AuthError, User as SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 // ========================================
 // ТИПЫ
@@ -12,28 +12,35 @@ export interface User {
   id: string;
   email: string;
   full_name: string;
-  progress: number;
-  completedLessons: number[];
-  joinedDate: string;
+  is_admin: boolean;
+  subscription_status: "free" | "premium";
+  paid_courses: number[];
+  created_at: string;
+  // Для совместимости со старым кодом
   hasPaid: boolean;
   paidCourses: number[];
-  subscription_status: 'free' | 'premium';
-  subscription_end_date: string | null;
-  stripe_customer_id: string | null;
+  completedLessons: number[];
+  progress: number;
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  isLoading: boolean;
+  isAdmin: boolean;
+  signUp: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  // Алиасы для совместимости
   loading: boolean;
-  error: string | null;
-  signup: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: { full_name?: string }) => Promise<void>;
-  clearError: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 // ========================================
 // ПРОВАЙДЕР
@@ -41,182 +48,135 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Очистка ошибки
-  const clearError = useCallback(() => setError(null), []);
-
-  // ========================================
-  // ЗАГРУЗКА ПРОФИЛЯ (с timeout 10 сек)
-  // ========================================
-  const loadUserProfile = useCallback(async (authUser: SupabaseUser): Promise<User | null> => {
-    // Timeout чтобы не зависать вечно
-    const timeoutPromise = new Promise<null>((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 10000)
-    );
-
+  // Загрузка профиля из БД
+  async function loadProfile(authUser: SupabaseUser): Promise<User | null> {
     try {
-      console.log('📋 Загрузка профиля для:', authUser.email);
+      console.log("📋 Загрузка профиля:", authUser.email);
 
-      // 1. Пытаемся получить профиль с timeout
-      const profilePromise = supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .maybeSingle();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
 
-      const { data: profile, error: profileError } = await Promise.race([
-        profilePromise,
-        timeoutPromise.then(() => ({ data: null, error: { message: 'Timeout' } }))
-      ]) as any;
-
-      if (profileError && profileError.message !== 'Timeout') {
-        console.error('❌ Ошибка загрузки профиля:', profileError);
-      }
-
-      // 2. Если профиля нет - создаём его
-      if (!profile) {
-        console.log('📝 Профиль не найден, создаём новый...');
+      if (error || !data) {
+        console.log("⏳ Профиль не найден, ждём триггер...");
+        await new Promise(r => setTimeout(r, 1500));
         
-        const newProfile = {
-          id: authUser.id,
-          email: authUser.email!,
-          full_name: authUser.user_metadata?.full_name || authUser.email!.split('@')[0],
-          subscription_status: 'free',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        const { data: retryData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", authUser.id)
+          .single();
 
-        // Пробуем создать профиль
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert(newProfile);
-
-        if (insertError) {
-          console.error('❌ Ошибка создания профиля:', insertError);
-        } else {
-          console.log('✅ Профиль создан');
+        if (!retryData) {
+          // Создаём профиль вручную если триггер не сработал
+          console.log("📝 Создаём профиль вручную...");
+          const { error: insertError } = await supabase.from("profiles").insert({
+            id: authUser.id,
+            email: authUser.email,
+            full_name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0],
+            is_admin: authUser.email === "amksim.coder@gmail.com",
+          });
+          
+          if (insertError) {
+            console.error("❌ Ошибка создания профиля:", insertError);
+          }
+          
+          // Возвращаем базовый профиль
+          return {
+            id: authUser.id,
+            email: authUser.email!,
+            full_name: authUser.email?.split("@")[0] || "User",
+            is_admin: authUser.email === "amksim.coder@gmail.com",
+            subscription_status: "free",
+            paid_courses: [],
+            created_at: new Date().toISOString(),
+            hasPaid: false,
+            paidCourses: [],
+            completedLessons: [],
+            progress: 0,
+          };
         }
 
-        // Возвращаем базовый профиль в любом случае
-        return {
-          id: authUser.id,
-          email: authUser.email!,
-          full_name: newProfile.full_name,
-          progress: 0,
-          completedLessons: [],
-          joinedDate: newProfile.created_at,
-          hasPaid: false,
-          paidCourses: [],
-          subscription_status: 'free',
-          subscription_end_date: null,
-          stripe_customer_id: null,
-        };
+        return mapProfile(retryData, authUser);
       }
 
-      // 3. Загружаем прогресс
-      const { data: progressData } = await supabase
-        .from('user_progress')
-        .select('lesson_index')
-        .eq('user_id', authUser.id)
-        .eq('completed', true);
-
-      const completedLessonIds = progressData?.map(p => p.lesson_index) || [];
-      const paidCourses = profile.paid_courses || [];
-
-      console.log('✅ Профиль загружен:', profile.full_name);
-
-      return {
-        id: authUser.id,
-        email: authUser.email!,
-        full_name: profile.full_name || 'User',
-        progress: completedLessonIds.length,
-        completedLessons: completedLessonIds,
-        joinedDate: profile.created_at || new Date().toISOString(),
-        hasPaid: profile.subscription_status === 'premium' || paidCourses.length > 0,
-        paidCourses: paidCourses,
-        subscription_status: profile.subscription_status || 'free',
-        subscription_end_date: profile.subscription_end_date || null,
-        stripe_customer_id: profile.stripe_customer_id || null,
-      };
+      return mapProfile(data, authUser);
     } catch (err) {
-      console.error('❌ Ошибка загрузки профиля:', err);
+      console.error("❌ Ошибка загрузки профиля:", err);
       return null;
     }
-  }, []);
+  }
 
-  // ========================================
-  // СЛУШАТЕЛЬ AUTH ИЗМЕНЕНИЙ
-  // ========================================
+  function mapProfile(data: any, authUser: SupabaseUser): User {
+    const paidCourses = data.paid_courses || [];
+    return {
+      id: data.id,
+      email: data.email,
+      full_name: data.full_name || authUser.email?.split("@")[0] || "User",
+      is_admin: data.is_admin || data.email === "amksim.coder@gmail.com",
+      subscription_status: data.subscription_status || "free",
+      paid_courses: paidCourses,
+      created_at: data.created_at,
+      // Для совместимости
+      hasPaid: data.subscription_status === "premium" || paidCourses.length > 0,
+      paidCourses: paidCourses,
+      completedLessons: [],
+      progress: 0,
+    };
+  }
+
+  async function refreshUser() {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (currentSession?.user) {
+      const profile = await loadProfile(currentSession.user);
+      setUser(profile);
+      setSession(currentSession);
+    }
+  }
+
+  // Инициализация
   useEffect(() => {
     let mounted = true;
 
-    // Инициализация
-    const initAuth = async () => {
+    async function init() {
       try {
-        console.log('🔍 Инициализация авторизации...');
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Ошибка получения сессии:', error);
-          if (mounted) {
-            setUser(null);
-            setLoading(false);
-          }
-          return;
-        }
-
-        if (session?.user) {
-          console.log('✅ Активная сессия найдена:', session.user.email);
-          const userProfile = await loadUserProfile(session.user);
-          if (mounted) {
-            setUser(userProfile);
-          }
-        } else {
-          console.log('👤 Нет активной сессии');
-          if (mounted) {
-            setUser(null);
-          }
+        if (currentSession?.user && mounted) {
+          setSession(currentSession);
+          const profile = await loadProfile(currentSession.user);
+          setUser(profile);
         }
       } catch (err) {
-        console.error('❌ Ошибка инициализации:', err);
-        if (mounted) {
-          setUser(null);
-        }
+        console.error("❌ Ошибка инициализации:", err);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setIsLoading(false);
       }
-    };
+    }
 
-    initAuth();
+    init();
 
-    // Подписка на изменения auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔔 Auth event:', event);
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          const userProfile = await loadUserProfile(session.user);
-          if (mounted) {
-            setUser(userProfile);
-            setLoading(false);
-          }
-        } else if (event === 'SIGNED_OUT') {
+      async (event, newSession) => {
+        console.log("🔔 Auth event:", event);
+        
+        if (event === "SIGNED_IN" && newSession?.user) {
+          setSession(newSession);
+          const profile = await loadProfile(newSession.user);
+          if (mounted) setUser(profile);
+        } else if (event === "SIGNED_OUT") {
           if (mounted) {
             setUser(null);
-            setLoading(false);
-          }
-        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Токен обновлён - обновляем профиль
-          const userProfile = await loadUserProfile(session.user);
-          if (mounted) {
-            setUser(userProfile);
+            setSession(null);
           }
         }
+        
+        if (mounted) setIsLoading(false);
       }
     );
 
@@ -224,243 +184,120 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [loadUserProfile]);
+  }, []);
 
   // ========================================
   // РЕГИСТРАЦИЯ
   // ========================================
-  const signup = useCallback(async (
-    email: string, 
-    password: string, 
-    name: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    console.log('📝 Регистрация:', email);
-    setError(null);
-
+  async function signUp(email: string, password: string, name?: string): Promise<{ error?: string }> {
     try {
-      // Валидация
-      if (!email || !password) {
-        const errorMsg = 'Email и пароль обязательны';
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      if (password.length < 6) {
-        const errorMsg = 'Пароль должен быть минимум 6 символов';
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      // Регистрация в Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: name || email.split('@')[0],
-          },
+          data: { full_name: name || email.split("@")[0] },
         },
       });
 
-      if (authError) {
-        console.error('❌ Ошибка регистрации:', authError);
-        const errorMsg = translateAuthError(authError);
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      if (!authData.user) {
-        const errorMsg = 'Не удалось создать пользователя';
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      console.log('✅ Пользователь зарегистрирован:', authData.user.id);
-
-      // Создаём профиль (если RLS разрешает)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: email,
-          full_name: name || email.split('@')[0],
-          subscription_status: 'free',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.warn('⚠️ Ошибка создания профиля (будет создан при входе):', profileError);
-      }
-
-      // Реферальная система (опционально)
-      try {
-        const referralCode = localStorage.getItem('referralCode');
-        if (referralCode) {
-          await supabase.from('users').insert({
-            id: authData.user.id,
-            email: email,
-            full_name: name || email.split('@')[0],
-            referred_by: referralCode,
-          });
-          localStorage.removeItem('referralCode');
+      if (error) {
+        if (error.message.includes("already registered")) {
+          return { error: "Этот email уже зарегистрирован" };
         }
-      } catch (e) {
-        console.warn('⚠️ Реферальная система:', e);
+        return { error: error.message };
       }
 
-      // Проверяем нужно ли подтверждение email
-      if (authData.session) {
-        // Сессия есть - пользователь сразу авторизован
-        console.log('✅ Регистрация завершена, сессия активна');
-        return { success: true };
-      } else {
-        // Нужно подтверждение email
-        console.log('📧 Требуется подтверждение email');
-        return { 
-          success: true, 
-          error: 'Проверьте почту для подтверждения регистрации' 
-        };
+      if (data.user && !data.session) {
+        return { error: "Проверьте почту для подтверждения" };
       }
+
+      return {};
     } catch (err: any) {
-      console.error('❌ Неожиданная ошибка регистрации:', err);
-      const errorMsg = err.message || 'Ошибка регистрации';
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
+      return { error: err.message || "Ошибка регистрации" };
     }
-  }, []);
+  }
 
   // ========================================
   // ВХОД
   // ========================================
-  const login = useCallback(async (
-    email: string, 
-    password: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    console.log('🔐 Вход:', email);
-    setError(null);
-
+  async function signIn(email: string, password: string): Promise<{ error?: string }> {
     try {
-      // Валидация
-      if (!email || !password) {
-        const errorMsg = 'Email и пароль обязательны';
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) {
-        console.error('❌ Ошибка входа:', authError);
-        const errorMsg = translateAuthError(authError);
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
+      if (error) {
+        if (error.message.includes("Invalid login")) {
+          return { error: "Неверный email или пароль" };
+        }
+        if (error.message.includes("Email not confirmed")) {
+          return { error: "Подтвердите email (проверьте почту)" };
+        }
+        return { error: error.message };
       }
 
-      if (!data.session) {
-        const errorMsg = 'Не удалось создать сессию';
-        setError(errorMsg);
-        return { success: false, error: errorMsg };
-      }
-
-      console.log('✅ Вход выполнен:', data.user?.email);
-      return { success: true };
+      return {};
     } catch (err: any) {
-      console.error('❌ Неожиданная ошибка входа:', err);
-      const errorMsg = err.message || 'Ошибка входа';
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
+      return { error: err.message || "Ошибка входа" };
     }
-  }, []);
+  }
 
   // ========================================
   // ВЫХОД
   // ========================================
-  const logout = useCallback(async () => {
-    console.log('👋 Выход');
-    setError(null);
+  async function signOut() {
     await supabase.auth.signOut();
     setUser(null);
-  }, []);
+    setSession(null);
+  }
 
   // ========================================
   // ОБНОВЛЕНИЕ ПРОФИЛЯ
   // ========================================
-  const updateProfile = useCallback(async (updates: { full_name?: string }) => {
-    if (!user) {
-      throw new Error('Пользователь не авторизован');
-    }
+  async function updateProfile(updates: { full_name?: string }) {
+    if (!user) return;
+    
+    await supabase
+      .from("profiles")
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq("id", user.id);
+    
+    await refreshUser();
+  }
 
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+  // Алиасы для совместимости со старым кодом
+  const login = async (email: string, password: string) => {
+    const result = await signIn(email, password);
+    return { success: !result.error, error: result.error };
+  };
 
-    if (updateError) {
-      console.error('❌ Ошибка обновления профиля:', updateError);
-      throw updateError;
-    }
+  const signup = async (email: string, password: string, name?: string) => {
+    const result = await signUp(email, password, name);
+    return { success: !result.error, error: result.error };
+  };
 
-    // Обновляем локальное состояние
-    setUser(prev => prev ? { ...prev, ...updates } : null);
-    console.log('✅ Профиль обновлен');
-  }, [user]);
-
-  // ========================================
-  // РЕНДЕР
-  // ========================================
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      error, 
-      signup, 
-      login, 
-      logout, 
-      updateProfile, 
-      clearError 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        isAdmin: user?.is_admin || false,
+        signUp,
+        signIn,
+        signOut,
+        refreshUser,
+        // Алиасы
+        loading: isLoading,
+        logout: signOut,
+        login,
+        signup,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
-
-// ========================================
-// ХЕЛПЕРЫ
-// ========================================
-
-function translateAuthError(error: AuthError): string {
-  const message = error.message.toLowerCase();
-  
-  if (message.includes('invalid login credentials')) {
-    return 'Неверный email или пароль';
-  }
-  if (message.includes('email not confirmed')) {
-    return 'Email не подтверждён. Проверьте почту';
-  }
-  if (message.includes('user already registered')) {
-    return 'Пользователь с таким email уже существует';
-  }
-  if (message.includes('password')) {
-    return 'Пароль должен быть минимум 6 символов';
-  }
-  if (message.includes('email')) {
-    return 'Некорректный email';
-  }
-  if (message.includes('rate limit')) {
-    return 'Слишком много попыток. Подождите минуту';
-  }
-  if (message.includes('network')) {
-    return 'Ошибка сети. Проверьте интернет';
-  }
-  
-  return error.message || 'Произошла ошибка';
 }
 
 // ========================================
@@ -469,8 +306,8 @@ function translateAuthError(error: AuthError): string {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within AuthProvider');
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 }

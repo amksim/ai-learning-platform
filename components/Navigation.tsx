@@ -11,7 +11,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export function Navigation() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { user, logout, loading } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   const navItems = [
     { href: "/", label: t.nav.home },
@@ -61,27 +61,9 @@ export function Navigation() {
             {/* Переключатель языков */}
             <LanguageSwitcher />
 
-            {loading ? (
-              // Показываем загрузку + кнопку выхода на случай застрявшей сессии
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                  <span className="hidden md:inline text-sm text-muted-foreground">Загрузка...</span>
-                </div>
-                <button
-                  onClick={async () => {
-                    await logout();
-                    window.location.reload();
-                  }}
-                  className="text-xs text-gray-500 hover:text-red-400 transition-colors"
-                  title="Выйти и сбросить"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : user ? (
+            {user ? (
               <>
-                {/* Profile button - только на больших экранах */}
+                {/* Profile button */}
                 <Link
                   href="/profile"
                   className={cn(
@@ -94,8 +76,8 @@ export function Navigation() {
                   <span className="text-sm">{t.nav.profile}</span>
                 </Link>
                 
-                {/* Admin panel - only for specific email */}
-                {user.email?.toLowerCase() === "kmak4551@gmail.com" && (
+                {/* Admin panel */}
+                {isAdmin && (
                   <Link
                     href="/admin"
                     className={cn(
@@ -108,9 +90,10 @@ export function Navigation() {
                     <span className="hidden lg:inline text-sm">Админ</span>
                   </Link>
                 )}
-                {/* Logout button - показываем на всех экранах */}
+
+                {/* Logout button */}
                 <button
-                  onClick={logout}
+                  onClick={signOut}
                   className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors"
                   title={t.nav.logout}
                 >
@@ -129,7 +112,6 @@ export function Navigation() {
             )}
           </div>
         </div>
-
       </div>
     </nav>
   );

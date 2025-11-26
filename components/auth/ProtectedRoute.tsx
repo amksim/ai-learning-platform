@@ -10,38 +10,18 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-/**
- * HOC для защиты роутов
- * 
- * @param requireAdmin - требуется ли admin доступ
- * @param redirectTo - куда редиректить если нет доступа
- * 
- * Использование:
- * <ProtectedRoute>
- *   <YourPage />
- * </ProtectedRoute>
- * 
- * Или с admin:
- * <ProtectedRoute requireAdmin>
- *   <AdminPage />
- * </ProtectedRoute>
- */
 export function ProtectedRoute({ 
   children, 
   requireAdmin = false,
   redirectTo = "/login"
 }: ProtectedRouteProps) {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
 
   useEffect(() => {
-    // Не проверяем пока идет загрузка
-    if (loading) return;
+    if (isLoading) return;
 
-    // Если нет пользователя - редирект на login
     if (!user) {
-      console.log('🔒 Доступ запрещен: пользователь не авторизован');
-      // Сохраняем URL для редиректа после входа
       if (typeof window !== 'undefined') {
         localStorage.setItem('redirectAfterLogin', window.location.pathname);
       }
@@ -49,33 +29,24 @@ export function ProtectedRoute({
       return;
     }
 
-    // Если требуется admin доступ
-    if (requireAdmin) {
-      const isAdmin = user.email?.toLowerCase() === "kmak4551@gmail.com";
-      if (!isAdmin) {
-        console.log('🔒 Доступ запрещен: требуются права администратора');
-        router.push("/");
-        return;
-      }
+    if (requireAdmin && !isAdmin) {
+      router.push("/");
+      return;
     }
+  }, [user, isLoading, isAdmin, requireAdmin, redirectTo, router]);
 
-    console.log('✅ Доступ разрешен');
-  }, [user, loading, requireAdmin, redirectTo, router]);
-
-  // Показываем загрузку пока проверяем авторизацию
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-400">Проверка авторизации...</p>
+          <p className="text-gray-400">Загрузка...</p>
         </div>
       </div>
     );
   }
 
-  // Не показываем контент пока не проверили доступ
-  if (!user || (requireAdmin && user.email?.toLowerCase() !== "kmak4551@gmail.com")) {
+  if (!user || (requireAdmin && !isAdmin)) {
     return null;
   }
 
