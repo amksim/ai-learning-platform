@@ -1,8 +1,11 @@
 "use client";
 
+// Отключаем статическую генерацию для этой страницы
+export const dynamic = 'force-dynamic';
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -25,98 +28,40 @@ export default function LoginPage() {
     try {
       if (isSignup) {
         if (password !== confirmPassword) {
-          toast.error(
-            (t) => (
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Пароли не совпадают!</p>
-                  <p className="text-sm opacity-90">Проверьте оба поля пароля</p>
-                </div>
-              </div>
-            ),
-            {
-              duration: 4000,
-              style: {
-                background: '#ef4444',
-                color: '#fff',
-                padding: '16px',
-              },
-            }
-          );
+          toast.error("Пароли не совпадают!");
           setLoading(false);
           return;
         }
+        
         if (password.length < 6) {
-          toast.error(
-            (t) => (
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Пароль слишком короткий</p>
-                  <p className="text-sm opacity-90">Минимум 6 символов</p>
-                </div>
-              </div>
-            ),
-            {
-              duration: 4000,
-              style: {
-                background: '#ef4444',
-                color: '#fff',
-                padding: '16px',
-              },
-            }
-          );
+          toast.error("Пароль должен быть минимум 6 символов");
           setLoading(false);
           return;
         }
-        await signup(email, password, name);
-        toast.success(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Добро пожаловать, {name}!</p>
-                <p className="text-sm opacity-90">Регистрация прошла успешно</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 3000,
-            style: {
-              background: '#10b981',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
+
+        const result = await signup(email, password, name);
+        
+        if (!result.success) {
+          toast.error(result.error || "Ошибка регистрации");
+          setLoading(false);
+          return;
+        }
+        
+        toast.success("Добро пожаловать!");
       } else {
-        await login(email, password);
-        toast.success(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Вы вошли!</p>
-                <p className="text-sm opacity-90">Перенаправление на курсы...</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 2000,
-            style: {
-              background: '#10b981',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
+        const result = await login(email, password);
+        
+        if (!result.success) {
+          toast.error(result.error || "Неверный email или пароль");
+          setLoading(false);
+          return;
+        }
+        
+        toast.success("Вы вошли!");
       }
 
-      // Небольшая задержка чтобы дать время checkUser завершиться
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Перенаправление - проверяем есть ли сохраненный URL
       const redirectUrl = localStorage.getItem('redirectAfterLogin');
       if (redirectUrl) {
         localStorage.removeItem('redirectAfterLogin');
@@ -126,137 +71,7 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      
-      // Специальная обработка для дубликатов email
-      if (error.message?.includes('already') || 
-          error.message?.includes('registered') ||
-          error.message?.includes('duplicate') ||
-          error.message?.includes('существует')) {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Email уже зарегистрирован</p>
-                <p className="text-sm opacity-90">Используйте кнопку 'Войти' ниже</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 5000,
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-        // Автоматически переключаем на вход
-        setTimeout(() => {
-          setIsSignup(false);
-          setPassword(''); // Очищаем пароль для безопасности
-        }, 1500);
-      } else if (error.message?.includes('Invalid login') || error.message?.includes('Invalid')) {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Неверный email или пароль</p>
-                <p className="text-sm opacity-90">Проверьте данные и попробуйте ещё раз</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 4000,
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-      } else if (error.message?.includes('security purposes') || error.message?.includes('rate limit')) {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Слишком много попыток</p>
-                <p className="text-sm opacity-90">Подождите 1 минуту и попробуйте снова</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 5000,
-            style: {
-              background: '#f59e0b',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-      } else if (error.message?.includes('Email not confirmed')) {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Подтвердите email</p>
-                <p className="text-sm opacity-90">Проверьте почту и подтвердите регистрацию</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 6000,
-            style: {
-              background: '#3b82f6',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-      } else if (error.message?.includes('User not found') || error.message?.includes('not found')) {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Пользователь не найден</p>
-                <p className="text-sm opacity-90">Проверьте email или зарегистрируйтесь</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 4000,
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-      } else {
-        toast.error(
-          (t) => (
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Произошла ошибка</p>
-                <p className="text-sm opacity-90">{error.message || "Попробуйте позже"}</p>
-              </div>
-            </div>
-          ),
-          {
-            duration: 4000,
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-              padding: '16px',
-            },
-          }
-        );
-      }
+      toast.error(error.message || "Произошла ошибка");
     } finally {
       setLoading(false);
     }
@@ -275,37 +90,26 @@ export default function LoginPage() {
                 {isSignup ? "Регистрация" : "Вход"}
               </CardTitle>
               <CardDescription className="text-center">
-                {isSignup
-                  ? "Создайте аккаунт для доступа к курсам"
-                  : "Войдите в свой аккаунт"}
+                {isSignup ? "Создайте аккаунт для доступа к курсам" : "Войдите в свой аккаунт"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isSignup && (
-                  <>
-                    <div className="space-y-2">
-                      <label htmlFor="name" className="text-sm font-medium">
-                        Имя (необязательно)
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Ваше имя"
-                        className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Если не указано, будет использован email
-                      </p>
-                    </div>
-                  </>
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="text-sm font-medium">Имя (необязательно)</label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Ваше имя"
+                      className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
                 )}
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium">
-                    Email
-                  </label>
+                  <label htmlFor="email" className="text-sm font-medium">Email</label>
                   <input
                     id="email"
                     type="email"
@@ -317,9 +121,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium">
-                    Пароль
-                  </label>
+                  <label htmlFor="password" className="text-sm font-medium">Пароль</label>
                   <input
                     id="password"
                     type="password"
@@ -333,25 +135,21 @@ export default function LoginPage() {
                 </div>
                 {isSignup && (
                   <div className="space-y-2">
-                    <label htmlFor="confirmPassword" className="text-sm font-medium">
-                      Подтвердите пароль
-                    </label>
+                    <label htmlFor="confirmPassword" className="text-sm font-medium">Подтвердите пароль</label>
                     <input
                       id="confirmPassword"
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Повторите пароль"
-                      required={isSignup}
+                      required
                       minLength={6}
                       className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 )}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    "Загрузка..."
-                  ) : (
+                  {loading ? "Загрузка..." : (
                     <>
                       <Mail className="mr-2 h-4 w-4" />
                       {isSignup ? "Зарегистрироваться" : "Войти"}
