@@ -218,47 +218,6 @@ function ProfilePageContent() {
           </Card>
         </div>
 
-        {/* Main Progress Card */}
-        <Card className="mb-8 glass border-2 border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-pink-500/5 premium-shadow">
-          <CardContent className="p-5 sm:p-6 md:p-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                {t.profile.your_progress}
-              </h2>
-              <div className="text-4xl font-bold text-white">
-                {completedLevels} <span className="text-gray-500">/ {totalLevels}</span>
-              </div>
-            </div>
-            
-            {/* Giant Progress Bar */}
-            <div className="relative h-8 overflow-hidden rounded-full bg-gray-800 border-2 border-purple-500/20">
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 transition-all duration-1000 neon-glow"
-                style={{ width: `${progressPercent}%` }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-white drop-shadow-lg z-10">
-                  {progressPercent}%
-                </span>
-              </div>
-            </div>
-            
-            {remainingLevels > 0 && (
-              <div className="mt-6 flex items-center justify-between">
-                <p className="text-gray-300">
-                  Продолжай! Осталось <span className="font-bold text-white">{remainingLevels}</span> уроков до завершения
-                </p>
-                <Link href="/courses">
-                  <button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-all premium-shadow">
-                    {t.common.continue}
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Прогресс по каждому курсу */}
         {courseCategories.length > 0 && (
           <Card className="mb-8 glass border-2 border-blue-500/20 premium-shadow">
