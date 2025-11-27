@@ -58,7 +58,7 @@ export default function PrivacyPage() {
               <p>🔒 {t.privacy.no_card_storage}</p>
               <ul className="list-disc list-inside ml-4 space-y-2">
                 <li>{t.privacy.payment_stripe}</li>
-                <li>{t.privacy.payment_liqpay}</li>
+                <li>{t.privacy.payment_monobank}</li>
                 <li>{t.privacy.payment_yookassa}</li>
               </ul>
             </div>

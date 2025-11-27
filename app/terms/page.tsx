@@ -121,7 +121,7 @@ export default function TermsPage() {
             <div className="text-gray-300 space-y-3">
               <p><strong>{t.terms.we_accept}</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-2">
-                <li>🇺🇦 {t.terms.payment_liqpay}</li>
+                <li>🇺🇦 {t.terms.payment_monobank}</li>
                 <li>🇷🇺 {t.terms.payment_yookassa}</li>
                 <li>🌍 {t.terms.payment_stripe}</li>
               </ul>

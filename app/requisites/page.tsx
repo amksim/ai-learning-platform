@@ -18,13 +18,13 @@ export default function RequisitesPage() {
           📄 {t.requisites.title}
         </h1>
 
-        {/* УКРАИНА (LiqPay) - показываем только для украинского языка */}
+        {/* УКРАИНА (Monobank) - показываем только для украинского языка */}
         {showUkraine && (
           <div className="bg-gradient-to-br from-yellow-50 to-blue-50 border-2 border-yellow-400 rounded-lg p-8 shadow-xl">
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="text-4xl">🇺🇦</span>
               <h2 className="text-3xl font-bold text-gray-900">
-                {t.requisites.ukraine_liqpay}
+                {t.requisites.ukraine_monobank}
               </h2>
               <span className="ml-4 px-3 py-1 bg-green-500 text-white text-sm font-bold rounded-full">
                 {t.requisites.main_badge}
@@ -70,7 +70,7 @@ export default function RequisitesPage() {
 
             <div className="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
               <p className="text-center text-green-800 font-medium">
-                💳 {t.requisites.liqpay_payment_info}
+                💳 {t.requisites.monobank_payment_info}
               </p>
             </div>
           </div>
