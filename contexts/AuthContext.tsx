@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: data.id,
       email: data.email,
       full_name: data.full_name || authUser.email?.split("@")[0] || "User",
-      is_admin: data.is_admin || data.email === "amksim.coder@gmail.com",
+      is_admin: data.is_admin || data.email?.toLowerCase() === "kmak4551@gmail.com",
       subscription_status: data.subscription_status || "free",
       paid_courses: paidCourses,
       created_at: data.created_at,

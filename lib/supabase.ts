@@ -1,42 +1,30 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
-// Supabase клиент для браузера - lazy initialization
-let supabaseInstance: SupabaseClient | null = null
+// Supabase клиент - создаём один раз
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export function getSupabase() {
-  // Только для клиентской стороны или с правильными env
-  if (typeof window === 'undefined' && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    // На сервере при build - возвращаем mock
-    return null as any
-  }
-  
-  if (!supabaseInstance) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase URL and Anon Key are required')
-    }
-    
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+// Создаём клиент только на клиенте
+export const supabase = typeof window !== 'undefined' 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-        storageKey: 'supabase.auth.token',
+        flowType: 'pkce',
       }
     })
-  }
-  return supabaseInstance
-}
+  : createClient(supabaseUrl || '', supabaseAnonKey || '', {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    })
 
-// Для обратной совместимости - используем getter
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(target, prop) {
-    return getSupabase()[prop as keyof SupabaseClient]
-  }
-})
+// Для обратной совместимости
+export function getSupabase() {
+  return supabase
+}
 
 // Типы для базы данных
 export type Profile = {

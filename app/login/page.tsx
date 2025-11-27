@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, signUp } = useAuth();
+  const { user, isLoading, signIn, signUp } = useAuth();
   
+  // Все useState должны быть до любых условных return
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +20,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Редирект если уже залогинен
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push("/courses");
+    }
+  }, [user, isLoading, router]);
+
+  // Показываем загрузку пока проверяем сессию
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-950">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mx-auto mb-4" />
+          <p className="text-gray-400">Проверка сессии...</p>
+        </div>
+      </div>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,7 +78,15 @@ export default function LoginPage() {
           return;
         }
 
-        router.push("/courses");
+        // Ждём немного чтобы профиль успел загрузиться
+        await new Promise(r => setTimeout(r, 500));
+        
+        // Проверяем сохранённый редирект
+        const redirectPath = typeof window !== 'undefined' 
+          ? localStorage.getItem('redirectAfterLogin') || '/courses'
+          : '/courses';
+        localStorage.removeItem('redirectAfterLogin');
+        router.push(redirectPath);
       }
     } catch (err: any) {
       setError(err.message || "Произошла ошибка");
