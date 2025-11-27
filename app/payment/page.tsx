@@ -404,260 +404,198 @@ export default function PaymentPage() {
         </Card>
       </div>
 
-      {/* Beautiful Payment Modal */}
+      {/* Beautiful Payment Modal with Payment Method Selection */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg">
-            <Card className="glass premium-shadow border-2 border-purple-500/50 bg-gradient-to-br from-purple-900/90 to-pink-900/90">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-2xl my-8">
+            <Card className="glass premium-shadow border-2 border-purple-500/50 bg-gradient-to-br from-gray-900 to-purple-900/50">
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-              
-              <CardContent className="p-4 sm:p-6 md:p-8">
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4 premium-shadow">
-                    <Trophy className="h-10 w-10 text-white" />
-                  </div>
-                  <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    {t.payment.great_choice}
-                  </h2>
-                  <p className="text-gray-300">
-                    {t.payment.get_access}
-                  </p>
-                </div>
-
-                <div className="mb-6 p-6 rounded-2xl bg-gray-900/50 border-2 border-green-500/30">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-gray-400">Обычная цена:</span>
-                    <span className="text-2xl text-gray-400 line-through">$599</span>
-                  </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-white font-bold">Скидка 33%:</span>
-                    <span className="text-2xl text-green-400 font-bold">-$200</span>
-                  </div>
-                  <div className="h-px bg-gradient-to-r from-transparent via-green-500 to-transparent mb-4" />
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-bold text-xl">Итого:</span>
-                    <span className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">$370</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Check className="h-5 w-5 text-green-400" />
-                    <span>Пожизненный доступ ко всем урокам</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Check className="h-5 w-5 text-green-400" />
-                    <span>Мгновенная активация после оплаты</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-300">
-                    <Check className="h-5 w-5 text-green-400" />
-                    <span>100% безопасная оплата</span>
-                  </div>
-                </div>
-
-                {/* АДМИНСКАЯ ПАНЕЛЬ - ВЫБОР ЦЕНЫ */}
-                {isAdmin && (
-                  <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
-                    <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН РЕЖИМ - ВЫБОР ЦЕНЫ:</p>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setUseTestPrice(false)}
-                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-                          !useTestPrice 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                        }`}
-                      >
-                        $370 (LIVE)
-                      </button>
-                      <button
-                        onClick={() => setUseTestPrice(true)}
-                        disabled={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST}
-                        className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-                          useTestPrice 
-                            ? 'bg-blue-500 text-white' 
-                            : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST
-                              ? 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                              : 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                        }`}
-                        title={!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST ? 'Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify env' : ''}
-                      >
-                        $0.99 (TEST)
-                      </button>
-                    </div>
-                    {!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TEST && (
-                      <p className="text-xs text-red-400 mt-2">
-                        ⚠️ Test price not configured. Add NEXT_PUBLIC_STRIPE_PRICE_ID_TEST to Netlify.
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Чекбокс согласия с условиями */}
-                <div className="mb-4 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                      className="mt-1 h-5 w-5 rounded border-gray-600 bg-gray-800 text-purple-500 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-gray-300">
-                      Я прочитал и согласен с{' '}
-                      <Link href="/terms" target="_blank" className="text-purple-400 hover:underline">
-                        Условиями использования и политикой возврата
-                      </Link>
-                      . Я понимаю, что возврат возможен только если курс не работает как обещано, 
-                      и я обязуюсь пройти минимум 10 уроков перед запросом возврата.
-                    </span>
-                  </label>
-                </div>
-
-                <button
-                  onClick={handlePayment}
-                  disabled={isProcessing || !agreedToTerms}
-                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-700 hover:via-emerald-700 hover:to-green-700 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 flex items-center justify-center gap-3 premium-shadow neon-glow text-lg mb-4"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="h-6 w-6" />
-                      {hasPromoDiscount ? 'Оплатить $300 (со скидкой)' : (useTestPrice ? 'Pay $0.99 (TEST)' : 'Оплатить $370')}
-                    </>
-                  )}
-                </button>
-
-                {!agreedToTerms && (
-                  <p className="text-xs text-center text-yellow-400 mb-2">
-                    ⚠️ Пожалуйста, примите условия для продолжения
-                  </p>
-                )}
-
-                <p className="text-xs text-center text-gray-400">
-                  Нажмите кнопку для мгновенного доступа ко всем урокам
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Country/Payment Method Selector Modal */}
-      {showCountrySelector && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl">
-            <Card className="glass premium-shadow border-2 border-purple-500/50 bg-gradient-to-br from-purple-900/90 to-pink-900/90">
-              <button
-                onClick={() => setShowCountrySelector(false)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
               >
                 <X className="h-6 w-6" />
               </button>
               
               <CardContent className="p-6 sm:p-8">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    🌍 Выберите способ оплаты
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold mb-2 text-white">
+                    💳 Выберите способ оплаты
                   </h2>
-                  <p className="text-gray-300">
-                    Мы автоматически определили ваш регион, но вы можете выбрать другой способ
+                  <p className="text-gray-400">
+                    Безопасная оплата через проверенные системы
                   </p>
                 </div>
 
-                <div className="grid gap-4 mb-6">
-                  {/* Stripe - Весь мир */}
+                {/* Payment Methods */}
+                <div className="space-y-4 mb-8">
+                  {/* Stripe - Весь мир включая Украину */}
                   <button
-                    onClick={() => {
-                      setPaymentMethod('stripe');
-                      setUserCountry('GB');
-                      setShowCountrySelector(false);
-                      setShowModal(true);
-                    }}
-                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                    onClick={() => setPaymentMethod('stripe')}
+                    className={`w-full p-5 rounded-2xl border-2 transition-all text-left ${
                       paymentMethod === 'stripe'
-                        ? 'border-blue-500 bg-blue-500/10'
+                        ? 'border-blue-500 bg-blue-500/20 shadow-lg shadow-blue-500/20'
                         : 'border-gray-700 hover:border-blue-500/50 bg-gray-800/50'
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                          <CreditCard className="h-6 w-6 text-blue-400" />
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                        <CreditCard className="h-7 w-7 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">💳 Банковская карта (Stripe)</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-bold text-white">Банковская карта</h3>
+                          {paymentMethod === 'stripe' && (
+                            <span className="px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs font-bold">Выбрано</span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-400 mb-2">
-                          🇺🇦 Украина, 🇬🇧 Англия, 🇺🇸 США, 🇪🇺 Европа и весь мир
+                          🇺🇦 Украина • 🇬🇧 Англия • 🇺🇸 США • 🇪🇺 Европа • Весь мир
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">Visa</span>
-                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">Mastercard</span>
-                          <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">American Express</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Visa</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Mastercard</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Apple Pay</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Google Pay</span>
                         </div>
                       </div>
-                      {paymentMethod === 'stripe' && (
-                        <div className="flex-shrink-0">
-                          <Check className="h-6 w-6 text-blue-400" />
-                        </div>
-                      )}
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        paymentMethod === 'stripe' ? 'border-blue-500 bg-blue-500' : 'border-gray-600'
+                      }`}>
+                        {paymentMethod === 'stripe' && <Check className="h-4 w-4 text-white" />}
+                      </div>
                     </div>
                   </button>
 
                   {/* YooKassa - Россия */}
                   <button
-                    onClick={() => {
-                      setPaymentMethod('yookassa');
-                      setUserCountry('RU');
-                      setShowCountrySelector(false);
-                      setShowModal(true);
-                    }}
-                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                    onClick={() => setPaymentMethod('yookassa')}
+                    className={`w-full p-5 rounded-2xl border-2 transition-all text-left ${
                       paymentMethod === 'yookassa'
-                        ? 'border-purple-500 bg-purple-500/10'
+                        ? 'border-purple-500 bg-purple-500/20 shadow-lg shadow-purple-500/20'
                         : 'border-gray-700 hover:border-purple-500/50 bg-gray-800/50'
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
-                          <span className="text-2xl">🇷🇺</span>
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">🇷🇺</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">🚀 СБП + Карты РФ (ЮMoney)</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-bold text-white">Россия (ЮMoney)</h3>
+                          {paymentMethod === 'yookassa' && (
+                            <span className="px-2 py-0.5 rounded-full bg-purple-500 text-white text-xs font-bold">Выбрано</span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-400 mb-2">
-                          Для пользователей из России - СБП, Мир, Visa, Mastercard
+                          Для пользователей из России
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">СБП</span>
-                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">Мир</span>
-                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">Visa РФ</span>
-                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 text-xs">MC РФ</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">СБП</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Мир</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Visa РФ</span>
+                          <span className="px-2 py-1 rounded-lg bg-white/10 text-gray-300 text-xs">Mastercard РФ</span>
                         </div>
                       </div>
-                      {paymentMethod === 'yookassa' && (
-                        <div className="flex-shrink-0">
-                          <Check className="h-6 w-6 text-purple-400" />
-                        </div>
-                      )}
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        paymentMethod === 'yookassa' ? 'border-purple-500 bg-purple-500' : 'border-gray-600'
+                      }`}>
+                        {paymentMethod === 'yookassa' && <Check className="h-4 w-4 text-white" />}
+                      </div>
                     </div>
                   </button>
                 </div>
 
-                <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
-                  <p className="text-xs text-gray-400 text-center">
-                    🔒 Все платежи защищены и обрабатываются через надёжные процессоры.<br/>
-                    Мы не храним данные вашей карты.
+                {/* Price Summary */}
+                <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm">Полный доступ ко всем 4 курсам</p>
+                      <p className="text-white font-bold text-lg">Пожизненный доступ</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-500 line-through text-sm">$599</p>
+                      <p className="text-3xl font-bold text-green-400">
+                        {paymentMethod === 'yookassa' ? '₽35 000' : '$370'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* АДМИНСКАЯ ПАНЕЛЬ */}
+                {isAdmin && (
+                  <div className="mb-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+                    <p className="text-xs text-yellow-400 mb-2 font-bold">🔧 АДМИН:</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setUseTestPrice(false)}
+                        className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold ${!useTestPrice ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-400'}`}
+                      >
+                        LIVE
+                      </button>
+                      <button
+                        onClick={() => setUseTestPrice(true)}
+                        className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold ${useTestPrice ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'}`}
+                      >
+                        TEST $0.99
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Terms Checkbox */}
+                <div className="mb-6 p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-1 h-5 w-5 rounded border-gray-600 bg-gray-800 text-green-500 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-300">
+                      Согласен с{' '}
+                      <Link href="/terms" target="_blank" className="text-purple-400 hover:underline">
+                        условиями использования
+                      </Link>
+                    </span>
+                  </label>
+                </div>
+
+                {/* Pay Button */}
+                <button
+                  onClick={handlePayment}
+                  disabled={isProcessing || !agreedToTerms}
+                  className={`w-full font-bold py-5 px-8 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg ${
+                    !agreedToTerms 
+                      ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                      : paymentMethod === 'stripe'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transform hover:scale-105'
+                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transform hover:scale-105'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      Обработка...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-6 w-6" />
+                      {paymentMethod === 'stripe' ? 'Оплатить картой' : 'Оплатить через СБП/карту'}
+                    </>
+                  )}
+                </button>
+
+                {!agreedToTerms && (
+                  <p className="text-xs text-center text-yellow-400 mt-3">
+                    ⚠️ Примите условия для продолжения
+                  </p>
+                )}
+
+                {/* Security Badge */}
+                <div className="mt-6 pt-4 border-t border-gray-700">
+                  <p className="text-xs text-center text-gray-500">
+                    🔒 Безопасная оплата • Данные карты не хранятся • Мгновенный доступ
                   </p>
                 </div>
               </CardContent>
