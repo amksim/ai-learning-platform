@@ -515,9 +515,7 @@ export default function PaymentPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-gray-500 line-through text-sm">$599</p>
-                      <p className="text-3xl font-bold text-green-400">
-                        {paymentMethod === 'yookassa' ? '₽35 000' : '$370'}
-                      </p>
+                      <p className="text-3xl font-bold text-green-400">$370</p>
                     </div>
                   </div>
                 </div>

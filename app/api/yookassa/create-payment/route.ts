@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 // YooKassa (ЮMoney) - для России + СБП
 export async function POST(request: Request) {
   try {
-    const { userEmail, amount = 249.99 } = await request.json();
+    const { userEmail } = await request.json();
 
     console.log('🇷🇺 Creating YooKassa payment for:', userEmail);
 
@@ -13,16 +13,19 @@ export async function POST(request: Request) {
     if (!shopId || !secretKey) {
       console.error('❌ YooKassa credentials not configured');
       return NextResponse.json(
-        { error: 'Payment system not configured' },
+        { error: 'Payment system not configured. Please contact support.' },
         { status: 500 }
       );
     }
 
+    // Цена $370 = примерно 37000 рублей (курс ~100)
+    const amountRUB = 37000;
+
     // Создаем платеж в YooKassa
     const paymentData = {
       amount: {
-        value: amount.toFixed(2),
-        currency: 'RUB' // Рубли для России
+        value: amountRUB.toFixed(2),
+        currency: 'RUB'
       },
       confirmation: {
         type: 'redirect',
