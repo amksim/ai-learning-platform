@@ -21,32 +21,44 @@ function ProfilePageContent() {
   const [reviewRating, setReviewRating] = useState(5);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [totalLevels, setTotalLevels] = useState(100); // По умолчанию 100, обновится из API
+  const [totalLevels, setTotalLevels] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [existingLessonIds, setExistingLessonIds] = useState<number[]>([]); // Список существующих уроков
+  const [existingLessonIds, setExistingLessonIds] = useState<number[]>([]);
+  const [courseCategories, setCourseCategories] = useState<any[]>([]);
+  const [coursesData, setCoursesData] = useState<any[]>([]);
 
-  // Загружаем реальное количество уроков из API и сохраняем их ID
+  // Загружаем категории курсов и уроки
   useEffect(() => {
-    const loadTotalLessons = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/api/courses');
-        const data = await response.json();
-        if (data.courses && data.courses.length > 0) {
-          setTotalLevels(data.courses.length);
-          // Сохраняем ID существующих уроков для корректного подсчёта прогресса
-          const lessonIds = data.courses.map((course: { id: number }) => course.id);
+        // Загружаем категории курсов
+        const categoriesRes = await fetch('/api/course-categories');
+        const categoriesData = await categoriesRes.json();
+        
+        // Загружаем все уроки
+        const coursesRes = await fetch('/api/courses');
+        const coursesDataRes = await coursesRes.json();
+        
+        if (categoriesData.categories) {
+          setCourseCategories(categoriesData.categories);
+          console.log(`📂 Загружено ${categoriesData.categories.length} категорий курсов`);
+        }
+        
+        if (coursesDataRes.courses) {
+          setCoursesData(coursesDataRes.courses);
+          setTotalLevels(coursesDataRes.courses.length);
+          const lessonIds = coursesDataRes.courses.map((course: { id: number }) => course.id);
           setExistingLessonIds(lessonIds);
-          console.log(`📚 Загружено ${data.courses.length} уроков из базы, ID:`, lessonIds);
+          console.log(`📚 Загружено ${coursesDataRes.courses.length} уроков`);
         }
       } catch (error) {
-        console.error('❌ Ошибка загрузки количества уроков:', error);
-        // Оставляем дефолтное значение 100
+        console.error('❌ Ошибка загрузки данных:', error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    loadTotalLessons();
+    loadData();
   }, []);
 
   // Removed redirect - causes issues when resetting payment status
@@ -110,7 +122,7 @@ function ProfilePageContent() {
   };
   
   // Дата регистрации
-  const joinedDate = user.joinedDate ? new Date(user.joinedDate) : new Date();
+  const joinedDate = user.created_at ? new Date(user.created_at) : new Date();
   const formattedDate = joinedDate.toLocaleDateString('ru-RU', { 
     day: 'numeric', 
     month: 'long', 
@@ -192,16 +204,16 @@ function ProfilePageContent() {
             </CardContent>
           </Card>
 
-          {/* Remaining */}
+          {/* Курсов */}
           <Card className="glass border-2 border-green-500/20 hover:border-green-500/40 transition-all premium-shadow">
             <CardContent className="p-4 sm:p-5 md:p-6 text-center">
               <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20">
                 <Target className="h-6 w-6 text-green-400" />
               </div>
               <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-1">
-                {remainingLevels}
+                {courseCategories.length || 4}
               </div>
-              <div className="text-xs text-gray-400">{t.profile.remaining}</div>
+              <div className="text-xs text-gray-400">Курсов</div>
             </CardContent>
           </Card>
         </div>
@@ -246,6 +258,74 @@ function ProfilePageContent() {
             )}
           </CardContent>
         </Card>
+
+        {/* Прогресс по каждому курсу */}
+        {courseCategories.length > 0 && (
+          <Card className="mb-8 glass border-2 border-blue-500/20 premium-shadow">
+            <CardContent className="p-5 sm:p-6 md:p-8">
+              <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+                <Book className="h-6 w-6 text-blue-400" />
+                Прогресс по курсам
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {courseCategories.map((category) => {
+                  // Уроки этой категории
+                  const categoryLessons = coursesData.filter(c => c.course_category_id === category.id);
+                  const categoryLessonIds = categoryLessons.map(l => l.id);
+                  // Пройденные уроки этой категории
+                  const completedInCategory = user?.completedLessons?.filter(id => categoryLessonIds.includes(id)).length || 0;
+                  const totalInCategory = categoryLessons.length;
+                  const categoryProgress = totalInCategory > 0 ? Math.round((completedInCategory / totalInCategory) * 100) : 0;
+                  
+                  // Цвета для разных курсов
+                  const colors = [
+                    { border: 'border-purple-500/30', bg: 'from-purple-500/10 to-pink-500/10', bar: 'from-purple-600 to-pink-600', text: 'text-purple-400' },
+                    { border: 'border-blue-500/30', bg: 'from-blue-500/10 to-cyan-500/10', bar: 'from-blue-600 to-cyan-600', text: 'text-blue-400' },
+                    { border: 'border-green-500/30', bg: 'from-green-500/10 to-emerald-500/10', bar: 'from-green-600 to-emerald-600', text: 'text-green-400' },
+                    { border: 'border-orange-500/30', bg: 'from-orange-500/10 to-red-500/10', bar: 'from-orange-600 to-red-600', text: 'text-orange-400' },
+                  ];
+                  const colorIndex = (category.display_order - 1) % colors.length;
+                  const color = colors[colorIndex];
+                  
+                  return (
+                    <div 
+                      key={category.id}
+                      className={`p-4 rounded-xl border-2 ${color.border} bg-gradient-to-br ${color.bg} hover:scale-[1.02] transition-all cursor-pointer`}
+                      onClick={() => router.push(`/courses?category=${category.slug}`)}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`text-2xl`}>{category.icon || '📚'}</div>
+                          <div>
+                            <h3 className="font-bold text-white">{category.title}</h3>
+                            <p className="text-xs text-gray-400">{totalInCategory} уроков</p>
+                          </div>
+                        </div>
+                        <div className={`text-2xl font-bold ${color.text}`}>
+                          {categoryProgress}%
+                        </div>
+                      </div>
+                      
+                      {/* Прогресс-бар */}
+                      <div className="relative h-3 overflow-hidden rounded-full bg-gray-800 border border-gray-700">
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-r ${color.bar} transition-all duration-500`}
+                          style={{ width: `${categoryProgress}%` }}
+                        />
+                      </div>
+                      
+                      <div className="mt-2 flex justify-between text-xs text-gray-400">
+                        <span>{completedInCategory} из {totalInCategory} пройдено</span>
+                        {categoryProgress === 100 && <span className="text-green-400">✓ Завершено</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Achievements / Badges - Horizontal Scroll */}
         <Card className="mb-8 glass border-2 border-purple-500/20 premium-shadow">
