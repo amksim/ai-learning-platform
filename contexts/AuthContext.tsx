@@ -145,12 +145,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function init() {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log("🚀 Инициализация AuthContext...");
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("❌ Ошибка getSession:", error);
+          return;
+        }
+        
+        console.log("📦 Текущая сессия:", currentSession?.user?.email || "нет");
         
         if (currentSession?.user && mounted) {
           setSession(currentSession);
           const profile = await loadProfile(currentSession.user);
-          setUser(profile);
+          if (mounted) setUser(profile);
+          console.log("✅ Профиль загружен:", profile?.email);
+        } else {
+          console.log("👤 Нет активной сессии");
         }
       } catch (err) {
         console.error("❌ Ошибка инициализации:", err);
@@ -163,20 +174,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log("🔔 Auth event:", event);
+        console.log("🔔 Auth event:", event, newSession?.user?.email);
         
-        if (event === "SIGNED_IN" && newSession?.user) {
-          setSession(newSession);
-          const profile = await loadProfile(newSession.user);
-          if (mounted) setUser(profile);
-        } else if (event === "SIGNED_OUT") {
-          if (mounted) {
-            setUser(null);
-            setSession(null);
+        if (!mounted) return;
+        
+        // Обрабатываем события с сессией
+        if (newSession?.user) {
+          // INITIAL_SESSION - восстановление сессии при загрузке страницы
+          // SIGNED_IN - новый вход
+          // TOKEN_REFRESHED - обновление токена
+          if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+            setSession(newSession);
+            const profile = await loadProfile(newSession.user);
+            if (mounted) {
+              setUser(profile);
+              setIsLoading(false);
+            }
+            return;
           }
         }
         
-        if (mounted) setIsLoading(false);
+        // SIGNED_OUT - выход
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+          setSession(null);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Для остальных событий просто снимаем loading
+        setIsLoading(false);
       }
     );
 
