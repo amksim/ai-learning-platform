@@ -11,7 +11,7 @@ import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-type PaymentMethod = 'stripe' | 'yookassa' | 'monobank';
+type PaymentMethod = 'stripe' | 'yookassa';
 
 export default function PaymentPage() {
   const { user, loading } = useAuth();
@@ -61,11 +61,8 @@ export default function PaymentPage() {
         if (country === 'RU') {
           setPaymentMethod('yookassa'); // YooKassa для России
           console.log('🇷🇺 Selected: YooKassa (СБП)');
-        } else if (country === 'UA') {
-          setPaymentMethod('monobank'); // Monobank для Украины
-          console.log('🇺🇦 Selected: Monobank');
         } else {
-          setPaymentMethod('stripe'); // Stripe для остальных
+          setPaymentMethod('stripe'); // Stripe для всех остальных (включая Украину)
           console.log('🌍 Selected: Stripe');
         }
       } catch (error) {
@@ -162,41 +159,7 @@ export default function PaymentPage() {
         return;
       }
 
-      // Monobank для Украины
-      if (paymentMethod === 'monobank') {
-        console.log('🇺🇦 Using Monobank for Ukraine');
-        
-        const response = await fetch('/api/monobank/create-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userEmail: user.email,
-            amount: 370, // Ціна в доларах
-            currency: 'USD'
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('📦 Monobank response:', data);
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        if (data.url) {
-          console.log('🇺🇦 Redirecting to Monobank...');
-          window.location.href = data.url;
-        } else {
-          throw new Error('No payment URL received');
-        }
-        return;
-      }
-
-      // Stripe для остального мира
+      // Stripe для всех (включая Украину)
       console.log('🌍 Using Stripe for international payments');
       
       const priceId = useTestPrice 
@@ -340,27 +303,37 @@ export default function PaymentPage() {
           </Card>
         </div>
 
-        {/* Promo Discount Block */}
+        {/* Promo Discount Block - Simplified */}
         <Card className="glass premium-shadow border-2 border-green-500/50 bg-gradient-to-br from-green-500/10 to-emerald-500/10 mb-8">
           <CardContent className="p-6 sm:p-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
                 <Video className="h-8 w-8 text-green-400" />
               </div>
-              <div>
-                <h3 className="text-2xl font-bold text-green-400">🎬 Скидка за рекламу — $179!</h3>
-                <p className="text-gray-300">Экономия $70 от обычной цены</p>
+              <h3 className="text-2xl font-bold text-white mb-2">🎬 Получи скидку $75!</h3>
+              <p className="text-gray-300">Опубликуй наше видео и плати меньше</p>
+              <div className="mt-3 flex items-center justify-center gap-4">
+                <span className="text-gray-500 line-through text-xl">$370</span>
+                <span className="text-3xl font-bold text-green-400">$295</span>
               </div>
             </div>
             
-            <div className="bg-gray-900/50 rounded-xl p-4 mb-4">
-              <p className="text-gray-300 mb-3"><strong>Как получить скидку:</strong></p>
-              <ol className="list-decimal list-inside space-y-2 text-gray-400 text-sm">
-                <li>Сними видео-рекламу нашего курса (YouTube, TikTok, Instagram)</li>
-                <li>Набери <strong className="text-green-400">1000+ просмотров</strong></li>
-                <li>Отправь ссылку на видео нам</li>
-                <li>После проверки получи курс за <strong className="text-green-400">$179</strong>!</li>
-              </ol>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+                <div className="text-2xl mb-2">📥</div>
+                <p className="font-bold text-white text-sm">1. Скачай видео</p>
+                <p className="text-xs text-gray-400">Готовые ролики для TikTok/YouTube</p>
+              </div>
+              <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+                <div className="text-2xl mb-2">📤</div>
+                <p className="font-bold text-white text-sm">2. Опубликуй</p>
+                <p className="text-xs text-gray-400">На свой YouTube, TikTok или Instagram</p>
+              </div>
+              <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+                <div className="text-2xl mb-2">🎉</div>
+                <p className="font-bold text-white text-sm">3. Получи скидку</p>
+                <p className="text-xs text-gray-400">Отправь ссылку — получи $75 скидки</p>
+              </div>
             </div>
 
             <button
@@ -368,7 +341,7 @@ export default function PaymentPage() {
               className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3"
             >
               <Video className="h-5 w-5" />
-              Отправить видео и получить скидку
+              Получить скидку $75
             </button>
           </CardContent>
         </Card>
@@ -624,7 +597,7 @@ export default function PaymentPage() {
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-1">💳 Банковская карта (Stripe)</h3>
                         <p className="text-sm text-gray-400 mb-2">
-                          Для пользователей из Англии, США, Европы и других стран
+                          🇺🇦 Украина, 🇬🇧 Англия, 🇺🇸 США, 🇪🇺 Европа и весь мир
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-300 text-xs">Visa</span>
@@ -675,46 +648,6 @@ export default function PaymentPage() {
                       {paymentMethod === 'yookassa' && (
                         <div className="flex-shrink-0">
                           <Check className="h-6 w-6 text-purple-400" />
-                        </div>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Monobank - Украина */}
-                  <button
-                    onClick={() => {
-                      setPaymentMethod('monobank');
-                      setUserCountry('UA');
-                      setShowCountrySelector(false);
-                      setShowModal(true);
-                    }}
-                    className={`p-6 rounded-xl border-2 transition-all text-left ${
-                      paymentMethod === 'monobank'
-                        ? 'border-yellow-500 bg-yellow-500/10'
-                        : 'border-gray-700 hover:border-yellow-500/50 bg-gray-800/50'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                          <span className="text-2xl">🇺🇦</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">🏦 Monobank (Україна)</h3>
-                        <p className="text-sm text-gray-400 mb-2">
-                          Для користувачів з України - картки будь-якого банку
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Visa</span>
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Mastercard</span>
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Apple Pay</span>
-                          <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 text-xs">Google Pay</span>
-                        </div>
-                      </div>
-                      {paymentMethod === 'monobank' && (
-                        <div className="flex-shrink-0">
-                          <Check className="h-6 w-6 text-yellow-400" />
                         </div>
                       )}
                     </div>
@@ -797,11 +730,11 @@ export default function PaymentPage() {
                     🎬 Скидка $75 за рекламу!
                   </h2>
                   <p className="text-gray-300 text-sm">
-                    Опубликуй наше рекламное видео и получи скидку
+                    Опубликуй наше видео — получи скидку
                   </p>
                   <p className="text-center mt-2">
-                    <span className="text-gray-500 line-through">$249.99</span>
-                    <span className="text-2xl font-bold text-green-400 ml-2">$174.99</span>
+                    <span className="text-gray-500 line-through">$370</span>
+                    <span className="text-2xl font-bold text-green-400 ml-2">$295</span>
                   </p>
                 </div>
 
@@ -844,13 +777,11 @@ export default function PaymentPage() {
 
                 {/* Инструкция */}
                 <div className="mb-6 p-4 rounded-xl bg-gray-900/50 border border-gray-700">
-                  <p className="text-sm text-gray-300 mb-3 font-medium">📋 Как получить скидку:</p>
+                  <p className="text-sm text-gray-300 mb-3 font-medium">📋 3 простых шага:</p>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
-                    <li><strong className="text-blue-400">Скачай</strong> наше готовое рекламное видео выше</li>
+                    <li><strong className="text-blue-400">Скачай</strong> готовое видео выше</li>
                     <li><strong className="text-blue-400">Опубликуй</strong> на YouTube, TikTok или Instagram</li>
-                    <li><strong className="text-yellow-400">Добавь код</strong> в описание или комментарий</li>
-                    <li>Набери минимум <strong className="text-green-400">1000 просмотров</strong></li>
-                    <li>Отправь ссылку ниже</li>
+                    <li><strong className="text-green-400">Отправь ссылку</strong> и получи скидку!</li>
                   </ol>
                 </div>
 
@@ -913,7 +844,7 @@ export default function PaymentPage() {
                 </button>
 
                 <p className="text-xs text-center text-gray-400 mt-4">
-                  После одобрения цена курса для вас станет <strong className="text-green-400">$179</strong>
+                  После проверки вы получите скидку <strong className="text-green-400">$75</strong> — итого <strong className="text-green-400">$295</strong>
                 </p>
               </CardContent>
             </Card>
