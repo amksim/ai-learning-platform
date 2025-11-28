@@ -212,8 +212,8 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Projects Grid - 4 в ряд */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {projects.map((project) => {
             const CategoryIcon = getCategoryIcon(project.category);
             
@@ -225,46 +225,46 @@ export default function ProjectsPage() {
                 rel="noopener noreferrer"
                 className="block group"
               >
-                <Card className="h-full glass border-2 border-purple-400/20 hover:border-purple-400/60 premium-shadow overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20">
+                <Card className="h-full glass border border-purple-400/20 hover:border-purple-400/60 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20">
                   {/* Image Section with Gradient */}
-                  <div className={`relative h-48 flex items-center justify-center bg-gradient-to-br ${project.gradient} transition-all duration-300 group-hover:scale-105`}>
+                  <div className={`relative h-32 flex items-center justify-center bg-gradient-to-br ${project.gradient} transition-all duration-300 group-hover:scale-105`}>
                     {/* Emoji */}
-                    <div className="text-7xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 drop-shadow-2xl">
+                    <div className="text-5xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 drop-shadow-xl">
                       {project.image}
                     </div>
                     
                     {/* Category Badge */}
-                    <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center gap-1.5 border border-purple-200">
-                      <CategoryIcon className="h-3.5 w-3.5 text-purple-600" />
-                      <span className="text-xs font-bold text-purple-600">{getCategoryLabel(project.category)}</span>
+                    <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-white/95 backdrop-blur-sm shadow-md flex items-center gap-1 border border-purple-200">
+                      <CategoryIcon className="h-3 w-3 text-purple-600" />
+                      <span className="text-[10px] font-bold text-purple-600">{getCategoryLabel(project.category)}</span>
                     </div>
 
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/95 rounded-full p-3 transform scale-75 group-hover:scale-100">
-                        <ExternalLink className="h-6 w-6 text-purple-600" />
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/95 rounded-full p-2 transform scale-75 group-hover:scale-100">
+                        <ExternalLink className="h-4 w-4 text-purple-600" />
                       </div>
                     </div>
                   </div>
                   
                   {/* Content */}
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all">
+                  <CardContent className="p-4">
+                    <h3 className="text-base font-bold mb-1 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all line-clamp-1">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-gray-400 mb-3 font-medium">от {project.author}</p>
-                    <p className="text-sm text-gray-300 leading-relaxed mb-4 line-clamp-2">
+                    <p className="text-xs text-gray-400 mb-2">от {project.author}</p>
+                    <p className="text-xs text-gray-300 leading-relaxed mb-3 line-clamp-2">
                       {project.description}
                     </p>
                     
                     {/* Score */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg">
-                        <Trophy className="h-4 w-4" />
-                        <span className="text-sm font-bold">{project.score}/100</span>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-md">
+                        <Trophy className="h-3 w-3" />
+                        <span className="text-xs font-bold">{project.score}/100</span>
                       </div>
                       <div className="text-purple-400 group-hover:text-purple-300 transition-colors">
-                        <ExternalLink className="h-5 w-5" />
+                        <ExternalLink className="h-4 w-4" />
                       </div>
                     </div>
                   </CardContent>

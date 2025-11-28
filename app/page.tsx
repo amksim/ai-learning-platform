@@ -512,8 +512,8 @@ export default function HomePage() {
             </p>
           </div>
           
-          {/* Премиум карточки проектов */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Премиум карточки проектов - 4 в ряд */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {studentProjects.map((project, index) => (
               <a 
                 key={project.title}
@@ -523,37 +523,37 @@ export default function HomePage() {
                 className="block group"
               >
                 <Card 
-                  className="h-full glass premium-shadow border-2 border-purple-400/20 hover:border-purple-400/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20 overflow-hidden cursor-pointer"
+                  className="h-full glass border border-purple-400/20 hover:border-purple-400/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 overflow-hidden cursor-pointer"
                 >
-                {/* Большой эмодзи с ярким градиентным фоном */}
-                <div className={`relative h-40 sm:h-48 flex items-center justify-center bg-gradient-to-br ${project.gradient} transition-all duration-300 group-hover:scale-105`}>
-                  <div className="text-6xl sm:text-7xl md:text-8xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 drop-shadow-2xl">
+                {/* Эмодзи с градиентным фоном */}
+                <div className={`relative h-28 sm:h-32 flex items-center justify-center bg-gradient-to-br ${project.gradient} transition-all duration-300 group-hover:scale-105`}>
+                  <div className="text-4xl sm:text-5xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 drop-shadow-xl">
                     {project.image}
                   </div>
                   {/* Бейдж категории */}
-                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-xs font-bold shadow-lg border border-white/50">
-                    {project.category === 'website' ? '🌐 Сайты' : project.category === 'app' ? '📱 Приложения' : '🎮 Игры'}
+                  <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-white/95 backdrop-blur-sm text-[10px] font-bold shadow-md border border-white/50">
+                    {project.category === 'website' ? '🌐' : project.category === 'app' ? '📱' : '🎮'}
                   </div>
                   
                   {/* Hover оверлей */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                 </div>
                 
-                <CardHeader className="p-4 sm:p-5 md:p-6">
-                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all">
+                <CardHeader className="p-3 sm:p-4">
+                  <CardTitle className="text-sm sm:text-base font-bold mb-1 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all line-clamp-1">
                     {project.title}
                   </CardTitle>
-                  <p className="text-sm text-gray-400 mb-2 font-medium">от {project.author}</p>
-                  <p className="text-sm text-gray-300 leading-relaxed line-clamp-2">{project.description}</p>
+                  <p className="text-xs text-gray-400 mb-1">от {project.author}</p>
+                  <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">{project.description}</p>
                 </CardHeader>
                 
-                <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
+                <CardContent className="p-3 sm:p-4 pt-0">
                   <Button 
                     variant="outline" 
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 hover:from-purple-700 hover:to-pink-700 hover:scale-105 transition-all shadow-lg font-bold"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 hover:from-purple-700 hover:to-pink-700 hover:scale-105 transition-all shadow-md font-bold text-xs py-2"
                   >
                     {t.home.view_project}
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
               </Card>
