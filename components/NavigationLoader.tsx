@@ -1,31 +1,82 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 export default function NavigationLoader() {
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true); // Начинаем с загрузки!
+  const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const checkCountRef = useRef(0);
 
   useEffect(() => {
-    // При первой загрузке/обновлении страницы
+    // При загрузке/смене страницы
     setIsLoading(true);
     setIsVisible(true);
+    checkCountRef.current = 0;
 
-    // Ждём полной загрузки страницы (все картинки, шрифты, стили)
-    const handleLoad = () => {
-      // Небольшая задержка для плавности
-      setTimeout(() => {
-        setIsLoading(false);
-        // Анимация исчезновения
-        setTimeout(() => {
-          setIsVisible(false);
-        }, 300);
-      }, 500); // Минимум 500ms показываем загрузку
+    // Функция проверки что контент загружен
+    const checkContentLoaded = () => {
+      // Проверяем что нет скелетонов и спиннеров (кроме самого лоадера)
+      const mainContent = document.querySelector('main');
+      if (!mainContent) return false;
+      
+      // Ищем скелетоны только внутри main (не считая лоадер)
+      const hasSkeletons = mainContent.querySelectorAll('[class*="skeleton"], .loading').length > 0;
+      const hasSpinners = mainContent.querySelectorAll('[class*="animate-spin"]').length > 0;
+      const hasContent = mainContent.children.length > 0;
+      
+      // Считаем загруженные картинки внутри main
+      const images = mainContent.querySelectorAll('img');
+      let allImagesLoaded = true;
+      images.forEach(img => {
+        if (!img.complete && img.src) {
+          allImagesLoaded = false;
+        }
+      });
+
+      return !hasSkeletons && !hasSpinners && hasContent && allImagesLoaded;
     };
 
-    // Проверяем, загружена ли страница уже
+    // Функция завершения загрузки
+    const finishLoading = () => {
+      setIsLoading(false);
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 300);
+    };
+
+    // Проверяем каждые 100ms пока контент не загрузится
+    const checkInterval = setInterval(() => {
+      checkCountRef.current++;
+      
+      // Минимум 600ms показываем загрузку
+      if (checkCountRef.current < 6) return;
+      
+      // Проверяем загружен ли контент
+      if (checkContentLoaded()) {
+        clearInterval(checkInterval);
+        finishLoading();
+      }
+      
+      // Максимум 5 секунд ждём, потом всё равно скрываем
+      if (checkCountRef.current > 50) {
+        clearInterval(checkInterval);
+        finishLoading();
+      }
+    }, 100);
+
+    // Также слушаем window.load как fallback
+    const handleLoad = () => {
+      // Дополнительная проверка через 800ms после load
+      setTimeout(() => {
+        if (checkContentLoaded()) {
+          clearInterval(checkInterval);
+          finishLoading();
+        }
+      }, 800);
+    };
+
     if (document.readyState === 'complete') {
       handleLoad();
     } else {
@@ -33,9 +84,10 @@ export default function NavigationLoader() {
     }
 
     return () => {
+      clearInterval(checkInterval);
       window.removeEventListener('load', handleLoad);
     };
-  }, [pathname]); // При смене страницы тоже показываем
+  }, [pathname]);
 
   // При навигации показываем снова
   useEffect(() => {
@@ -48,6 +100,7 @@ export default function NavigationLoader() {
         if (url.origin === window.location.origin && url.pathname !== pathname) {
           setIsLoading(true);
           setIsVisible(true);
+          checkCountRef.current = 0;
         }
       }
     };
