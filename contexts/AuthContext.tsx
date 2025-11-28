@@ -32,6 +32,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateProgress: (courseSlug: string, lessonIndex: number) => Promise<void>;
   // Алиасы для совместимости
   loading: boolean;
   logout: () => Promise<void>;
@@ -102,18 +103,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
         }
 
-        return mapProfile(retryData, authUser);
+        return await mapProfile(retryData, authUser);
       }
 
-      return mapProfile(data, authUser);
+      return await mapProfile(data, authUser);
     } catch (err) {
       console.error("❌ Ошибка загрузки профиля:", err);
       return null;
     }
   }
 
-  function mapProfile(data: any, authUser: SupabaseUser): User {
+  async function mapProfile(data: any, authUser: SupabaseUser): Promise<User> {
     const paidCourses = data.paid_courses || [];
+    
+    // Загружаем пройденные уроки из user_progress
+    let completedLessons: number[] = [];
+    try {
+      const { data: progressData, error } = await supabase
+        .from('user_progress')
+        .select('lesson_index')
+        .eq('user_id', data.id)
+        .eq('completed', true);
+      
+      if (!error && progressData) {
+        completedLessons = progressData.map((p: any) => p.lesson_index);
+        console.log('✅ Загружены пройденные уроки:', completedLessons.length);
+      }
+    } catch (err) {
+      console.error('❌ Ошибка загрузки прогресса:', err);
+    }
+    
     return {
       id: data.id,
       email: data.email,
@@ -125,8 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Для совместимости
       hasPaid: data.subscription_status === "premium" || paidCourses.length > 0,
       paidCourses: paidCourses,
-      completedLessons: [],
-      progress: 0,
+      completedLessons: completedLessons,
+      progress: completedLessons.length,
     };
   }
 
@@ -279,6 +298,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // ========================================
+  // ОБНОВЛЕНИЕ ПРОГРЕССА УРОКА
+  // ========================================
+  async function updateProgress(courseSlug: string, lessonIndex: number) {
+    if (!user) {
+      console.log('❌ updateProgress: user not found');
+      return;
+    }
+
+    // Проверяем - уже пройден?
+    if (user.completedLessons.includes(lessonIndex)) {
+      console.log('✅ Урок уже пройден:', lessonIndex);
+      return;
+    }
+
+    console.log('📝 Сохраняем прогресс урока:', lessonIndex, 'для пользователя:', user.email);
+
+    try {
+      // Сохраняем в user_progress
+      const { error } = await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: user.id,
+          lesson_index: lessonIndex,
+          completed: true,
+          completed_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,lesson_index'
+        });
+
+      if (error) {
+        console.error('❌ Ошибка сохранения прогресса:', error);
+        throw error;
+      }
+
+      console.log('✅ Прогресс сохранен в БД');
+
+      // Обновляем локальное состояние
+      setUser(prev => {
+        if (!prev) return prev;
+        const newCompletedLessons = [...prev.completedLessons, lessonIndex];
+        return {
+          ...prev,
+          completedLessons: newCompletedLessons,
+          progress: newCompletedLessons.length,
+        };
+      });
+
+    } catch (err) {
+      console.error('❌ Критическая ошибка updateProgress:', err);
+    }
+  }
+
+  // ========================================
   // ОБНОВЛЕНИЕ ПРОФИЛЯ
   // ========================================
   async function updateProfile(updates: { full_name?: string }) {
@@ -314,6 +386,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signOut,
         refreshUser,
+        updateProgress,
         // Алиасы
         loading: isLoading,
         logout: signOut,
