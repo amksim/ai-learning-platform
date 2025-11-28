@@ -1,104 +1,139 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import NProgress from 'nprogress';
-
-// Настройки NProgress
-NProgress.configure({ 
-  showSpinner: false,
-  minimum: 0.1,
-  speed: 300,
-  trickleSpeed: 100
-});
+import { usePathname } from 'next/navigation';
 
 export default function NavigationLoader() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Начинаем с загрузки!
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Показываем загрузку при изменении URL
-    const handleStart = () => {
-      setIsLoading(true);
-      NProgress.start();
+    // При первой загрузке/обновлении страницы
+    setIsLoading(true);
+    setIsVisible(true);
+
+    // Ждём полной загрузки страницы (все картинки, шрифты, стили)
+    const handleLoad = () => {
+      // Небольшая задержка для плавности
+      setTimeout(() => {
+        setIsLoading(false);
+        // Анимация исчезновения
+        setTimeout(() => {
+          setIsVisible(false);
+        }, 300);
+      }, 500); // Минимум 500ms показываем загрузку
     };
 
-    const handleComplete = () => {
-      setIsLoading(false);
-      NProgress.done();
-    };
+    // Проверяем, загружена ли страница уже
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
 
-    // Слушаем клики по ссылкам
+    return () => {
+      window.removeEventListener('load', handleLoad);
+    };
+  }, [pathname]); // При смене страницы тоже показываем
+
+  // При навигации показываем снова
+  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a');
       
       if (link && link.href && !link.target && !link.download) {
         const url = new URL(link.href);
-        // Если это внутренняя ссылка и не та же страница
         if (url.origin === window.location.origin && url.pathname !== pathname) {
-          handleStart();
+          setIsLoading(true);
+          setIsVisible(true);
         }
       }
     };
 
     document.addEventListener('click', handleClick);
-    
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
+    return () => document.removeEventListener('click', handleClick);
   }, [pathname]);
 
-  // Завершаем загрузку когда URL изменился
-  useEffect(() => {
-    NProgress.done();
-    setIsLoading(false);
-  }, [pathname, searchParams]);
+  if (!isVisible) return null;
 
   return (
-    <>
-      {/* NProgress CSS */}
-      <style jsx global>{`
-        #nprogress {
-          pointer-events: none;
-        }
-        #nprogress .bar {
-          background: linear-gradient(90deg, #a855f7, #ec4899, #3b82f6);
-          position: fixed;
-          z-index: 9999;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 4px;
-          box-shadow: 0 0 10px #a855f7, 0 0 5px #ec4899;
-        }
-        #nprogress .peg {
-          display: block;
-          position: absolute;
-          right: 0px;
-          width: 100px;
-          height: 100%;
-          box-shadow: 0 0 10px #a855f7, 0 0 5px #a855f7;
-          opacity: 1;
-          transform: rotate(3deg) translate(0px, -4px);
-        }
-      `}</style>
+    <div 
+      className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-300 ${
+        isLoading ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ 
+        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 50%, #0f0f1a 100%)'
+      }}
+    >
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
 
-      {/* Full screen loader overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 z-[98] pointer-events-none flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300">
-          <div className="flex flex-col items-center gap-4">
-            {/* Animated brain */}
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full border-4 border-purple-500/30 border-t-purple-500 animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center text-3xl animate-pulse">
-                🧠
-              </div>
-            </div>
+      {/* Main loader */}
+      <div className="relative flex flex-col items-center gap-6">
+        {/* Spinning rings with brain */}
+        <div className="relative w-28 h-28">
+          {/* Outer ring */}
+          <div 
+            className="absolute inset-0 rounded-full border-4 border-transparent animate-spin"
+            style={{ 
+              borderTopColor: '#a855f7',
+              borderRightColor: '#ec4899',
+              animationDuration: '1.5s'
+            }}
+          />
+          {/* Inner ring */}
+          <div 
+            className="absolute inset-3 rounded-full border-4 border-transparent animate-spin"
+            style={{ 
+              borderBottomColor: '#3b82f6',
+              borderLeftColor: '#06b6d4',
+              animationDuration: '1s',
+              animationDirection: 'reverse'
+            }}
+          />
+          {/* Brain icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl animate-pulse">🧠</span>
           </div>
         </div>
-      )}
-    </>
+
+        {/* Logo text */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            AI Learning Platform
+          </h2>
+          <div className="flex items-center justify-center gap-1 mt-2">
+            <span className="text-gray-400">Загрузка</span>
+            <span className="text-purple-400 animate-bounce" style={{ animationDelay: '0s' }}>.</span>
+            <span className="text-pink-400 animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+            <span className="text-blue-400 animate-bounce" style={{ animationDelay: '0.4s' }}>.</span>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full animate-loading-bar"
+          />
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes loading-bar {
+          0% { width: 0%; margin-left: 0%; }
+          50% { width: 70%; margin-left: 15%; }
+          100% { width: 100%; margin-left: 0%; }
+        }
+        .animate-loading-bar {
+          animation: loading-bar 1.5s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
   );
 }
