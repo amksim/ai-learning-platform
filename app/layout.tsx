@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReviewsProvider } from "@/contexts/ReviewsContext";
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
+import NavigationLoader from "@/components/NavigationLoader";
 
 export const viewport = {
   width: 'device-width',
@@ -96,6 +98,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className="font-sans">
+        <Suspense fallback={null}>
+          <NavigationLoader />
+        </Suspense>
         <AuthProvider>
           <LanguageProvider>
             <ReviewsProvider>
