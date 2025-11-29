@@ -20,16 +20,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [forceShowForm, setForceShowForm] = useState(false);
+
+  // Принудительный таймаут - если 3 секунды загрузка, показываем форму
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('⏰ Таймаут проверки сессии на странице логина');
+        setForceShowForm(true);
+      }
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
 
   // Редирект если уже залогинен
   useEffect(() => {
     if (!isLoading && user) {
-      router.push("/courses");
+      console.log('✅ Пользователь залогинен, редирект на /courses');
+      window.location.href = "/courses"; // Принудительный редирект
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading]);
 
-  // Показываем загрузку пока проверяем сессию
-  if (isLoading) {
+  // Показываем загрузку пока проверяем сессию (но не больше 3 сек)
+  if (isLoading && !forceShowForm) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="text-center">

@@ -162,6 +162,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
     
+    // ГЛОБАЛЬНЫЙ ТАЙМАУТ - гарантия что isLoading сбросится
+    const globalTimeout = setTimeout(() => {
+      if (mounted) {
+        console.log("⏰ Глобальный таймаут AuthContext - сбрасываем isLoading");
+        setIsLoading(false);
+      }
+    }, 5000);
+    
     // Функция загрузки данных пользователя
     async function loadUserData(currentSession: Session) {
       try {
@@ -177,7 +185,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Даже если профиль не загрузился, сессия есть - не выкидываем пользователя
         if (mounted) setSession(currentSession);
       } finally {
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+          clearTimeout(globalTimeout);
+        }
       }
     }
 
@@ -194,12 +205,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (initialSession) {
           await loadUserData(initialSession);
         } else {
-          if (mounted) setIsLoading(false);
+          if (mounted) {
+            setIsLoading(false);
+            clearTimeout(globalTimeout);
+          }
         }
 
       } catch (error) {
         console.error("❌ Ошибка инициализации:", error);
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+          clearTimeout(globalTimeout);
+        }
       }
     }
 
@@ -230,6 +247,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      clearTimeout(globalTimeout);
       subscription.unsubscribe();
     };
   }, []);
