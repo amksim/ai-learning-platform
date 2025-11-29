@@ -317,21 +317,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('📝 Сохраняем прогресс урока:', lessonIndex, 'для пользователя:', user.email);
 
     try {
-      // Сохраняем в user_progress
-      const { error } = await supabase
+      // Проверяем, есть ли уже запись
+      const { data: existing } = await supabase
         .from('user_progress')
-        .upsert({
-          user_id: user.id,
-          lesson_index: lessonIndex,
-          completed: true,
-          completed_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,lesson_index'
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('lesson_index', lessonIndex)
+        .single();
 
-      if (error) {
-        console.error('❌ Ошибка сохранения прогресса:', error);
-        throw error;
+      if (existing) {
+        // Обновляем существующую запись
+        const { error } = await supabase
+          .from('user_progress')
+          .update({
+            completed: true,
+            completed_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+
+        if (error) {
+          console.error('❌ Ошибка обновления прогресса:', error);
+          throw error;
+        }
+      } else {
+        // Создаём новую запись
+        const { error } = await supabase
+          .from('user_progress')
+          .insert({
+            user_id: user.id,
+            course_slug: courseSlug,
+            lesson_index: lessonIndex,
+            completed: true,
+            completed_at: new Date().toISOString(),
+          });
+
+        if (error) {
+          console.error('❌ Ошибка создания прогресса:', error);
+          throw error;
+        }
       }
 
       console.log('✅ Прогресс сохранен в БД');

@@ -31,15 +31,27 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Фильтруем курсы - только с обязательными полями
+    // Фильтруем курсы - только с валидными данными
     const filteredCourses = (data || []).filter(course => {
-      // Проверяем только title (самое важное поле)
-      if (!course.title || course.title.trim().length === 0) {
-        console.log('🚫 Фильтрую курс без title:', course.id);
+      // 1. Проверяем title
+      if (!course.title || course.title.trim().length < 3) {
+        console.log('🚫 Фильтрую курс с коротким title:', course.id, course.title);
         return false;
       }
       
-      // Не фильтруем по description, difficulty, images, videos - это может удалить рабочие курсы
+      // 2. Проверяем что title не мусор (должен содержать хотя бы одну букву)
+      const hasLetter = /[a-zA-Zа-яА-ЯіІїЇєЄ]/.test(course.title);
+      if (!hasLetter) {
+        console.log('🚫 Фильтрую курс без букв в title:', course.id, course.title);
+        return false;
+      }
+      
+      // 3. Курс должен принадлежать категории
+      if (!course.course_category_id) {
+        console.log('🚫 Фильтрую курс без категории:', course.id, course.title);
+        return false;
+      }
+      
       return true;
     });
 
