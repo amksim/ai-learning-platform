@@ -51,10 +51,11 @@ export default function LoginPage() {
 
   // Редирект если залогинен
   useEffect(() => {
-    if (!isLoading && user) {
+    if (user) {
+      console.log('✅ Пользователь залогинен, редирект...');
       window.location.href = "/courses";
     }
-  }, [user, isLoading]);
+  }, [user]);
 
   // Обратный отсчёт для повторной отправки кода
   useEffect(() => {
@@ -80,33 +81,59 @@ export default function LoginPage() {
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
-      // Проверяем существует ли пользователь
-      const { data: existingUser } = await supabase
+      // Проверяем существует ли пользователь (с таймаутом)
+      const checkPromise = supabase
         .from('profiles')
         .select('id')
         .eq('email', email.toLowerCase())
         .single();
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Таймаут запроса')), 10000)
+      );
+
+      let existingUser = null;
+      try {
+        const result = await Promise.race([checkPromise, timeoutPromise]) as any;
+        existingUser = result?.data;
+      } catch {
+        // Если ошибка проверки - считаем что новый пользователь
+      }
 
       setIsNewUser(!existingUser);
 
       // Отправляем OTP код
+      console.log('📧 Отправляем OTP на:', email.toLowerCase());
+      
       const { error } = await supabase.auth.signInWithOtp({
         email: email.toLowerCase(),
         options: {
-          shouldCreateUser: true, // Создавать пользователя если не существует
+          shouldCreateUser: true,
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Ошибка OTP:', error);
+        throw error;
+      }
 
+      console.log('✅ OTP отправлен успешно');
       setSuccess("Код отправлен на вашу почту!");
       setStep('code');
       setCountdown(60);
     } catch (err: any) {
-      setError(err.message || "Ошибка отправки кода");
+      console.error('❌ Ошибка:', err);
+      if (err.message?.includes('rate limit')) {
+        setError("Слишком много попыток. Подождите минуту.");
+      } else if (err.message?.includes('Таймаут')) {
+        setError("Сервер не отвечает. Попробуйте позже.");
+      } else {
+        setError(err.message || "Ошибка отправки кода");
+      }
     } finally {
       setLoading(false);
     }
