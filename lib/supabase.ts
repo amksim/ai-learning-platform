@@ -4,22 +4,15 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Создаём клиент только на клиенте
-export const supabase = typeof window !== 'undefined' 
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce',
-      }
-    })
-  : createClient(supabaseUrl || '', supabaseAnonKey || '', {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      }
-    })
+// Создаём клиент с настройками для максимальной живучести сессии
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true, // Сохранять в localStorage
+    autoRefreshToken: true, // Обновлять токен
+    detectSessionInUrl: true, // Ловить ссылки
+    storageKey: 'supabase.auth.token', // Явный ключ
+  }
+})
 
 // Для обратной совместимости
 export function getSupabase() {
