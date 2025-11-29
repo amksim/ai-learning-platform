@@ -135,7 +135,8 @@ export default function PaymentPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userEmail: user.email,
-            amount: 399
+            productId: 'all', // TODO: добавить выбор курса
+            hasDiscount: hasPromoDiscount
           })
         });
 

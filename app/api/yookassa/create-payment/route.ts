@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 
+// Продукты и цены в рублях
+const PRODUCTS: Record<string, { price: number; discountPrice: number; name: string; courseId: number | 'all' }> = {
+  'websites': { price: 25000, discountPrice: 17500, name: 'Курс "Сайты"', courseId: 1 },
+  'apps': { price: 25000, discountPrice: 17500, name: 'Курс "Приложения"', courseId: 2 },
+  'games': { price: 25000, discountPrice: 17500, name: 'Курс "Игры"', courseId: 3 },
+  'payments': { price: 5000, discountPrice: 3500, name: 'Курс "Платёжные системы"', courseId: 4 },
+  'all': { price: 37000, discountPrice: 37000, name: 'Все курсы', courseId: 'all' },
+};
+
 // YooKassa (ЮMoney) - для России + СБП
 export async function POST(request: Request) {
   try {
-    const { userEmail } = await request.json();
+    const { userEmail, productId, hasDiscount } = await request.json();
 
-    console.log('🇷🇺 Creating YooKassa payment for:', userEmail);
+    console.log('🇷🇺 Creating YooKassa payment for:', userEmail, 'Product:', productId);
 
     const shopId = process.env.YOOKASSA_SHOP_ID;
     const secretKey = process.env.YOOKASSA_SECRET_KEY;
@@ -18,8 +27,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Цена $370 = примерно 37000 рублей (курс ~100)
-    const amountRUB = 37000;
+    // Получаем продукт
+    const product = PRODUCTS[productId];
+    if (!product) {
+      return NextResponse.json(
+        { error: 'Invalid product' },
+        { status: 400 }
+      );
+    }
+
+    // Цена со скидкой или без
+    const amountRUB = hasDiscount ? product.discountPrice : product.price;
 
     // Создаем платеж в YooKassa
     const paymentData = {
@@ -29,13 +47,15 @@ export async function POST(request: Request) {
       },
       confirmation: {
         type: 'redirect',
-        return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-learning45.netlify.app'}/payment/success`
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai-learning45.netlify.app'}/payment/success?product=${productId}`
       },
       capture: true, // Автоматическое списание
-      description: `AI Learning Platform - Full Course Access for ${userEmail}`,
+      description: `AI Learning Platform - ${product.name} for ${userEmail}`,
       metadata: {
         userEmail,
-        product: 'full_course_access'
+        productId,
+        courseId: String(product.courseId),
+        hasDiscount: String(hasDiscount)
       }
     };
 
