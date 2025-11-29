@@ -68,7 +68,10 @@ export default function LoginPage() {
         }
 
         setSuccess("Регистрация успешна!");
-        setTimeout(() => router.push("/courses"), 1000);
+        setTimeout(() => {
+          window.location.href = "/courses";
+        }, 1000);
+        return; // Не сбрасываем loading
       } else {
         const result = await signIn(email, password);
         
@@ -78,19 +81,23 @@ export default function LoginPage() {
           return;
         }
 
-        // Ждём немного чтобы профиль успел загрузиться
-        await new Promise(r => setTimeout(r, 500));
+        // Успешный вход - делаем принудительный редирект
+        setSuccess("Вход выполнен!");
         
         // Проверяем сохранённый редирект
         const redirectPath = typeof window !== 'undefined' 
           ? localStorage.getItem('redirectAfterLogin') || '/courses'
           : '/courses';
         localStorage.removeItem('redirectAfterLogin');
-        router.push(redirectPath);
+        
+        // Используем window.location для надёжного редиректа
+        setTimeout(() => {
+          window.location.href = redirectPath;
+        }, 300);
+        return; // Не сбрасываем loading - уходим со страницы
       }
     } catch (err: any) {
       setError(err.message || "Произошла ошибка");
-    } finally {
       setLoading(false);
     }
   }
