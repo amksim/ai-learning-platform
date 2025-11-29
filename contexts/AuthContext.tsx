@@ -161,95 +161,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Инициализация
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
-
-    async function init() {
-      // Таймаут на случай если getSession зависнет
-      timeoutId = setTimeout(() => {
-        if (mounted) {
-          console.log("⏰ Таймаут проверки сессии - показываем страницу");
-          setIsLoading(false);
-        }
-      }, 5000); // Максимум 5 секунд на проверку
-
+    
+    // Функция загрузки данных пользователя
+    async function loadUserData(currentSession: Session) {
       try {
-        console.log("🚀 Инициализация AuthContext...");
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        console.log("👤 Загрузка данных для:", currentSession.user.email);
+        const profile = await loadProfile(currentSession.user);
         
-        clearTimeout(timeoutId);
-        
-        if (error) {
-          console.error("❌ Ошибка getSession:", error);
-          if (mounted) setIsLoading(false);
-          return;
-        }
-        
-        console.log("📦 Текущая сессия:", currentSession?.user?.email || "нет");
-        
-        if (currentSession?.user && mounted) {
+        if (mounted) {
           setSession(currentSession);
-          try {
-            const profile = await loadProfile(currentSession.user);
-            if (mounted) setUser(profile);
-            console.log("✅ Профиль загружен:", profile?.email);
-          } catch (profileErr) {
-            console.error("❌ Ошибка загрузки профиля:", profileErr);
-          }
-        } else {
-          console.log("👤 Нет активной сессии");
+          setUser(profile);
         }
-      } catch (err) {
-        console.error("❌ Ошибка инициализации:", err);
-        clearTimeout(timeoutId);
+      } catch (error) {
+        console.error("❌ Ошибка загрузки данных пользователя:", error);
+        // Даже если профиль не загрузился, сессия есть - не выкидываем пользователя
+        if (mounted) setSession(currentSession);
       } finally {
         if (mounted) setIsLoading(false);
       }
     }
 
-    init();
+    // Главная логика инициализации
+    async function initializeAuth() {
+      try {
+        // 1. Сначала получаем текущую сессию
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
 
+        if (initialSession) {
+          await loadUserData(initialSession);
+        } else {
+          if (mounted) setIsLoading(false);
+        }
+
+      } catch (error) {
+        console.error("❌ Ошибка инициализации:", error);
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    initializeAuth();
+
+    // 2. Подписываемся на изменения
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log("🔔 Auth event:", event, newSession?.user?.email);
+        console.log("🔔 Auth event:", event);
         
         if (!mounted) return;
-        
-        // Обрабатываем события с сессией
-        if (newSession?.user) {
-          // INITIAL_SESSION - восстановление сессии при загрузке страницы
-          // SIGNED_IN - новый вход
-          // TOKEN_REFRESHED - обновление токена
-          if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-            setSession(newSession);
-            try {
-              const profile = await loadProfile(newSession.user);
-              if (mounted) {
-                setUser(profile);
-              }
-            } catch (err) {
-              console.error("❌ Ошибка загрузки профиля в onAuthStateChange:", err);
-            }
-            if (mounted) setIsLoading(false);
-            return;
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+          if (newSession) {
+            await loadUserData(newSession);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setIsLoading(false);
+          // Очищаем кеш редиректа
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('redirectAfterLogin');
           }
         }
-        
-        // SIGNED_OUT - выход
-        if (event === "SIGNED_OUT") {
-          setUser(null);
-          setSession(null);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Для остальных событий просто снимаем loading
-        setIsLoading(false);
       }
     );
 
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
