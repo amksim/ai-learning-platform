@@ -161,14 +161,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Инициализация
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     async function init() {
+      // Таймаут на случай если getSession зависнет
+      timeoutId = setTimeout(() => {
+        if (mounted) {
+          console.log("⏰ Таймаут проверки сессии - показываем страницу");
+          setIsLoading(false);
+        }
+      }, 5000); // Максимум 5 секунд на проверку
+
       try {
         console.log("🚀 Инициализация AuthContext...");
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         
+        clearTimeout(timeoutId);
+        
         if (error) {
           console.error("❌ Ошибка getSession:", error);
+          if (mounted) setIsLoading(false);
           return;
         }
         
@@ -176,14 +188,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (currentSession?.user && mounted) {
           setSession(currentSession);
-          const profile = await loadProfile(currentSession.user);
-          if (mounted) setUser(profile);
-          console.log("✅ Профиль загружен:", profile?.email);
+          try {
+            const profile = await loadProfile(currentSession.user);
+            if (mounted) setUser(profile);
+            console.log("✅ Профиль загружен:", profile?.email);
+          } catch (profileErr) {
+            console.error("❌ Ошибка загрузки профиля:", profileErr);
+          }
         } else {
           console.log("👤 Нет активной сессии");
         }
       } catch (err) {
         console.error("❌ Ошибка инициализации:", err);
+        clearTimeout(timeoutId);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -204,11 +221,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // TOKEN_REFRESHED - обновление токена
           if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
             setSession(newSession);
-            const profile = await loadProfile(newSession.user);
-            if (mounted) {
-              setUser(profile);
-              setIsLoading(false);
+            try {
+              const profile = await loadProfile(newSession.user);
+              if (mounted) {
+                setUser(profile);
+              }
+            } catch (err) {
+              console.error("❌ Ошибка загрузки профиля в onAuthStateChange:", err);
             }
+            if (mounted) setIsLoading(false);
             return;
           }
         }
@@ -228,6 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
