@@ -161,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Инициализация
   useEffect(() => {
     let mounted = true;
+    let refreshInterval: NodeJS.Timeout | null = null;
     
     // ГЛОБАЛЬНЫЙ ТАЙМАУТ - гарантия что isLoading сбросится
     const globalTimeout = setTimeout(() => {
@@ -192,6 +193,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // КРИТИЧНО: Принудительное обновление токена
+    async function forceRefreshToken() {
+      try {
+        console.log("🔄 Принудительное обновление токена...");
+        const { data, error } = await supabase.auth.refreshSession();
+        
+        if (error) {
+          console.error("❌ Ошибка обновления токена:", error);
+          // Если refresh token тоже умер - выходим
+          if (error.message.includes('refresh_token_not_found') || 
+              error.message.includes('Invalid Refresh Token')) {
+            console.error("💀 Refresh token умер - принудительный выход");
+            await supabase.auth.signOut();
+            setUser(null);
+            setSession(null);
+          }
+          return;
+        }
+        
+        if (data.session) {
+          console.log("✅ Токен обновлён успешно");
+          setSession(data.session);
+        }
+      } catch (err) {
+        console.error("❌ Критическая ошибка обновления токена:", err);
+      }
+    }
+
     // Главная логика инициализации
     async function initializeAuth() {
       try {
@@ -199,12 +228,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error("❌ Ошибка получения сессии:", error);
           throw error;
         }
 
         if (initialSession) {
+          console.log("✅ Сессия найдена, expires_at:", new Date(initialSession.expires_at! * 1000).toLocaleString());
           await loadUserData(initialSession);
+          
+          // КРИТИЧНО: Настраиваем автообновление токена каждые 50 минут
+          refreshInterval = setInterval(() => {
+            console.log("⏰ Плановое обновление токена (каждые 50 мин)");
+            forceRefreshToken();
+          }, 50 * 60 * 1000); // 50 минут
+          
         } else {
+          console.log("ℹ️ Сессия не найдена");
           if (mounted) {
             setIsLoading(false);
             clearTimeout(globalTimeout);
@@ -225,21 +264,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 2. Подписываемся на изменения
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log("🔔 Auth event:", event);
+        console.log("🔔 Auth event:", event, newSession ? `expires_at: ${new Date(newSession.expires_at! * 1000).toLocaleString()}` : 'no session');
         
         if (!mounted) return;
 
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        if (event === 'SIGNED_IN') {
+          console.log("✅ Успешный вход");
           if (newSession) {
             await loadUserData(newSession);
+            
+            // Запускаем автообновление токена
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(() => {
+              console.log("⏰ Плановое обновление токена");
+              forceRefreshToken();
+            }, 50 * 60 * 1000);
+          }
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log("🔄 Токен обновлён автоматически");
+          if (newSession) {
+            setSession(newSession);
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log("👋 Выход из системы");
           setSession(null);
           setUser(null);
           setIsLoading(false);
+          
+          // Останавливаем автообновление
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+          }
+          
           // Очищаем кеш редиректа
           if (typeof window !== 'undefined') {
             localStorage.removeItem('redirectAfterLogin');
+          }
+        } else if (event === 'USER_UPDATED') {
+          console.log("👤 Данные пользователя обновлены");
+          if (newSession) {
+            await loadUserData(newSession);
           }
         }
       }
@@ -248,6 +313,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
       clearTimeout(globalTimeout);
+      if (refreshInterval) clearInterval(refreshInterval);
       subscription.unsubscribe();
     };
   }, []);
